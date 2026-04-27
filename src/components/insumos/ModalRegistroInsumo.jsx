@@ -1,28 +1,28 @@
 import React, {useState} from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
-const ModalRegistroServicio = ({
+const ModalRegistroInsumo = ({
   mostrarModal,
   setMostrarModal,
-  nuevoServicio,
+  nuevoInsumo,
   manejoCambioInput,
-  agregarServicio,
-  limpiarServicio,
-  categorias
+  agregarInsumo,
+  limpiarInsumo
 }) => {
   const [deshabilitado, setDeshabilitado] = useState(false);
 
   const handleRegistrar = async () => {
     if (deshabilitado) return;
     setDeshabilitado(true);
-    await agregarServicio();
+    await agregarInsumo();
     setDeshabilitado(false);
   };
+
   return (
     <Modal
       show={mostrarModal}
       onHide={() => {
-        limpiarServicio();
+        limpiarInsumo();
         setMostrarModal(false);
       }}
       backdrop="static"
@@ -30,68 +30,72 @@ const ModalRegistroServicio = ({
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title>Agregar Servicio</Modal.Title>
+        <Modal.Title>Agregar Insumo</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>Servicio</Form.Label>
+            <Form.Label>Nombre</Form.Label>
             <Form.Control
               type="text"
               name="nombre"
-              value={nuevoServicio.nombre}
+              value={nuevoInsumo.nombre}
               onChange={manejoCambioInput}
-              placeholder="Ingresa el nombre del servicio"
+              placeholder="Ingresa el nombre de Insumo"
             />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Descripción</Form.Label>
             <Form.Control
-              type="text"
+              type="textarea"
               name="descripcion"
-              value={nuevoServicio.descripcion}
+              value={nuevoInsumo.descripcion}
               onChange={manejoCambioInput}
-              placeholder="Ingresa la descripción del servicio"
+              placeholder="Ingresa la descripción"
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Precio</Form.Label>
+            <Form.Label>Costo</Form.Label>
             <Form.Control
               type="number"
-              name="precio"
-              value={nuevoServicio.precio}
+              name="costo_producto"
+              value={nuevoInsumo.costo_producto}
               onChange={manejoCambioInput}
-              placeholder="Ingresa el precio"
-              min="1"
-              step="0.01"
+              placeholder="Ingresa el costo del producto"
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Duración</Form.Label>
+            <Form.Label>Contenido del Producto</Form.Label>
             <Form.Control
               type="number"
-              min="1"
-              name="duracion"
-              value={nuevoServicio.duracion}
+              name="contenido_total"
+              value={nuevoInsumo.contenido_total}
               onChange={manejoCambioInput}
-              placeholder="Ingresa la duración del servicio (en minutos)"
+              placeholder="Ingresa el contenido total del producto (ej. 1000)"
             />
           </Form.Group>
+          <Form.Select
+            name="unidad_medida"
+            value={nuevoInsumo.unidad_medida}
+            onChange={manejoCambioInput}
+          >
+            <option value="">Seleccione una unidad</option>
+            <option value="ml">ml - mililitros</option>
+            <option value="g">g - gramos</option>
+            <option value="kg">kg - kilogramos</option>
+            <option value="oz">oz - onzas</option>
+            <option value="lb">lb - libras</option>
+            <option value="lt">lt - litros</option>
+          </Form.Select>
           <Form.Group className="mb-3">
-            <Form.Label>Categoría</Form.Label>
-            <Form.Select
-              name="id_categoria"
-              value={nuevoServicio.id_categoria}
+            <Form.Label>Stock</Form.Label>
+            <Form.Control
+              type="text"
+              name="stock"
+              value={nuevoInsumo.stock}
               onChange={manejoCambioInput}
-            >
-              <option value="">Seleccione una categoría</option>
-
-              {categorias.map((cat) => (
-                <option key={cat.id_categoria} value={cat.id_categoria}>
-                  {cat.nombre}
-                </option>
-              ))}
-            </Form.Select>
+              placeholder="Ingresa el Stock"
+            />
           </Form.Group>
         </Form>
       </Modal.Body>
@@ -99,7 +103,7 @@ const ModalRegistroServicio = ({
         <Button
           variant="secondary"
           onClick={() => {
-            limpiarServicio();
+            limpiarInsumo();
             setMostrarModal(false);
           }}
         >
@@ -108,10 +112,7 @@ const ModalRegistroServicio = ({
         <Button
           variant="primary"
           onClick={handleRegistrar}
-          disabled={
-            nuevoServicio.nombre.trim() === "" ||
-            deshabilitado
-          }
+          disabled={nuevoInsumo.nombre.trim() === "" || deshabilitado}
         >
           Guardar
         </Button>
@@ -120,4 +121,4 @@ const ModalRegistroServicio = ({
   );
 };
 
-export default ModalRegistroServicio;
+export default ModalRegistroInsumo;

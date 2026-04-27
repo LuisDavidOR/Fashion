@@ -117,6 +117,14 @@ const Encabezado = () => {
             </Nav.Link>
 
             <Nav.Link
+              onClick={() => manejarNavegacion("/insumos")}
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
+            >
+              {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+              <strong>Insumos</strong>
+            </Nav.Link>
+
+            <Nav.Link
               onClick={() => manejarNavegacion("/usuarios")}
               className={mostrarMenu ? "color-texto-marca" : "text-white"}
             >

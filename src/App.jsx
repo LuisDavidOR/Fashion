@@ -12,6 +12,7 @@ import Empleados from "./views/Empleados";
 import Pagina404 from "./views/Pagina404";
 import Login from "./views/Login";
 import Servicios from "./views/Servicios";
+import Insumos from './views/Insumos';
 import RutaProtegida from "./components/rutas/RutaProtegida";
 
 const App = () => {
@@ -30,6 +31,7 @@ const App = () => {
           <Route path='/empleados' element={<RutaProtegida><Empleados /></RutaProtegida>} />
           <Route path='/clientes' element={<RutaProtegida><Clientes /></RutaProtegida>} />
           <Route path='/citas' element={<RutaProtegida><Citas /></RutaProtegida>} />
+          <Route path='/insumos' element={<RutaProtegida><Insumos /></RutaProtegida>} />
 
           <Route path='*' element={<Pagina404/>} />
         </Routes>
