@@ -47,7 +47,8 @@ const ModalRegistroCategoria = ({
           <Form.Group className="mb-3">
             <Form.Label>Descripción</Form.Label>
             <Form.Control
-              type="textarea"
+              as="textarea"
+              rows={3}
               name="descripcion"
               value={nuevaCategoria.descripcion}
               onChange={manejoCambioInput}
