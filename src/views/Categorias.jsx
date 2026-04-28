@@ -346,26 +346,20 @@ const Categorias = () => {
         </Col>
       </Row>
 
-      <hr />
+       <hr />
 
-      {/* Botones para activar/inactivar */}
+      {/* 🔥 BOTONES MODIFICADOS */}
       <div className="d-flex gap-2 mb-3">
         <Button
-          variant={filtroEstado === "activo" ? "success" : "outline-success"}
-          onClick={() => {
-            setFiltroEstado("activo");
-            establecerPaginaActual(1);
-          }}
+          className={filtroEstado === "activo" ? "btn-activas" : "btn-inactivas"}
+          onClick={() => setFiltroEstado("activo")}
         >
           Activas
         </Button>
 
         <Button
-          variant={filtroEstado === "inactivo" ? "secondary" : "outline-secondary"}
-          onClick={() => {
-            setFiltroEstado("inactivo");
-            establecerPaginaActual(1);
-          }}
+          className={filtroEstado === "inactivo" ? "btn-activas" : "btn-inactivas"}
+          onClick={() => setFiltroEstado("inactivo")}
         >
           Inactivas
         </Button>

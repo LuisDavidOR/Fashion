@@ -182,7 +182,7 @@ const Encabezado = () => {
 
         <Navbar.Brand
           onClick={() => manejarNavegacion(esCatalogo ? "/catalogo" : "/")}
-          className="text-white fw-bold d-flex align-items-center"
+          className="text-dark fw-bold d-flex align-items-center"
           style={{cursor: "pointer"}}
         >
           <img

@@ -1,68 +1,135 @@
+/* CONTENEDOR GENERAL */
 .estilocontenedor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 108%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
-  overflow: hidden;
-  padding: 20px;
+  background: #EBCFC4; /* fondo principal */
 }
 
+/* HOVER para ambos botones */
+.btn-activas:hover,
+.btn-inactivas:hover {
+  background-color: #EBCFC4 !important;
+  border-color: #EBCFC4 !important;
+  color: #1D1E1D !important;
+}
+
+.btn-activas {
+  background-color: #7A564A;
+  color: #fff;
+  border-radius: 10px;
+}
+
+.btn-inactivas {
+  border: 1px solid #7A564A;
+  color: #7A564A;
+  background: transparent;
+}
+
+/* BOTONES DE PAGINACIÓN */
+.page-link {
+  color: #7A564A !important; /* café */
+  border: 1px solid #7A564A !important;
+  background-color: transparent;
+  transition: 0.3s;
+}
+
+.btn-login {
+  background-color: #92847E !important;
+  border-color: #92847E !important;
+  color: #ffffff !important;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+/* HOVER (color opaco) */
+.page-link:hover {
+  background-color: #EBCFC4 !important; /* opaco */
+  border-color: #7A564A !important;
+  color: #1D1E1D !important;
+}
+
+/* PÁGINA ACTIVA */
+.page-item.active .page-link {
+  background-color: #7A564A !important;
+  border-color: #7A564A !important;
+  color: #ffffff !important;
+}
+
+/* QUITAR AZUL AL HACER CLICK */
+.page-link:focus,
+.page-link:active {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* NAVBAR */
 .color-navbar {
-  background-color: #1068db !important;
-  background-image: linear-gradient(90deg, #121b96 0%, #2889b6 50%, #2697cc 100%);
+  background-color: #BE9E87 !important;
+  border-bottom: 1px solid #92847E;
 }
 
+/* TEXTO MARCA */
 .color-texto-marca {
-  color: #1e3d87 !important;
+  color: #5B5858 !important;
   font-size: 18px;
+  font-weight: 600;
 }
 
-.margen-superior-main {
-margin-top: 50px;
-padding: 20px;
+/* LINKS NAVBAR (cuando NO está el menú abierto) */
+.navbar-dark .navbar-nav .nav-link {
+  color: #1D1E1D !important;
+  transition: 0.3s;
 }
 
-.tarjeta-categoria-contenedor {
-  position: relative;
-  overflow: hidden;
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: #ffffff !important;
 }
 
-.tarjeta-categoria-cuerpo {
-  transition: opacity 150ms ease;
+/* OFFCANVAS (MENÚ LATERAL) */
+.offcanvas {
+  background-color: #EBCFC4;
 }
 
-.tarjeta-categoria-cuerpo-activo {
-  opacity: 0.4;
+/* TÍTULO DEL MENÚ */
+.offcanvas-title {
+  color: #5B5858;
+  font-weight: bold;
 }
 
-.tarjeta-categoria-cuerpo-inactivo {
-  opacity: 1;
-}
-
-.tarjeta-categoria-placeholder-imagen {
-  height: 50px;
-  width: 50px;
-}
-
-.tarjeta-categoria-capa {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-  background: rgba(255, 255, 255, 0.25);
-  padding: 8px;
-}
-
-.tarjeta-categoria-botones-capa {
-  background: rgba(255, 255, 255, 0.95);
+/* ITEMS DEL MENÚ */
+.offcanvas .nav-link {
+  color: #5B5858 !important;
   border-radius: 8px;
-  padding: 6px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  padding: 10px;
+  transition: 0.3s;
+}
+
+.offcanvas .nav-link:hover {
+  background: #BE9E87;
+  color: #ffffff !important;
+}
+
+/* SECCIÓN USUARIO */
+.bg-light {
+  background-color: #BE9E87 !important;
+  color: #1D1E1D !important;
+}
+
+/* BOTÓN CERRAR SESIÓN */
+.btn-outline-danger {
+  border-color: #5B5858;
+  color: #5B5858;
+}
+
+.btn-outline-danger:hover {
+  background-color: #5B5858;
+  color: #fff;
+}
+
+/* ICONOS */
+.bi {
+  color: inherit;
+}
+
+/* HR */
+hr {
+  border-color: #92847E;
 }

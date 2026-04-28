@@ -33,7 +33,7 @@ const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena
             />
           </Form.Group>
 
-          <Button variant="primary" className="w-100" onClick={iniciarSesion}>
+          <Button className="btn-login w-100" onClick={iniciarSesion}>
             Iniciar Sesión
           </Button>
         </Form>
