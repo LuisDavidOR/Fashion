@@ -346,20 +346,26 @@ const Categorias = () => {
         </Col>
       </Row>
 
-       <hr />
+      <hr />
 
-      {/* 🔥 BOTONES MODIFICADOS */}
+      {/* Botones para activar/inactivar */}
       <div className="d-flex gap-2 mb-3">
         <Button
           className={filtroEstado === "activo" ? "btn-activas" : "btn-inactivas"}
-          onClick={() => setFiltroEstado("activo")}
+          onClick={() => {
+            setFiltroEstado("activo");
+            establecerPaginaActual(1);
+          }}
         >
           Activas
         </Button>
 
         <Button
           className={filtroEstado === "inactivo" ? "btn-activas" : "btn-inactivas"}
-          onClick={() => setFiltroEstado("inactivo")}
+          onClick={() => {
+            setFiltroEstado("inactivo");
+            establecerPaginaActual(1);
+          }}
         >
           Inactivas
         </Button>
