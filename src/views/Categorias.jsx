@@ -40,6 +40,7 @@ const Categorias = () => {
   });
   //Manejar busqueda y filtros
   const [textoBusqueda, setTextoBusqueda] = useState("");
+  const [buscando, setBuscando] = useState(false);
   const [filtroEstado, setFiltroEstado] = useState("activo");
   const [categoriasFiltradas, setCategoriasFiltradas] = useState([]);
   //Manejar filtrado y paginación
@@ -55,6 +56,7 @@ const Categorias = () => {
     paginaActual * registrosPorPagina
   );
 
+  //limpiar codigo
   const limpiarCategoria = () => {
     setNuevaCategoria({
       nombre: "",
@@ -69,6 +71,8 @@ const Categorias = () => {
 
   //useEffect para la busqueda
   useEffect(() => {
+    setBuscando(true);
+
     let resultado = categorias.filter(
       (cat) => cat.estado === filtroEstado
     );
@@ -83,9 +87,10 @@ const Categorias = () => {
             cat.descripcion.toLowerCase().includes(textoLower))
       );
     }
-    
 
     setCategoriasFiltradas(resultado);
+
+    setBuscando(false);
   }, [textoBusqueda, categorias, filtroEstado]);
 
   //useEffect para que siempre busque en la pagina 1 y busque todo
@@ -403,41 +408,64 @@ const Categorias = () => {
         </Col>
       </Row>
 
+      {cargando && (
+        <Row className="text-center my-5">
+          <Col>
+            <Spinner animation="border" variant="success" size="lg" />
+            <p className="mt-3 text-muted">Cargando categorías...</p>
+          </Col>
+        </Row>
+      )}
+
       {/* Mensaje de no coincidencias solo cuando hay búsqueda y no hay resultados */}
-      {!cargando && textoBusqueda.trim() && categoriasFiltradas.length === 0 && (
+      {!cargando && !buscando && textoBusqueda.trim() && categoriasFiltradas.length === 0 && (
         <Row className="mb-4">
           <Col>
-          <Alert variant="info" className="text-center">
-            <i className="bi bi-info-circle me-2"></i>
-            No se encontraron categorías que coincidan con "{textoBusqueda}".
-          </Alert>
+            <Alert variant="info" className="text-center">
+              <i className="bi bi-info-circle me-2"></i>
+              No se encontraron categorías que coincidan con "{textoBusqueda}".
+            </Alert>
+          </Col>
+        </Row>
+      )}
+
+      {/* Mensaje cuando una tabla activa/inactiva de categoria esta vacia */}
+      {!cargando && !buscando && !textoBusqueda.trim() && categoriasFiltradas.length === 0 && (
+        <Row className="mb-4">
+          <Col>
+            <Alert variant="info" className="text-center">
+              <i className="bi bi-info-circle me-2"></i>
+              No hay categorías {filtroEstado === "activo" ? "activas" : "inactivas"}.
+            </Alert>
           </Col>
         </Row>
       )}
 
       {/* Lista de categorías cargadas */}
-      {!cargando && categorias.length > 0 && (
-        <Row>
-          {/* Tarjeta para dispositivos moviles */}
-          <Col xs={12} sm={12} md={12} className="d-lg-none">
-            <TarjetaCategoria
-              categorias={categoriasPaginadas}
-              abrirModalEdicion={abrirModalEdicion}
-              abrirModalEliminacion={abrirModalEliminacion}
-              cambiarEstadoCategoria={abrirModalEstado}
-            />
-          </Col>
-          {/* Tabla para equipos de escritorio */}
-          <Col lg={12} className="d-none d-lg-block">
-            <TablaCategorias
-              categorias={categoriasPaginadas}
-              abrirModalEdicion={abrirModalEdicion}
-              abrirModalEliminacion={abrirModalEliminacion}
-              cambiarEstadoCategoria={abrirModalEstado}
-            />
-          </Col>
-        </Row>
-      )}
+      <div className="contenedor-tabla-paginacion">
+        {!cargando && categoriasPaginadas.length > 0 && (
+          <Row>
+            {/* Tarjeta para dispositivos moviles */}
+            <Col xs={12} sm={12} md={12} className="d-lg-none">
+              <TarjetaCategoria
+                categorias={categoriasPaginadas}
+                abrirModalEdicion={abrirModalEdicion}
+                abrirModalEliminacion={abrirModalEliminacion}
+                cambiarEstadoCategoria={abrirModalEstado}
+              />
+            </Col>
+            {/* Tabla para equipos de escritorio */}
+            <Col lg={12} className="d-none d-lg-block">
+              <TablaCategorias
+                categorias={categoriasPaginadas}
+                abrirModalEdicion={abrirModalEdicion}
+                abrirModalEliminacion={abrirModalEliminacion}
+                cambiarEstadoCategoria={abrirModalEstado}
+              />
+            </Col>
+          </Row>
+        )}
+      </div>
  
       {/* Modal para Agregar una categoría nueva */}
       <ModalRegistroCategoria 

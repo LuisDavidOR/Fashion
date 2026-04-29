@@ -229,4 +229,6 @@ hr {
   border-color: #7A564A !important;
 }
 
-
+.contenedor-tabla-paginacion {
+  min-height: 300px;
+}

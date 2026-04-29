@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Spinner, Button } from "react-bootstrap";
+import { Table, Button } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const TablaCategorias = ({
@@ -8,25 +8,8 @@ const TablaCategorias = ({
     abrirModalEliminacion,
     cambiarEstadoCategoria
   }) => {
-  
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (categorias && categorias.length > 0) {
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-  }, [categorias]);
 
   return (
-    <>
-      {loading ? (
-        <div className="text-center">
-          <h4>Cargando categorías...</h4>
-          <Spinner animation="border" variant="success" role="status" />
-        </div>
-      ) : (
         <Table striped borderless hover responsive size="sm">
           <thead>
             <tr>
@@ -83,8 +66,6 @@ const TablaCategorias = ({
             ))}
           </tbody>
         </Table>
-      )}
-    </>
   );
 };
 

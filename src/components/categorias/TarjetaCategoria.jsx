@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Card, Row, Col, Spinner, Button } from "react-bootstrap";
+import { Card, Row, Col, Button } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const TarjetaCategoria = ({
@@ -8,13 +8,7 @@ const TarjetaCategoria = ({
   abrirModalEliminacion,
   cambiarEstadoCategoria
 }) => {
-
-  const [cargando, setCargando] = useState(true);
   const [idTarjetaActiva, setIdTarjetaActiva] = useState(null);
-
-  useEffect(() => {
-    setCargando(!(categorias && categorias.length > 0));
-  }, [categorias]);
 
   const manejarTeclaEscape = useCallback((evento) => {
     if (evento.key === "Escape") setIdTarjetaActiva(null);
@@ -31,12 +25,6 @@ const TarjetaCategoria = ({
 
   return (
     <>
-    {cargando ? (
-      <div className="text-center my-5">
-        <h5>Cargando categorías...</h5>
-        <Spinner animation="border" variant="success" role="status" />
-      </div>
-    ) : (
       <div>
         {categorias.map((categoria) => {
           const tarjetaActiva = idTarjetaActiva === categoria.id_categoria;
@@ -151,7 +139,6 @@ const TarjetaCategoria = ({
           );
         })}
       </div>
-    )}
     
     </>
   );
