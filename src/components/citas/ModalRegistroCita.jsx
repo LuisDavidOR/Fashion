@@ -184,7 +184,11 @@
             Cancelar
           </Button>
           <Button
-            variant="primary"
+          style={{
+              backgroundColor: "#7A564A",
+              borderColor: "#7A564A",
+              color: "#ffffff"
+            }}
             onClick={handleRegistrar}
             disabled={
               nuevaCita.fecha.trim() === "" ||

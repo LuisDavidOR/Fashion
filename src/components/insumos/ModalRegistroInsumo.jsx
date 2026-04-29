@@ -110,7 +110,11 @@ const ModalRegistroInsumo = ({
           Cancelar
         </Button>
         <Button
-          variant="primary"
+         style={{
+          backgroundColor: "#7A564A",
+          borderColor: "#7A564A",
+          color: "#ffffff"
+        }}
           onClick={handleRegistrar}
           disabled={nuevoInsumo.nombre.trim() === "" || deshabilitado}
         >
