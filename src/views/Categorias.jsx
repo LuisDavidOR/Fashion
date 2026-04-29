@@ -8,6 +8,7 @@ import TablaCategorias from "../components/categorias/TablaCategorias";
 import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 import ModalEdicionCategoria from "../components/categorias/ModalEdicionCategoria";
 import ModalEliminacionCategoria from "../components/categorias/ModalEliminacionCategoria";
+import ModalEstadoCategoria from "../components/categorias/ModalEstadoCategoria";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
 
@@ -27,6 +28,9 @@ const Categorias = () => {
   //Eliminar categoria
   const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
   const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
+  //Controlar el estado de categoria
+  const [mostrarModalEstado, setMostrarModalEstado] = useState(false);
+  const [categoriaEstado, setCategoriaEstado] = useState(null);
   //Actualizar categoria
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
   const [categoriaEditar, setCategoriaEditar] = useState({
@@ -107,7 +111,7 @@ const Categorias = () => {
     }));
   };
 
-  //Abrir modales Edición y Eliminación
+  //Abrir modal Edición
   const abrirModalEdicion = (categoria) => {
     setCategoriaEditar({
       id_categoria: categoria.id_categoria,
@@ -117,11 +121,19 @@ const Categorias = () => {
     setMostrarModalEdicion(true);
   };
 
+  //Abrir modal Eliminación
   const abrirModalEliminacion = (categoria) => {
     setCategoriaAEliminar(categoria);
     setMostrarModalEliminacion(true);
   };
 
+  //Abrir modal Estado
+  const abrirModalEstado = (categoria) => {
+    setCategoriaEstado(categoria);
+    setMostrarModalEstado(true);
+  };
+
+  //Cargar categorias ya sea en tabla o tarjeta
   const cargarCategorias = async () => {
     try {
       setCargando(true);
@@ -151,6 +163,7 @@ const Categorias = () => {
     }
   };
 
+  //Agregar una categoria nueva
   const agregarCategoria = async () => {
     try {
       if (
@@ -202,6 +215,7 @@ const Categorias = () => {
     }
   };
 
+  //Actualizar una categoría existente
   const actualizarCategoria = async () => {
     try {
       if (
@@ -251,6 +265,7 @@ const Categorias = () => {
     }
   };
 
+  //Eliminar una categoría existente
   const eliminarCategoria = async () => {
     if (!categoriaAEliminar) return;
     try {
@@ -287,15 +302,18 @@ const Categorias = () => {
     }
   };
 
-  const cambiarEstadoCategoria = async (categoria) => {
+  //Cambiar el estado de una categoría Activo/Inactivo
+  const cambiarEstadoCategoria = async () => {
+    if (!categoriaEstado) return;
+
     try {
       const nuevoEstado =
-        categoria.estado === "activo" ? "inactivo" : "activo";
+        categoriaEstado.estado === "activo" ? "inactivo" : "activo";
 
       const { error } = await supabase
         .from("Categorias")
         .update({ estado: nuevoEstado })
-        .eq("id_categoria", categoria.id_categoria);
+        .eq("id_categoria", categoriaEstado.id_categoria);
 
       if (error) {
         console.error("Error al cambiar estado:", error.message);
@@ -307,14 +325,17 @@ const Categorias = () => {
         return;
       }
 
+      setMostrarModalEstado(false);
+
       setToast({
         mostrar: true,
-        mensaje: `Categoría "${categoria.nombre}" ${
+        mensaje: `Categoría "${categoriaEstado.nombre}" ${
           nuevoEstado === "activo" ? "activada" : "inactivada"
         } correctamente.`,
         tipo: "exito",
       });
 
+      setCategoriaEstado(null);
       await cargarCategorias();
     } catch (err) {
       console.error("Error inesperado al cambiar estado:", err.message);
@@ -397,27 +418,28 @@ const Categorias = () => {
       {/* Lista de categorías cargadas */}
       {!cargando && categorias.length > 0 && (
         <Row>
+          {/* Tarjeta para dispositivos moviles */}
           <Col xs={12} sm={12} md={12} className="d-lg-none">
             <TarjetaCategoria
               categorias={categoriasPaginadas}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
-              cambiarEstadoCategoria={cambiarEstadoCategoria}
+              cambiarEstadoCategoria={abrirModalEstado}
             />
           </Col>
+          {/* Tabla para equipos de escritorio */}
           <Col lg={12} className="d-none d-lg-block">
             <TablaCategorias
               categorias={categoriasPaginadas}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
-              cambiarEstadoCategoria={cambiarEstadoCategoria}
+              cambiarEstadoCategoria={abrirModalEstado}
             />
           </Col>
         </Row>
       )}
-
-      
-
+ 
+      {/* Modal para Agregar una categoría nueva */}
       <ModalRegistroCategoria 
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}
@@ -427,6 +449,7 @@ const Categorias = () => {
         limpiarCategoria={limpiarCategoria}
       />
 
+      {/* Modal para editar una categoría */}
       <ModalEdicionCategoria
         mostrarModalEdicion={mostrarModalEdicion}
         setMostrarModalEdicion={setMostrarModalEdicion}
@@ -435,11 +458,20 @@ const Categorias = () => {
         actualizarCategoria={actualizarCategoria}
       />
 
+      {/* Modal para eliminar una categoría */}
       <ModalEliminacionCategoria
         mostrarModalEliminacion={mostrarModalEliminacion}
         setMostrarModalEliminacion={setMostrarModalEliminacion}
         eliminarCategoria={eliminarCategoria}
         categoria={categoriaAEliminar}
+      />
+
+      {/* Modal para cambiar el estado de una categoría */}
+      <ModalEstadoCategoria
+        mostrarModalEstado={mostrarModalEstado}
+        setMostrarModalEstado={setMostrarModalEstado}
+        categoria={categoriaEstado}
+        cambiarEstadoCategoria={cambiarEstadoCategoria}
       />
 
       {/* Paginación */}
