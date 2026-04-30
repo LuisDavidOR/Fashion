@@ -1,22 +1,30 @@
-import React, {useState} from "react";
-import { Modal, Form, Button } from "react-bootstrap";
+import React, { useState } from "react";
+import { Modal, Form, Button, Row, Col } from "react-bootstrap";
 
 const ModalRegistroInsumo = ({
   mostrarModal,
   setMostrarModal,
   nuevoInsumo,
   manejoCambioInput,
+  manejoCambioArchivo,
   agregarInsumo,
-  limpiarInsumo
+  limpiarInsumo,
 }) => {
   const [deshabilitado, setDeshabilitado] = useState(false);
 
   const handleRegistrar = async () => {
     if (deshabilitado) return;
+
     setDeshabilitado(true);
     await agregarInsumo();
     setDeshabilitado(false);
   };
+
+  const camposVacios =
+    nuevoInsumo.nombre.trim() === "" ||
+    nuevoInsumo.costo_producto === "" ||
+    nuevoInsumo.contenido_total === "" ||
+    nuevoInsumo.unidad_medida.trim() === "";
 
   return (
     <Modal
@@ -28,77 +36,119 @@ const ModalRegistroInsumo = ({
       backdrop="static"
       keyboard={false}
       centered
+      size="lg"
     >
       <Modal.Header closeButton>
         <Modal.Title>Agregar Insumo</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
         <Form>
-          <Form.Group className="mb-3">
-            <Form.Label>Nombre</Form.Label>
-            <Form.Control
-              type="text"
-              name="nombre"
-              value={nuevoInsumo.nombre}
-              onChange={manejoCambioInput}
-              placeholder="Ingresa el nombre de Insumo"
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Descripción</Form.Label>
-            <Form.Control
-              type="textarea"
-              name="descripcion"
-              value={nuevoInsumo.descripcion}
-              onChange={manejoCambioInput}
-              placeholder="Ingresa la descripción"
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Costo</Form.Label>
-            <Form.Control
-              type="number"
-              name="costo_producto"
-              value={nuevoInsumo.costo_producto}
-              onChange={manejoCambioInput}
-              placeholder="Ingresa el costo del producto"
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Contenido del Producto</Form.Label>
-            <Form.Control
-              type="number"
-              name="contenido_total"
-              value={nuevoInsumo.contenido_total}
-              onChange={manejoCambioInput}
-              placeholder="Ingresa el contenido total del producto (ej. 1000)"
-            />
-          </Form.Group>
-          <Form.Select
-            name="unidad_medida"
-            value={nuevoInsumo.unidad_medida}
-            onChange={manejoCambioInput}
-          >
-            <option value="">Seleccione una unidad</option>
-            <option value="ml">ml - mililitros</option>
-            <option value="g">g - gramos</option>
-            <option value="kg">kg - kilogramos</option>
-            <option value="oz">oz - onzas</option>
-            <option value="lb">lb - libras</option>
-            <option value="lt">lt - litros</option>
-          </Form.Select>
-          <Form.Group className="mb-3">
-            <Form.Label>Stock</Form.Label>
-            <Form.Control
-              type="text"
-              name="stock"
-              value={nuevoInsumo.stock}
-              onChange={manejoCambioInput}
-              placeholder="Ingresa el Stock"
-            />
-          </Form.Group>
+          <Row>
+            <Col xs={12} md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Nombre *</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="nombre"
+                  value={nuevoInsumo.nombre}
+                  onChange={manejoCambioInput}
+                  placeholder="Ej: Shampoo profesional"
+                />
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Costo del producto *</Form.Label>
+                <Form.Control
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="costo_producto"
+                  value={nuevoInsumo.costo_producto}
+                  onChange={manejoCambioInput}
+                  placeholder="Ej: 350"
+                />
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Contenido total *</Form.Label>
+                <Form.Control
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  name="contenido_total"
+                  value={nuevoInsumo.contenido_total}
+                  onChange={manejoCambioInput}
+                  placeholder="Ej: 1000"
+                />
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Unidad de medida *</Form.Label>
+                <Form.Select
+                  name="unidad_medida"
+                  value={nuevoInsumo.unidad_medida}
+                  onChange={manejoCambioInput}
+                >
+                  <option value="">Seleccione...</option>
+                  <option value="ml">ml</option>
+                  <option value="g">g</option>
+                  <option value="oz">oz</option>
+                  <option value="unidad">unidad</option>
+                  <option value="litro">litro</option>
+                  <option value="kg">kg</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Stock</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  name="stock"
+                  value={nuevoInsumo.stock}
+                  onChange={manejoCambioInput}
+                  placeholder="Ej: 10"
+                />
+              </Form.Group>
+            </Col>
+
+            <Col xs={12} md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Imagen del insumo</Form.Label>
+                <Form.Control
+                  type="file"
+                  accept="image/*,.jpg,.jpeg,.png,.webp"
+                  onChange={manejoCambioArchivo}
+                />
+              </Form.Group>
+            </Col>
+
+            <Col xs={12}>
+              <Form.Group className="mb-3">
+                <Form.Label>Descripción</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={4}
+                  name="descripcion"
+                  value={nuevoInsumo.descripcion}
+                  onChange={manejoCambioInput}
+                  placeholder="Descripción del insumo"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
         </Form>
       </Modal.Body>
+
       <Modal.Footer>
         <Button
           variant="secondary"
@@ -106,17 +156,19 @@ const ModalRegistroInsumo = ({
             limpiarInsumo();
             setMostrarModal(false);
           }}
+          disabled={deshabilitado}
         >
           Cancelar
         </Button>
+
         <Button
-         style={{
-          backgroundColor: "#7A564A",
-          borderColor: "#7A564A",
-          color: "#ffffff"
-        }}
+          style={{
+            backgroundColor: "#7A564A",
+            borderColor: "#7A564A",
+            color: "#ffffff",
+          }}
           onClick={handleRegistrar}
-          disabled={nuevoInsumo.nombre.trim() === "" || deshabilitado}
+          disabled={camposVacios || deshabilitado}
         >
           Guardar
         </Button>
