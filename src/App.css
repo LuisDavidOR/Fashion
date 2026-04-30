@@ -232,3 +232,209 @@ hr {
 .contenedor-tabla-paginacion {
   min-height: 300px;
 }
+
+/* DISEÑO TARJETAS DE EMPLEADOS */
+.empleado-card {
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #ffffff;
+  animation: fadeInUp 0.4s ease forwards;
+  transition: all 0.2s ease;
+}
+
+.empleado-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+}
+
+.empleado-card:hover .empleado-info {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  background: #f1ece9;
+}
+
+.empleado-card:hover .empleado-foto {
+  transform: scale(1.08);
+}
+
+.empleado-card button {
+  transition: all 0.2s ease;
+}
+
+.empleado-card button:hover {
+  transform: scale(1.15);
+}
+
+.empleado-foto-contenedor {
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(135deg, #7a564a, #c4a28d);
+  transition: box-shadow 0.3s ease;
+}
+
+.empleado-card:hover .empleado-foto-contenedor {
+  box-shadow: 0 0 12px rgba(122, 86, 74, 0.4);
+}
+
+.empleado-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  transition: transform 0.3s ease;
+}
+
+.empleado-foto-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #f3eeee;
+  color: #7a564a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  border: 3px solid #ffffff;
+}
+
+.empleado-info {
+  background: #f8f5f3;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 0.9rem;
+  color: #4b3a34;
+  transition: all 0.3s ease;
+}
+
+.empleado-info div {
+  margin-bottom: 6px;
+}
+
+.empleado-info div:last-child {
+  margin-bottom: 0;
+}
+
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*DISEÑO TARJETAS DE SERVICIO*/
+@keyframes fadeInUpServicio {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.servicio-card {
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  animation: fadeInUpServicio 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.servicio-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+}
+
+.servicio-imagen-contenedor {
+  width: 100%;
+  height: 210px;
+  position: relative;
+  overflow: hidden;
+  background: #f3eeee;
+}
+
+.servicio-imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.servicio-card:hover .servicio-imagen {
+  transform: scale(1.08);
+}
+
+.servicio-imagen-placeholder {
+  width: 100%;
+  height: 100%;
+  color: #7a564a;
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.servicio-badge-estado {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 7px 10px;
+  border-radius: 999px;
+}
+
+.servicio-categoria {
+  background: #f8f5f3;
+  color: #7a564a;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.servicio-descripcion {
+  color: #6c625f;
+  font-size: 0.9rem;
+  min-height: 42px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.servicio-info {
+  background: #f8f5f3;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 0.9rem;
+  color: #4b3a34;
+}
+
+.servicio-info div {
+  margin-bottom: 6px;
+}
+
+.servicio-info div:last-child {
+  margin-bottom: 0;
+}
+
+.servicio-card button {
+  transition: all 0.2s ease;
+}
+
+.servicio-card button:hover {
+  transform: scale(1.14);
+}
