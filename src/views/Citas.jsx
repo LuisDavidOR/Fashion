@@ -4,6 +4,7 @@ import { supabase } from "../database/supabaseconfig";
 
 import ModalRegistroCita from "../components/citas/ModalRegistroCita";
 import NotificacionOperacion from "../components/NotificacionOperacion";
+import TablaCitas from "../components/citas/TablaCitas";
 
 const Citas = () => {
 
@@ -20,6 +21,9 @@ const Citas = () => {
   const [empleados, setEmpleados] = useState([]);
   const [servicios, setServicios] = useState([]);
   const [detalleCita, setDetalleCita] = useState([]);
+  const [citas, setCitas] = useState([]);
+  const [cargandoCitas, setCargandoCitas] = useState(true);
+  const [citaExpandida, setCitaExpandida] = useState(null);
 
   const limpiarCita = () => {
     setNuevaCita({
@@ -32,6 +36,57 @@ const Citas = () => {
 
     setDetalleCita([]);
   };
+
+  const cargarCitas = async () => {
+      try {
+        setCargandoCitas(true);
+
+        const { data, error } = await supabase
+          .from("Citas")
+          .select(`
+            id_cita,
+            fecha,
+            hora,
+            estado_cita,
+            Clientes (
+              nombre,
+              apellido
+            ),
+            Empleados (
+              nombre,
+              apellido
+            ),
+            Detalle_cita (
+              id_detalle_cita,
+              subtotal,
+              costo_empleado,
+              costo_insumo,
+              Servicios (
+                nombre,
+                precio
+              )
+            )
+          `)
+          .order("fecha", { ascending: false })
+          .order("hora", { ascending: false });
+
+        if (error) {
+          console.error("Error cargando citas:", error.message);
+          setToast({
+            mostrar: true,
+            mensaje: "Error al cargar citas.",
+            tipo: "error",
+          });
+          return;
+        }
+
+        setCitas(data || []);
+      } catch (err) {
+        console.error("Excepción al cargar citas:", err.message);
+      } finally {
+        setCargandoCitas(false);
+      }
+    };
 
   const cargarClientes = async () => {
     const { data, error } = await supabase
@@ -89,6 +144,7 @@ const Citas = () => {
     cargarClientes();
     cargarEmpleados();
     cargarServicios();
+    cargarCitas();
   }, []);
 
   const manejoCambioInput = (e) => {
@@ -223,6 +279,9 @@ const Citas = () => {
 
       limpiarCita();
       setMostrarModal(false);
+
+      await cargarCitas();
+
     } catch (err) {
       console.error("Excepción al agregar cita: ", err.message);
       setToast({
@@ -254,6 +313,26 @@ const Citas = () => {
       </Row>
 
       <hr />
+
+      {cargandoCitas ? (
+        <Row className="text-center my-5">
+          <Col>
+            <Spinner animation="border" variant="success" />
+            <p className="mt-3 text-muted">Cargando citas...</p>
+          </Col>
+        </Row>
+      ) : citas.length === 0 ? (
+        <Alert variant="info" className="text-center">
+          <i className="bi bi-info-circle me-2"></i>
+          No hay citas registradas.
+        </Alert>
+      ) : (
+        <TablaCitas
+          citas={citas}
+          citaExpandida={citaExpandida}
+          setCitaExpandida={setCitaExpandida}
+        />
+      )}
 
       <ModalRegistroCita
         mostrarModal={mostrarModal}
