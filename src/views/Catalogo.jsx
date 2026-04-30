@@ -191,13 +191,18 @@ const Catalogo = () => {
             <button
               className={
                 categoriaSeleccionada === "todas"
-                  ? "catalogo-chip activo"
-                  : "catalogo-chip"
+                  ? "catalogo-categoria-card todas activa"
+                  : "catalogo-categoria-card todas"
               }
               onClick={() => setCategoriaSeleccionada("todas")}
             >
-              <i className="bi bi-grid me-2"></i>
-              Todas
+              <div className="catalogo-categoria-bg categoria-todas-bg"></div>
+              <div className="catalogo-categoria-overlay"></div>
+
+              <span>
+                <i className="bi bi-grid me-2"></i>
+                Todas
+              </span>
             </button>
 
             {categorias.map((categoria) => (
@@ -205,12 +210,23 @@ const Catalogo = () => {
                 key={categoria.id_categoria}
                 className={
                   String(categoriaSeleccionada) === String(categoria.id_categoria)
-                    ? "catalogo-chip activo"
-                    : "catalogo-chip"
+                    ? "catalogo-categoria-card activa"
+                    : "catalogo-categoria-card"
                 }
                 onClick={() => setCategoriaSeleccionada(categoria.id_categoria)}
               >
-                {categoria.nombre}
+                <div
+                  className="catalogo-categoria-bg"
+                  style={{
+                    backgroundImage: categoria.url_imagen
+                      ? `url(${categoria.url_imagen})`
+                      : "none",
+                  }}
+                ></div>
+
+                <div className="catalogo-categoria-overlay"></div>
+
+                <span>{categoria.nombre}</span>
               </button>
             ))}
           </div>
