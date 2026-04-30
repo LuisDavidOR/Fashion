@@ -9,7 +9,7 @@ const TarjetaEmpleado = ({
   cambiarEstadoEmpleado,
 }) => {
   return (
-    <Row className="g-4">
+    <Row className="g-4 justify-content-center">
       {empleados.map((empleado, index) => (
         <Col xs={12} sm={6} lg={4} xl={3} key={empleado.id_empleado}>
           <Card key={empleado.id_empleado}
@@ -60,7 +60,9 @@ const TarjetaEmpleado = ({
 
                 <div>
                   <i className="bi bi-percent me-2"></i>
-                  Comisión: {Number(empleado.comision).toFixed(2)}%
+                  Comisión: {Number.isInteger(Number(empleado.comision)) 
+                    ? Number(empleado.comision) 
+                    : Number(empleado.comision).toFixed(2)}%
                 </div>
               </div>
 

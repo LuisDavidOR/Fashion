@@ -2,7 +2,7 @@ import React from "react";
 import { Row, Col, Card, Badge } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-const TarjetaCatalogo = ({ servicios, abrirModalCalificacion }) => {
+const TarjetaCatalogo = ({ servicios, abrirModalCalificacion, abrirModalDetalle }) => {
   const renderEstrellas = (rating) => {
     const estrellas = [];
 
@@ -25,9 +25,11 @@ const TarjetaCatalogo = ({ servicios, abrirModalCalificacion }) => {
         <Col xs={12} sm={6} md={4} lg={3} key={servicio.id_servicio}>
           <Card
             className="catalogo-card h-100"
+            onClick={() => abrirModalDetalle(servicio)}
             style={{
               animationDelay: `${index * 0.07}s`,
               animationFillMode: "both",
+              cursor: "pointer",
             }}
           >
             <div className="catalogo-imagen-contenedor">
@@ -45,9 +47,6 @@ const TarjetaCatalogo = ({ servicios, abrirModalCalificacion }) => {
             </div>
 
             <Card.Body>
-              <Badge className="mb-2 catalogo-categoria">
-                {servicio.Categorias?.nombre}
-              </Badge>
 
               <h5 className="fw-bold">{servicio.nombre}</h5>
 
@@ -94,8 +93,11 @@ const TarjetaCatalogo = ({ servicios, abrirModalCalificacion }) => {
                 </div>
 
                 <button
-                className="btn-calificar-servicio mt-3"
-                onClick={() => abrirModalCalificacion(servicio)}
+                  className="btn-calificar-servicio mt-3"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    abrirModalCalificacion(servicio);
+                  }}
                 >
                 <i className="bi bi-star-fill me-2"></i>
                 Calificar

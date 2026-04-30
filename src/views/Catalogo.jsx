@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
+import { Container, Row, Col, Spinner, Alert, Form } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import ModalCalificacionServicio from "../components/catalogo/ModalCalificacionServicio";
 import TarjetaCatalogo from "../components/catalogo/TarjetaCatalogo";
-
-
+import ModalDetalleServicio from "../components/catalogo/ModalDetalleServicio";
 
 const Catalogo = () => {
   const [servicios, setServicios] = useState([]);
@@ -19,6 +18,9 @@ const Catalogo = () => {
     puntuacion: 5,
     comentario: "",
   });
+
+  const [mostrarModalDetalle, setMostrarModalDetalle] = useState(false);
+  const [servicioDetalle, setServicioDetalle] = useState(null);
 
   useEffect(() => {
     cargarCategorias();
@@ -48,9 +50,25 @@ const Catalogo = () => {
       if (error) throw error;
 
       // 2. Traer calificaciones
-      const { data: calificacionesData } = await supabase
+      const { data: calificacionesData, error: errorCalificaciones } = await supabase
         .from("Calificaciones")
-        .select("id_servicio, puntuacion");
+        .select(`
+          id_calificacion,
+          id_cliente,
+          id_servicio,
+          puntuacion,
+          comentario,
+          Clientes (
+            id_cliente,
+            nombre,
+            apellido
+          )
+        `);
+
+      if (errorCalificaciones) {
+        console.error("Error cargando calificaciones:", errorCalificaciones.message);
+        console.log("Calificaciones:", calificacionesData);
+      }
 
       // 3. Agrupar calificaciones
       const mapaCalificaciones = {};
@@ -60,7 +78,7 @@ const Catalogo = () => {
           mapaCalificaciones[cal.id_servicio] = [];
         }
 
-        mapaCalificaciones[cal.id_servicio].push(cal.puntuacion);
+        mapaCalificaciones[cal.id_servicio].push(cal);
       });
 
       // 4. Calcular promedio
@@ -69,7 +87,7 @@ const Catalogo = () => {
 
         const promedio =
           calificaciones.length > 0
-            ? calificaciones.reduce((a, b) => a + b, 0) /
+            ? calificaciones.reduce((total, cal) => total + Number(cal.puntuacion), 0) /
               calificaciones.length
             : 0;
 
@@ -77,6 +95,7 @@ const Catalogo = () => {
           ...servicio,
           rating: promedio,
           totalReviews: calificaciones.length,
+          calificaciones,
         };
       });
 
@@ -113,43 +132,100 @@ const Catalogo = () => {
       };
 
     const serviciosFiltrados =
-        categoriaSeleccionada === "todas"
-          ? servicios
-          : servicios.filter(
-              (servicio) =>
-                String(servicio.id_categoria) === String(categoriaSeleccionada)
-            );
+      categoriaSeleccionada === "todas"
+        ? servicios
+        : servicios.filter(
+          (servicio) =>
+            String(servicio.id_categoria) === String(categoriaSeleccionada)
+        );
+    
+    const agruparPorCategoria = (listaServicios) => {
+      return listaServicios.reduce((acc, servicio) => {
+        const categoria = servicio.Categorias?.nombre || "Sin categoría";
+
+        if (!acc[categoria]) {
+          acc[categoria] = [];
+        }
+
+        acc[categoria].push(servicio);
+        return acc;
+      }, {});
+    };
+
+    const serviciosAgrupados = agruparPorCategoria(serviciosFiltrados);
 
   return (
     <Container className="mt-4">
       <h3 className="mb-4">
         <i className="bi bi-grid-fill me-2"></i> Catálogo de Servicios
           </h3>
-      <div className="mb-4 catalogo-filtros">
-        <button
-          className={
-            categoriaSeleccionada === "todas"
-              ? "catalogo-filtro-activo"
-              : "catalogo-filtro"
-          }
-          onClick={() => setCategoriaSeleccionada("todas")}
-        >
-          Todos
-        </button>
+      <div className="catalogo-categorias-section mb-4">
+        <div className="d-flex align-items-center justify-content-between mb-2">
+          <h6 className="catalogo-categorias-titulo mb-0">
+            Explorar por categoría
+          </h6>
 
-        {categorias.map((categoria) => (
+          {categoriaSeleccionada !== "todas" && (
+            <button
+              className="catalogo-limpiar-filtro"
+              onClick={() => setCategoriaSeleccionada("todas")}
+            >
+              Ver todas
+            </button>
+          )}
+        </div>
+
+        <div className="catalogo-categorias-wrapper">
           <button
-            key={categoria.id_categoria}
-            className={
-              String(categoriaSeleccionada) === String(categoria.id_categoria)
-                ? "catalogo-filtro-activo"
-                : "catalogo-filtro"
+            className="catalogo-flecha-scroll"
+            onClick={() =>
+              document
+                .querySelector(".catalogo-categorias-scroll")
+                ?.scrollBy({ left: -180, behavior: "smooth" })
             }
-            onClick={() => setCategoriaSeleccionada(categoria.id_categoria)}
           >
-            {categoria.nombre}
+            <i className="bi bi-chevron-left"></i>
           </button>
-        ))}
+
+          <div className="catalogo-categorias-scroll">
+            <button
+              className={
+                categoriaSeleccionada === "todas"
+                  ? "catalogo-chip activo"
+                  : "catalogo-chip"
+              }
+              onClick={() => setCategoriaSeleccionada("todas")}
+            >
+              <i className="bi bi-grid me-2"></i>
+              Todas
+            </button>
+
+            {categorias.map((categoria) => (
+              <button
+                key={categoria.id_categoria}
+                className={
+                  String(categoriaSeleccionada) === String(categoria.id_categoria)
+                    ? "catalogo-chip activo"
+                    : "catalogo-chip"
+                }
+                onClick={() => setCategoriaSeleccionada(categoria.id_categoria)}
+              >
+                {categoria.nombre}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="catalogo-flecha-scroll"
+            onClick={() =>
+              document
+                .querySelector(".catalogo-categorias-scroll")
+                ?.scrollBy({ left: 180, behavior: "smooth" })
+            }
+          >
+            <i className="bi bi-chevron-right"></i>
+          </button>
+        </div>
       </div>
     
 
@@ -169,26 +245,55 @@ const Catalogo = () => {
       )}
 
       {!cargando && servicios.length > 0 && (
-        <TarjetaCatalogo
-          servicios={serviciosFiltrados}
-          abrirModalCalificacion={(servicio) => {
-            setServicioSeleccionado(servicio);
-            setNuevaCalificacion({
-              puntuacion: 5,
-              comentario: "",
-            });
-            setMostrarModalCalificacion(true);
-          }}
-        />
+        <>
+          {Object.entries(serviciosAgrupados).map(([categoria, servicios]) => (
+            <section key={categoria} className="mb-5">
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <h4 className="fw-bold mb-0">{categoria}</h4>
+                <span className="text-muted small">
+                  {servicios.length} servicio{servicios.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              <div className="catalogo-scroll-horizontal">
+                {servicios.map((servicio) => (
+                  <div className="catalogo-card-scroll" key={servicio.id_servicio}>
+                    <TarjetaCatalogo
+                      servicios={[servicio]}
+                      abrirModalDetalle={(servicio) => {
+                        setServicioDetalle(servicio);
+                        setMostrarModalDetalle(true);
+                      }}
+                      abrirModalCalificacion={(servicio) => {
+                        setServicioSeleccionado(servicio);
+                        setNuevaCalificacion({
+                          puntuacion: 5,
+                          comentario: "",
+                        });
+                        setMostrarModalCalificacion(true);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </>
       )}
 
       <ModalCalificacionServicio
-      mostrarModal={mostrarModalCalificacion}
-      setMostrarModal={setMostrarModalCalificacion}
-      servicio={servicioSeleccionado}
-      nuevaCalificacion={nuevaCalificacion}
-      setNuevaCalificacion={setNuevaCalificacion}
-      guardarCalificacion={guardarCalificacion}
+        mostrarModal={mostrarModalCalificacion}
+        setMostrarModal={setMostrarModalCalificacion}
+        servicio={servicioSeleccionado}
+        nuevaCalificacion={nuevaCalificacion}
+        setNuevaCalificacion={setNuevaCalificacion}
+        guardarCalificacion={guardarCalificacion}
+      />
+
+      <ModalDetalleServicio
+        mostrarModal={mostrarModalDetalle}
+        setMostrarModal={setMostrarModalDetalle}
+        servicio={servicioDetalle}
       />
     </Container>
   );

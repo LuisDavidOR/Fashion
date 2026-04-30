@@ -147,6 +147,7 @@ const ModalEdicionEmpleado = ({
                   type="number"
                   step="0.01"
                   min="0"
+                  max="100"
                   name="comision"
                   value={empleadoEditar.comision || ""}
                   onChange={manejoCambioInputEdicion}

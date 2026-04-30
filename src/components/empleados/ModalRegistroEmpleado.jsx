@@ -119,6 +119,7 @@ const ModalRegistroEmpleado = ({
                   type="number"
                   step="0.01"
                   min="0"
+                  max="100"
                   name="comision"
                   value={nuevoEmpleado.comision}
                   onChange={manejoCambioInput}
