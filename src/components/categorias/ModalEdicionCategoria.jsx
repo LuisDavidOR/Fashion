@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
 const ModalEdicionCategoria = ({
@@ -6,13 +6,14 @@ const ModalEdicionCategoria = ({
   setMostrarModalEdicion,
   categoriaEditar,
   manejoCambioInputEdicion,
+  manejoCambioArchivoActualizar,
   actualizarCategoria,
 }) => {
-
   const [deshabilitado, setDeshabilitado] = useState(false);
 
   const handleActualizar = async () => {
     if (deshabilitado) return;
+
     setDeshabilitado(true);
     await actualizarCategoria();
     setDeshabilitado(false);
@@ -29,10 +30,44 @@ const ModalEdicionCategoria = ({
       <Modal.Header closeButton>
         <Modal.Title>Editar Categoría</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
         <Form>
+          <Form.Group className="mb-3 text-center">
+            <Form.Label>Imagen actual</Form.Label>
+
+            {categoriaEditar.url_imagen ? (
+              <div className="mb-2">
+                <img
+                  src={categoriaEditar.url_imagen}
+                  alt="Categoría actual"
+                  style={{
+                    width: "180px",
+                    height: "120px",
+                    objectFit: "cover",
+                    borderRadius: "14px",
+                  }}
+                />
+              </div>
+            ) : (
+              <p className="text-muted">Sin imagen</p>
+            )}
+          </Form.Group>
+
           <Form.Group className="mb-3">
-            <Form.Label>Nombre</Form.Label>
+            <Form.Label>Nueva imagen</Form.Label>
+            <Form.Control
+              type="file"
+              accept="image/*,.jpg,.jpeg,.png,.webp"
+              onChange={manejoCambioArchivoActualizar}
+            />
+            <Form.Text className="text-muted">
+              Si seleccionas una nueva imagen, reemplazará la actual.
+            </Form.Text>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Nombre *</Form.Label>
             <Form.Control
               type="text"
               name="nombre"
@@ -41,6 +76,7 @@ const ModalEdicionCategoria = ({
               placeholder="Ingresa el nombre"
             />
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Descripción</Form.Label>
             <Form.Control
@@ -54,13 +90,16 @@ const ModalEdicionCategoria = ({
           </Form.Group>
         </Form>
       </Modal.Body>
+
       <Modal.Footer>
         <Button
           variant="secondary"
           onClick={() => setMostrarModalEdicion(false)}
+          disabled={deshabilitado}
         >
           Cancelar
         </Button>
+
         <Button
           variant="primary"
           onClick={handleActualizar}

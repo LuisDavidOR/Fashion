@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
 const ModalRegistroCategoria = ({
@@ -6,13 +6,15 @@ const ModalRegistroCategoria = ({
   setMostrarModal,
   nuevaCategoria,
   manejoCambioInput,
+  manejoCambioArchivo,
   agregarCategoria,
-  limpiarCategoria
+  limpiarCategoria,
 }) => {
   const [deshabilitado, setDeshabilitado] = useState(false);
 
   const handleRegistrar = async () => {
     if (deshabilitado) return;
+
     setDeshabilitado(true);
     await agregarCategoria();
     setDeshabilitado(false);
@@ -32,10 +34,11 @@ const ModalRegistroCategoria = ({
       <Modal.Header closeButton>
         <Modal.Title>Agregar Categoría</Modal.Title>
       </Modal.Header>
+
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>Nombre</Form.Label>
+            <Form.Label>Nombre *</Form.Label>
             <Form.Control
               type="text"
               name="nombre"
@@ -44,6 +47,19 @@ const ModalRegistroCategoria = ({
               placeholder="Ingresa el nombre de categoría"
             />
           </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Imagen de categoría</Form.Label>
+            <Form.Control
+              type="file"
+              accept="image/*,.jpg,.jpeg,.png,.webp"
+              onChange={manejoCambioArchivo}
+            />
+            <Form.Text className="text-muted">
+              Se recomienda una imagen horizontal o cuadrada.
+            </Form.Text>
+          </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Descripción</Form.Label>
             <Form.Control
@@ -57,6 +73,7 @@ const ModalRegistroCategoria = ({
           </Form.Group>
         </Form>
       </Modal.Body>
+
       <Modal.Footer>
         <Button
           variant="secondary"
@@ -64,14 +81,16 @@ const ModalRegistroCategoria = ({
             limpiarCategoria();
             setMostrarModal(false);
           }}
+          disabled={deshabilitado}
         >
           Cancelar
         </Button>
+
         <Button
-            style={{
+          style={{
             backgroundColor: "#7A564A",
             borderColor: "#7A564A",
-            color: "#ffffff"
+            color: "#ffffff",
           }}
           onClick={handleRegistrar}
           disabled={nuevaCategoria.nombre.trim() === "" || deshabilitado}

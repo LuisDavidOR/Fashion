@@ -1,146 +1,99 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, Row, Col, Button } from "react-bootstrap";
+import React from "react";
+import { Row, Col, Card, Button, Badge } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const TarjetaCategoria = ({
   categorias,
   abrirModalEdicion,
   abrirModalEliminacion,
-  cambiarEstadoCategoria
+  cambiarEstadoCategoria,
 }) => {
-  const [idTarjetaActiva, setIdTarjetaActiva] = useState(null);
-
-  const manejarTeclaEscape = useCallback((evento) => {
-    if (evento.key === "Escape") setIdTarjetaActiva(null);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("keydown", manejarTeclaEscape);
-    return () => window.removeEventListener("keydown", manejarTeclaEscape);
-  }, [manejarTeclaEscape]);
-
-  const alternarTarjetaActiva = (id) => {
-    setIdTarjetaActiva((anterior) => (anterior === id ? null : id));
-  };
-
   return (
-    <>
-      <div>
-        {categorias.map((categoria) => {
-          const tarjetaActiva = idTarjetaActiva === categoria.id_categoria;
-
-          return (
-            <Card
-              key={categoria.id_categoria}
-              className="mb-3 border-0 rounded-3 shadow-sm w-100 tarjeta-categoria-contenedor"
-              onClick={() => alternarTarjetaActiva(categoria.id_categoria)}
-              tabIndex={0}
-              onKeyDown={(evento) => {
-                if (evento.key === "Enter" || evento.key === " ") {
-                  evento.preventDefault();
-                  alternarTarjetaActiva(categoria.id_categoria);
-                }
-              }}
-              aria-label={`Categoría ${categoria.nombre}`}
-            >
-              <Card.Body
-                className={`p-2 tarjeta-categoria-cuerpo ${
-                  tarjetaActiva
-                    ? "tarjeta-categoria-cuerpo-activo"
-                    : "tarjeta-categoria-cuerpo-inactivo"
-                }`}
-              >
-                <Row className="align-items-center gx-3">
-                  <Col xs={2} className="px-2">
-                    <div
-                      className="bg-light d-flex align-items-center justify-content-center rounded tarjeta-categoria-placeholder-imagen"
-                    >
-                      <i className="bi bi-bookmark text-muted fs-3"></i>
-                    </div>
-                  </Col>
-
-                  <Col xs={5} className="text-start">
-                    <div className="fw-semibold text-truncate">
-                      {categoria.nombre}
-                    </div>
-                    <div className="small text-muted text-truncate">
-                      {categoria.descripcion}
-                    </div>
-                  </Col>
-                </Row>
-              </Card.Body>
-
-              {tarjetaActiva && (
-                <div
-                  role="dialog"
-                  aria-modal="true"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIdTarjetaActiva(null);
-                  }}
-                  className="tarjeta-categoria-capa"
-                >
-                  <div
-                    className="d-flex gap-2 tarjeta-categoria-botones-capa"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Button
-                      variant="outline-warning"
-                      size="sm"
-                      onClick={() => {
-                        abrirModalEdicion(categoria);
-                        setIdTarjetaActiva(null);
-                      }}
-                      aria-label={`Editar ${categoria.nombre}`}
-                    >
-                      <i className="bi bi-pencil"></i>
-                    </Button>
-
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => {
-                        abrirModalEliminacion(categoria);
-                        setIdTarjetaActiva(null);
-                      }}
-                      aria-label={`Eliminar ${categoria.nombre}`}
-                    >
-                      <i className="bi bi-trash"></i>
-                    </Button>
-                    <Button
-                      variant={
-                        categoria.estado === "activo"
-                          ? "outline-secondary"
-                          : "outline-success"
-                      }
-                      size="sm"
-                      onClick={() => {
-                        cambiarEstadoCategoria(categoria);
-                        setIdTarjetaActiva(null);
-                      }}
-                      aria-label={
-                        categoria.estado === "activo"
-                          ? `Inactivar ${categoria.nombre}`
-                          : `Activar ${categoria.nombre}`
-                      }
-                    >
-                      <i
-                        className={
-                          categoria.estado === "activo"
-                            ? "bi bi-toggle-off"
-                            : "bi bi-toggle-on"
-                        }
-                      ></i>
-                    </Button>
-                  </div>
+    <Row className="g-4">
+      {categorias.map((categoria, index) => (
+        <Col xs={12} sm={6} lg={4} xl={4} key={categoria.id_categoria}>
+          <Card
+            className="categoria-card h-100"
+            style={{
+              animationDelay: `${index * 0.08}s`,
+              animationFillMode: "both",
+            }}
+          >
+            <div className="categoria-imagen-contenedor">
+              {categoria.url_imagen ? (
+                <img
+                  src={categoria.url_imagen}
+                  alt={categoria.nombre}
+                  className="categoria-imagen"
+                />
+              ) : (
+                <div className="categoria-imagen-placeholder">
+                  <i className="bi bi-bookmark-heart"></i>
                 </div>
               )}
-            </Card>
-          );
-        })}
-      </div>
-    
-    </>
+
+              <Badge
+                bg={categoria.estado === "activo" ? "success" : "secondary"}
+                className="categoria-badge-estado"
+              >
+                {categoria.estado === "activo" ? "Activa" : "Inactiva"}
+              </Badge>
+            </div>
+
+            <Card.Body className="p-4">
+              <h5 className="fw-bold mb-2 text-truncate">
+                {categoria.nombre}
+              </h5>
+
+              <p className="categoria-descripcion">
+                {categoria.descripcion || "Sin descripción"}
+              </p>
+
+              <div className="d-flex justify-content-center gap-2 mt-3">
+                <Button
+                  variant="outline-warning"
+                  size="sm"
+                  onClick={() => abrirModalEdicion(categoria)}
+                  title="Editar"
+                >
+                  <i className="bi bi-pencil"></i>
+                </Button>
+
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => abrirModalEliminacion(categoria)}
+                  title="Eliminar"
+                >
+                  <i className="bi bi-trash"></i>
+                </Button>
+
+                <Button
+                  variant={
+                    categoria.estado === "activo"
+                      ? "outline-secondary"
+                      : "outline-success"
+                  }
+                  size="sm"
+                  onClick={() => cambiarEstadoCategoria(categoria)}
+                  title={
+                    categoria.estado === "activo" ? "Inactivar" : "Activar"
+                  }
+                >
+                  <i
+                    className={
+                      categoria.estado === "activo"
+                        ? "bi bi-toggle-off"
+                        : "bi bi-toggle-on"
+                    }
+                  ></i>
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      ))}
+    </Row>
   );
 };
 

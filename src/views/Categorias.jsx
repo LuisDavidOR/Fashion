@@ -19,9 +19,10 @@ const Categorias = () => {
   //Agregar categoria
   const [mostrarModal, setMostrarModal] = useState(false);
   const [nuevaCategoria, setNuevaCategoria] = useState({
-    nombre: "",
-    descripcion: "",
-  });
+  nombre: "",
+  descripcion: "",
+  archivo: null,
+});
   //Visualizar categorias
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true); //Estado de carga inicial
@@ -34,10 +35,12 @@ const Categorias = () => {
   //Actualizar categoria
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
   const [categoriaEditar, setCategoriaEditar] = useState({
-    id_categoria: "",
-    nombre: "",
-    descripcion: "",
-  });
+  id_categoria: "",
+  nombre: "",
+  descripcion: "",
+  url_imagen: "",
+  archivo: null,
+});
   //Manejar busqueda y filtros
   const [textoBusqueda, setTextoBusqueda] = useState("");
   const [buscando, setBuscando] = useState(false);
@@ -58,11 +61,12 @@ const Categorias = () => {
 
   //limpiar codigo
   const limpiarCategoria = () => {
-    setNuevaCategoria({
-      nombre: "",
-      descripcion: "",
-    });
-  };
+  setNuevaCategoria({
+    nombre: "",
+    descripcion: "",
+    archivo: null,
+  });
+};
 
   //UseEffect Principal
   useEffect(() => {
@@ -118,13 +122,16 @@ const Categorias = () => {
 
   //Abrir modal Edición
   const abrirModalEdicion = (categoria) => {
-    setCategoriaEditar({
-      id_categoria: categoria.id_categoria,
-      nombre: categoria.nombre,
-      descripcion: categoria.descripcion,
-    });
-    setMostrarModalEdicion(true);
-  };
+  setCategoriaEditar({
+    id_categoria: categoria.id_categoria,
+    nombre: categoria.nombre,
+    descripcion: categoria.descripcion || "",
+    url_imagen: categoria.url_imagen || "",
+    archivo: null,
+  });
+
+  setMostrarModalEdicion(true);
+};
 
   //Abrir modal Eliminación
   const abrirModalEliminacion = (categoria) => {
@@ -170,79 +177,91 @@ const Categorias = () => {
 
   //Agregar una categoria nueva
   const agregarCategoria = async () => {
-    try {
-      if (
-        !nuevaCategoria.nombre.trim()
-      ) {
+      try {
+        if (!nuevaCategoria.nombre.trim()) {
+          setToast({
+            mostrar: true,
+            mensaje: "Debe agregar el nombre de una categoría.",
+            tipo: "advertencia",
+          });
+          return;
+        }
+
+        let urlImagen = "";
+
+        if (nuevaCategoria.archivo) {
+          urlImagen = await subirImagenCategoria(nuevaCategoria.archivo);
+        }
+
+        const { error } = await supabase.from("Categorias").insert([
+          {
+            nombre: nuevaCategoria.nombre.trim(),
+            descripcion: nuevaCategoria.descripcion.trim() || null,
+            url_imagen: urlImagen || null,
+          },
+        ]);
+
+        if (error) {
+          console.error("Error al agregar categoría:", error.message);
+          setToast({
+            mostrar: true,
+            mensaje: "Error al registrar categoría.",
+            tipo: "error",
+          });
+          return;
+        }
+
         setToast({
           mostrar: true,
-          mensaje: "Debe agregar el nombre de una categoría.",
-          tipo: "advertencia",
+          mensaje: `Categoría "${nuevaCategoria.nombre}" registrada exitosamente.`,
+          tipo: "exito",
         });
-        return;
-      }
 
-      const { error } = await supabase.from("Categorias"). insert([
-        {
-          nombre: nuevaCategoria.nombre,
-          descripcion: nuevaCategoria.descripcion,
-        },
-      ]);
-
-      if(error) {
-        console.error("Error al agregar categoría: ", error.message);
+        limpiarCategoria();
+        await cargarCategorias();
+        setMostrarModal(false);
+      } catch (err) {
+        console.error("Excepción al agregar categoría:", err.message);
         setToast({
-          mostrar:true,
-          mensaje: "Error al registrar categoría.",
+          mostrar: true,
+          mensaje: "Error inesperado al registrar categoría.",
           tipo: "error",
         });
-        return;
       }
-
-      //Éxito
-      setToast({
-        mostrar: true,
-        mensaje: `Categoría "${nuevaCategoria.nombre}" registrada exitosamente.`,
-        tipo: "exito",
-      });
-
-      //Limpiar formulario y cerrar modal
-      setNuevaCategoria({ nombre: "", descripcion: ""});
-      await cargarCategorias();
-      setMostrarModal(false);
-    } catch (err) {
-      console.error("Excepción al agregar categoría: ", err.message);
-      setToast({
-        mostrar: true,
-        mensaje: "Error inesperado al registrar categoría.",
-        tipo: "error",
-      });
-    }
-  };
+    };
 
   //Actualizar una categoría existente
   const actualizarCategoria = async () => {
-    try {
-      if (
-        !categoriaEditar.nombre.trim()
-      ) {
-        setToast({
-          mostrar:true,
-          mensaje: "Debe agregar un nombre de categoría.",
-          tipo: "advertencia",
-        });
-        return;
-      }
+      try {
+        if (!categoriaEditar.nombre.trim()) {
+          setToast({
+            mostrar: true,
+            mensaje: "Debe agregar un nombre de categoría.",
+            tipo: "advertencia",
+          });
+          return;
+        }
 
-      setMostrarModalEdicion(false);
+        setMostrarModalEdicion(false);
 
-      const { error } = await supabase
-        .from("Categorias")
-        .update({
-          nombre: categoriaEditar.nombre,
-          descripcion: categoriaEditar.descripcion,
-        })
-        .eq("id_categoria", categoriaEditar.id_categoria);
+        let datosActualizados = {
+          nombre: categoriaEditar.nombre.trim(),
+          descripcion: categoriaEditar.descripcion.trim() || null,
+          url_imagen: categoriaEditar.url_imagen || null,
+        };
+
+        if (categoriaEditar.archivo) {
+          const nuevaUrlImagen = await subirImagenCategoria(categoriaEditar.archivo);
+
+          datosActualizados.url_imagen = nuevaUrlImagen;
+
+          await eliminarImagenAnterior(categoriaEditar.url_imagen);
+        }
+
+        const { error } = await supabase
+          .from("Categorias")
+          .update(datosActualizados)
+          .eq("id_categoria", categoriaEditar.id_categoria);
 
         if (error) {
           console.error("Error al actualizar categoría:", error.message);
@@ -255,20 +274,21 @@ const Categorias = () => {
         }
 
         await cargarCategorias();
+
         setToast({
           mostrar: true,
           mensaje: `Categoría ${categoriaEditar.nombre} actualizada exitosamente.`,
           tipo: "exito",
         });
-    } catch (err) {
-      setToast({
-        mostrar: true,
-        mensaje: "Error inesperado al actualizar categoría.",
-        tipo: "error",
-      });
-      console.error("Excepción al actualizar categoría: ", err.message);
-    }
-  };
+      } catch (err) {
+        console.error("Excepción al actualizar categoría:", err.message);
+        setToast({
+          mostrar: true,
+          mensaje: "Error inesperado al actualizar categoría.",
+          tipo: "error",
+        });
+      }
+    };
 
   //Eliminar una categoría existente
   const eliminarCategoria = async () => {
@@ -290,6 +310,8 @@ const Categorias = () => {
         });
         return;
       }
+
+      await eliminarImagenAnterior(categoriaAEliminar.url_imagen);
       
       await cargarCategorias();
       setToast({
@@ -351,6 +373,85 @@ const Categorias = () => {
       });
     }
   };
+
+    //FUNCIONES NUEVAS PARA IMAGENES
+    const esImagenValida = (archivo) => {
+        return (
+          archivo?.type?.startsWith("image/") ||
+          /\.(jpg|jpeg|png|webp)$/i.test(archivo?.name || "")
+        );
+      };
+
+      const manejoCambioArchivo = (e) => {
+        const archivo = e.target.files[0];
+
+        if (!archivo) return;
+
+        if (esImagenValida(archivo)) {
+          setNuevaCategoria((prev) => ({
+            ...prev,
+            archivo,
+          }));
+        } else {
+          setToast({
+            mostrar: true,
+            mensaje: "Selecciona una imagen válida: JPG, JPEG, PNG o WEBP.",
+            tipo: "advertencia",
+          });
+        }
+      };
+
+      const manejoCambioArchivoActualizar = (e) => {
+        const archivo = e.target.files[0];
+
+        if (!archivo) return;
+
+        if (esImagenValida(archivo)) {
+          setCategoriaEditar((prev) => ({
+            ...prev,
+            archivo,
+          }));
+        } else {
+          setToast({
+            mostrar: true,
+            mensaje: "Selecciona una imagen válida: JPG, JPEG, PNG o WEBP.",
+            tipo: "advertencia",
+          });
+        }
+      };
+
+      const subirImagenCategoria = async (archivo) => {
+        const extension = archivo.name.split(".").pop();
+
+        const nombreArchivo = `${Date.now()}_categoria.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("imagenes_categorias")
+          .upload(nombreArchivo, archivo);
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from("imagenes_categorias")
+          .getPublicUrl(nombreArchivo);
+
+        return urlData.publicUrl;
+      };
+
+      const eliminarImagenAnterior = async (urlImagen) => {
+        if (!urlImagen) return;
+
+        try {
+          const nombreAnterior = urlImagen.split("/").pop().split("?")[0];
+
+          await supabase.storage
+            .from("imagenes_categorias")
+            .remove([nombreAnterior]);
+        } catch (err) {
+          console.warn("No se pudo eliminar la imagen anterior:", err.message);
+        }
+      };
+
 
   return (
     
@@ -446,23 +547,14 @@ const Categorias = () => {
         {!cargando && categoriasPaginadas.length > 0 && (
           <Row>
             {/* Tarjeta para dispositivos moviles */}
-            <Col xs={12} sm={12} md={12} className="d-lg-none">
-              <TarjetaCategoria
-                categorias={categoriasPaginadas}
-                abrirModalEdicion={abrirModalEdicion}
-                abrirModalEliminacion={abrirModalEliminacion}
-                cambiarEstadoCategoria={abrirModalEstado}
-              />
-            </Col>
-            {/* Tabla para equipos de escritorio */}
-            <Col lg={12} className="d-none d-lg-block">
-              <TablaCategorias
-                categorias={categoriasPaginadas}
-                abrirModalEdicion={abrirModalEdicion}
-                abrirModalEliminacion={abrirModalEliminacion}
-                cambiarEstadoCategoria={abrirModalEstado}
-              />
-            </Col>
+            <Col lg={12}>
+          <TarjetaCategoria
+              categorias={categoriasPaginadas}
+              abrirModalEdicion={abrirModalEdicion}
+              abrirModalEliminacion={abrirModalEliminacion}
+              cambiarEstadoCategoria={abrirModalEstado}
+            />
+          </Col>
           </Row>
         )}
       </div>
@@ -475,6 +567,7 @@ const Categorias = () => {
         manejoCambioInput={manejoCambioInput}
         agregarCategoria={agregarCategoria}
         limpiarCategoria={limpiarCategoria}
+        manejoCambioArchivo={manejoCambioArchivo}
       />
 
       {/* Modal para editar una categoría */}
@@ -484,6 +577,7 @@ const Categorias = () => {
         categoriaEditar={categoriaEditar}
         manejoCambioInputEdicion={manejoCambioInputEdicion}
         actualizarCategoria={actualizarCategoria}
+        manejoCambioArchivoActualizar={manejoCambioArchivoActualizar}
       />
 
       {/* Modal para eliminar una categoría */}
