@@ -14,13 +14,14 @@ import Login from "./views/Login";
 import Servicios from "./views/Servicios";
 import Insumos from './views/Insumos';
 import RutaProtegida from "./components/rutas/RutaProtegida";
-
+import ScrollToTop from './components/ScrollToTop';
 const App = () => {
   return(
     <Router>
       <Encabezado />
 
       <main className='margen-superior-main'>
+        <ScrollToTop />
         <Routes>
           <Route path='/login' element={<Login />} />
 
