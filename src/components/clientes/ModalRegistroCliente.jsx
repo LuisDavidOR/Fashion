@@ -19,17 +19,17 @@ const ModalRegistroCliente = ({
     setDeshabilitado(false);
   };
 
+  // 🔴 VALIDACIÓN NOMBRE (solo letras y espacios)
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(nuevoCliente.nombre);
+
+  // 🔴 VALIDACIÓN APELLIDO (solo letras y espacios)
+  const apellidoValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(nuevoCliente.apellido);
+
   // 🔴 VALIDACIÓN DE TELÉFONO
-  // Expresión regular:
-  // ^[0-9]{8}$ → solo números y exactamente 8 caracteres (ni más ni menos)
   const telefonoValido = /^[0-9]{8}$/.test(nuevoCliente.telefono);
 
   // 🔴 VALIDACIÓN DE CORREO
-  // Verifica:
-  // - Que tenga texto antes del @
-  // - Que tenga dominio válido
-  // - Que termine en extensiones comunes (.com, .net, .org, .edu)
-  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu)$/i.test(
+  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|ni|es|mx|us)$/i.test(
     nuevoCliente.correo
   );
 
@@ -61,38 +61,75 @@ const ModalRegistroCliente = ({
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>Nombre</Form.Label>
+            <Form.Label>Nombre *</Form.Label>
             <Form.Control
               type="text"
               name="nombre"
               value={nuevoCliente.nombre}
-              onChange={manejoCambioInput}
+              onChange={(e) => {
+                const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+                manejoCambioInput({
+                  target: {
+                    name: "nombre",
+                    value: soloLetras,
+                  },
+                });
+              }}
               placeholder="Ingresa el nombre del cliente"
+
+              isInvalid={nuevoCliente.nombre && !nombreValido}
             />
+
+            <Form.Control.Feedback type="invalid">
+              El nombre solo debe contener letras
+            </Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Apellido</Form.Label>
+            <Form.Label>Apellido *</Form.Label>
             <Form.Control
               type="text"
               name="apellido"
               value={nuevoCliente.apellido}
-              onChange={manejoCambioInput}
+              onChange={(e) => {
+                const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+                manejoCambioInput({
+                  target: {
+                    name: "apellido",
+                    value: soloLetras,
+                  },
+                });
+              }}
               placeholder="Ingresa el apellido del cliente"
+
+              isInvalid={nuevoCliente.apellido && !apellidoValido}
             />
+
+            <Form.Control.Feedback type="invalid">
+              El apellido solo debe contener letras
+            </Form.Control.Feedback>
           </Form.Group>
 
           {/* 🔴 INPUT TELÉFONO CON VALIDACIÓN VISUAL */}
           <Form.Group className="mb-3">
-            <Form.Label>Teléfono</Form.Label>
+            <Form.Label>Teléfono *</Form.Label>
             <Form.Control
               type="text"
               name="telefono"
               value={nuevoCliente.telefono}
-              onChange={manejoCambioInput}
+              onChange={(e) => {
+                const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 8);
+                manejoCambioInput({
+                  target: {
+                    name: "telefono",
+                    value: soloNumeros,
+                  },
+                });
+              }}
+              maxLength={8}
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Ingresa el teléfono del cliente"
-              
-              // 🔴 Si el usuario ya escribió algo y es inválido → borde rojo
               isInvalid={nuevoCliente.telefono && !telefonoValido}
             />
 
@@ -104,7 +141,7 @@ const ModalRegistroCliente = ({
 
           {/* 🔴 INPUT CORREO CON VALIDACIÓN VISUAL */}
           <Form.Group className="mb-3">
-            <Form.Label>Correo</Form.Label>
+            <Form.Label>Correo *</Form.Label>
             <Form.Control
               type="email"
               name="correo"

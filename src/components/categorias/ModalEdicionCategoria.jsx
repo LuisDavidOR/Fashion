@@ -19,18 +19,13 @@ const ModalEdicionCategoria = ({
     setDeshabilitado(false);
   };
 
-  // 🔴 VALIDACIÓN NOMBRE (solo letras)
-  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+  // 🔴 VALIDACIÓN NOMBRE
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s&.,-]+$/.test(
     categoriaEditar.nombre
   );
 
-  // 🔴 VALIDACIÓN DESCRIPCIÓN (sin números)
-  const descripcionValida =
-    categoriaEditar.descripcion === "" ||
-    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(categoriaEditar.descripcion);
-
   // 🔴 ERRORES
-  const hayErrores = !nombreValido || !descripcionValida;
+  const hayErrores = !nombreValido;
 
   return (
     <Modal
@@ -78,8 +73,6 @@ const ModalEdicionCategoria = ({
               Si seleccionas una nueva imagen, reemplazará la actual.
             </Form.Text>
           </Form.Group>
-
-          {/* 🔴 NOMBRE */}
           <Form.Group className="mb-3">
             <Form.Label>Nombre *</Form.Label>
             <Form.Control
@@ -91,13 +84,11 @@ const ModalEdicionCategoria = ({
               isInvalid={categoriaEditar.nombre && !nombreValido}
             />
             <Form.Control.Feedback type="invalid">
-              El nombre solo debe contener letras
+              El nombre contiene caracteres no permitidos
             </Form.Control.Feedback>
           </Form.Group>
-
-          {/* 🔴 DESCRIPCIÓN */}
           <Form.Group className="mb-3">
-            <Form.Label>Descripción *</Form.Label>
+            <Form.Label>Descripción</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -105,14 +96,7 @@ const ModalEdicionCategoria = ({
               value={categoriaEditar.descripcion}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa la descripción"
-              isInvalid={
-                categoriaEditar.descripcion &&
-                !descripcionValida
-              }
             />
-            <Form.Control.Feedback type="invalid">
-              La descripción no debe contener números
-            </Form.Control.Feedback>
           </Form.Group>
         </Form>
       </Modal.Body>
@@ -131,7 +115,6 @@ const ModalEdicionCategoria = ({
           onClick={handleActualizar}
           disabled={
             categoriaEditar.nombre.trim() === "" ||
-            categoriaEditar.descripcion.trim() === "" || // 🔴 NUEVO
             hayErrores ||
             deshabilitado
           }

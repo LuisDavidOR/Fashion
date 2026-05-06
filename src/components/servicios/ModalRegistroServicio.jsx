@@ -21,15 +21,14 @@ const ModalRegistroServicio = ({
     setDeshabilitado(false);
   };
 
-  // 🔴 VALIDACIÓN NOMBRE (sin números)
-  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s&.,#-]+$/.test(
     nuevoServicio.nombre
   );
 
-  // 🔴 VALIDACIÓN DESCRIPCIÓN (opcional, sin números)
-  const descripcionValida =
-    nuevoServicio.descripcion === "" ||
-    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(nuevoServicio.descripcion);
+  const precioValido = /^[0-9]+(\.[0-9]+)?$/.test(nuevoServicio.precio);
+
+  const duracionValida = /^[0-9]+$/.test(nuevoServicio.duracion);
 
   const camposVacios =
     nuevoServicio.nombre.trim() === "" ||
@@ -38,7 +37,7 @@ const ModalRegistroServicio = ({
     nuevoServicio.id_categoria === "";
 
   // 🔴 ERRORES SOLO DE LO PEDIDO
-  const hayErrores = !nombreValido || !descripcionValida;
+  const hayErrores = !nombreValido || !duracionValida || !precioValido;
 
   return (
     <Modal
@@ -73,7 +72,7 @@ const ModalRegistroServicio = ({
                   isInvalid={nuevoServicio.nombre && !nombreValido}
                 />
                 <Form.Control.Feedback type="invalid">
-                  El nombre no debe contener números
+                  El nombre contiene caracteres no permitidos
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -100,14 +99,17 @@ const ModalRegistroServicio = ({
               <Form.Group className="mb-3">
                 <Form.Label>Precio *</Form.Label>
                 <Form.Control
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
                   name="precio"
                   value={nuevoServicio.precio}
                   onChange={manejoCambioInput}
                   placeholder="Ej: 250"
+                  isInvalid={nuevoServicio.precio !== "" && !precioValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El precio solo puede contener números
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -115,13 +117,17 @@ const ModalRegistroServicio = ({
               <Form.Group className="mb-3">
                 <Form.Label>Duración *</Form.Label>
                 <Form.Control
-                  type="number"
-                  min="1"
+                  type="text"
+                  inputMode="numeric"
                   name="duracion"
                   value={nuevoServicio.duracion}
                   onChange={manejoCambioInput}
                   placeholder="Duración en minutos"
+                  isInvalid={nuevoServicio.duracion !== "" && !duracionValida}
                 />
+                <Form.Control.Feedback type="invalid">
+                  La duración solo puede contener números enteros
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -150,15 +156,7 @@ const ModalRegistroServicio = ({
                   value={nuevoServicio.descripcion}
                   onChange={manejoCambioInput}
                   placeholder="Describe brevemente el servicio"
-
-                  isInvalid={
-                    nuevoServicio.descripcion &&
-                    !descripcionValida
-                  }
                 />
-                <Form.Control.Feedback type="invalid">
-                  La descripción no debe contener números
-                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -185,7 +183,6 @@ const ModalRegistroServicio = ({
           }}
           onClick={handleRegistrar}
 
-          // 🔴 BLOQUEO SOLO POR NOMBRE/DESCRIPCIÓN
           disabled={camposVacios || hayErrores || deshabilitado}
         >
           Guardar

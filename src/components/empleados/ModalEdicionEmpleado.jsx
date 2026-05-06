@@ -21,19 +21,15 @@ const ModalEdicionEmpleado = ({
 
   // 🔴 VALIDACIÓN NOMBRE Y APELLIDO
   // Solo letras y espacios (no números ni caracteres raros)
-  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
-    empleadoEditar.nombre
-  );
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(empleadoEditar.nombre);
 
-  const apellidoValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
-    empleadoEditar.apellido
-  );
+  const apellidoValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(empleadoEditar.apellido);
 
   // 🔴 VALIDACIÓN TELÉFONO (8 dígitos exactos)
   const telefonoValido = /^[0-9]{8}$/.test(empleadoEditar.telefono);
 
   // 🔴 VALIDACIÓN CORREO
-  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu)$/i.test(
+  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|ni|es|mx|us)$/i.test(
     empleadoEditar.correo
   );
 
@@ -112,7 +108,15 @@ const ModalEdicionEmpleado = ({
                   type="text"
                   name="nombre"
                   value={empleadoEditar.nombre || ""}
-                  onChange={manejoCambioInputEdicion}
+                  onChange={(e) => {
+                    const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+                    manejoCambioInputEdicion({
+                      target: {
+                        name: "nombre",
+                        value: soloLetras,
+                      },
+                    });
+                  }}
 
                   // 🔴 Marca error si contiene números
                   isInvalid={empleadoEditar.nombre && !nombreValido}
@@ -131,7 +135,15 @@ const ModalEdicionEmpleado = ({
                   type="text"
                   name="apellido"
                   value={empleadoEditar.apellido || ""}
-                  onChange={manejoCambioInputEdicion}
+                  onChange={(e) => {
+                    const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+                    manejoCambioInputEdicion({
+                      target: {
+                        name: "apellido",
+                        value: soloLetras,
+                      },
+                    });
+                  }}
 
                   // 🔴 Marca error si contiene números
                   isInvalid={empleadoEditar.apellido && !apellidoValido}
@@ -150,8 +162,18 @@ const ModalEdicionEmpleado = ({
                   type="text"
                   name="telefono"
                   value={empleadoEditar.telefono || ""}
-                  onChange={manejoCambioInputEdicion}
+                  onChange={(e) => {
+                    const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 8);
+                    manejoCambioInputEdicion({
+                      target: {
+                        name: "telefono",
+                        value: soloNumeros,
+                      },
+                    });
+                  }}
                   maxLength={8}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   isInvalid={empleadoEditar.telefono && !telefonoValido}
                 />
                 <Form.Control.Feedback type="invalid">

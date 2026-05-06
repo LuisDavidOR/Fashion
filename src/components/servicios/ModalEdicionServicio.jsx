@@ -26,18 +26,16 @@ const ModalEdicionServicio = ({
     servicioEditar.duracion === "" ||
     servicioEditar.id_categoria === "";
 
-  // 🔴 VALIDACIÓN NOMBRE (sin números)
-  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s&.,#-]+$/.test(
     servicioEditar.nombre
   );
 
-  // 🔴 VALIDACIÓN DESCRIPCIÓN (opcional, sin números)
-  const descripcionValida =
-    servicioEditar.descripcion === "" ||
-    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(servicioEditar.descripcion);
+  const precioValido = /^[0-9]+(\.[0-9]+)?$/.test(servicioEditar.precio);
 
-  // 🔴 ERRORES
-  const hayErrores = !nombreValido || !descripcionValida;
+  const duracionValida = /^[0-9]+$/.test(servicioEditar.duracion);
+
+  // 🔴 ERRORES SOLO DE LO PEDIDO
+  const hayErrores = !nombreValido || !duracionValida || !precioValido;
 
   return (
     <Modal
@@ -107,7 +105,7 @@ const ModalEdicionServicio = ({
                   }
                 />
                 <Form.Control.Feedback type="invalid">
-                  El nombre no debe contener números
+                  El nombre contiene caracteres no permitidos
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -134,13 +132,17 @@ const ModalEdicionServicio = ({
               <Form.Group className="mb-3">
                 <Form.Label>Precio *</Form.Label>
                 <Form.Control
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   min="0"
                   name="precio"
                   value={servicioEditar.precio || ""}
                   onChange={manejoCambioInputEdicion}
+                  isInvalid={servicioEditar.precio !== "" && !precioValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El precio solo puede contener números
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -148,12 +150,16 @@ const ModalEdicionServicio = ({
               <Form.Group className="mb-3">
                 <Form.Label>Duración *</Form.Label>
                 <Form.Control
-                  type="number"
-                  min="1"
+                  type="text"
+                  inputMode="numeric"
                   name="duracion"
                   value={servicioEditar.duracion || ""}
                   onChange={manejoCambioInputEdicion}
+                  isInvalid={servicioEditar.duracion !== "" && !duracionValida}
                 />
+                <Form.Control.Feedback type="invalid">
+                  La duración solo puede contener números enteros
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -167,15 +173,7 @@ const ModalEdicionServicio = ({
                   name="descripcion"
                   value={servicioEditar.descripcion || ""}
                   onChange={manejoCambioInputEdicion}
-
-                  isInvalid={
-                    servicioEditar.descripcion &&
-                    !descripcionValida
-                  }
                 />
-                <Form.Control.Feedback type="invalid">
-                  La descripción no debe contener números
-                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -195,7 +193,6 @@ const ModalEdicionServicio = ({
           variant="primary"
           onClick={handleActualizar}
 
-          // 🔴 BLOQUEO SOLO POR VALIDACIÓN
           disabled={camposVacios || hayErrores || deshabilitado}
         >
           Actualizar

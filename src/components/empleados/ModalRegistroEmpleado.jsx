@@ -21,20 +21,16 @@ const ModalRegistroEmpleado = ({
   };
 
   // 🔴 VALIDACIÓN NOMBRE (solo letras y espacios)
-  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
-    nuevoEmpleado.nombre
-  );
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(nuevoEmpleado.nombre);
 
   // 🔴 VALIDACIÓN APELLIDO (solo letras y espacios)
-  const apellidoValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
-    nuevoEmpleado.apellido
-  );
+  const apellidoValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(nuevoEmpleado.apellido);
 
   // 🔴 VALIDACIÓN TELÉFONO (8 dígitos exactos)
   const telefonoValido = /^[0-9]{8}$/.test(nuevoEmpleado.telefono);
 
   // 🔴 VALIDACIÓN CORREO
-  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu)$/i.test(
+  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|ni|es|mx|us)$/i.test(
     nuevoEmpleado.correo
   );
 
@@ -79,7 +75,15 @@ const ModalRegistroEmpleado = ({
                   type="text"
                   name="nombre"
                   value={nuevoEmpleado.nombre}
-                  onChange={manejoCambioInput}
+                  onChange={(e) => {
+                    const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+                    manejoCambioInput({
+                      target: {
+                        name: "nombre",
+                        value: soloLetras,
+                      },
+                    });
+                  }}
                   placeholder="Ingresa el nombre"
 
                   // 🔴 Borde rojo si contiene números
@@ -99,7 +103,15 @@ const ModalRegistroEmpleado = ({
                   type="text"
                   name="apellido"
                   value={nuevoEmpleado.apellido}
-                  onChange={manejoCambioInput}
+                  onChange={(e) => {
+                    const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+                    manejoCambioInput({
+                      target: {
+                        name: "apellido",
+                        value: soloLetras,
+                      },
+                    });
+                  }}
                   placeholder="Ingresa el apellido"
 
                   // 🔴 Borde rojo si contiene números
@@ -119,9 +131,19 @@ const ModalRegistroEmpleado = ({
                   type="text"
                   name="telefono"
                   value={nuevoEmpleado.telefono}
-                  onChange={manejoCambioInput}
-                  placeholder="Ingresa el teléfono de 8 dígitos"
+                  onChange={(e) => {
+                    const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 8);
+                    manejoCambioInput({
+                      target: {
+                        name: "telefono",
+                        value: soloNumeros,
+                      },
+                    });
+                  }}
                   maxLength={8}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Ingresa el teléfono de 8 dígitos"
                   isInvalid={nuevoEmpleado.telefono && !telefonoValido}
                 />
                 <Form.Control.Feedback type="invalid">

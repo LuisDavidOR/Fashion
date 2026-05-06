@@ -19,26 +19,32 @@ const ModalEdicionInsumo = ({
     setDeshabilitado(false);
   };
 
-  // 🔴 VALIDACIÓN NOMBRE (solo letras)
   const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
     insumoEditar.nombre
   );
 
-  // 🔴 VALIDACIÓN DESCRIPCIÓN
-  // Obligatoria + sin números
-  const descripcionValida =
-    insumoEditar.descripcion.trim() !== "" &&
-    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(insumoEditar.descripcion);
+  const stockValido = /^[0-9]+$/.test(insumoEditar.stock);
+
+  const contenidoTotalValido = /^[0-9]+(\.[0-9]+)?$/.test(
+    insumoEditar.contenido_total
+  );
+
+  const costoProductoValido = /^[0-9]+(\.[0-9]+)?$/.test(
+    insumoEditar.costo_producto
+  );
 
   const camposVacios =
     insumoEditar.nombre.trim() === "" ||
     insumoEditar.costo_producto === "" ||
     insumoEditar.contenido_total === "" ||
-    insumoEditar.unidad_medida.trim() === "" ||
-    insumoEditar.descripcion.trim() === ""; // 🔴 AHORA OBLIGATORIA
+    insumoEditar.unidad_medida.trim() === "";
 
   // 🔴 ERRORES
-  const hayErrores = !nombreValido || !descripcionValida;
+  const hayErrores =
+  !nombreValido ||
+  !stockValido ||
+  !contenidoTotalValido ||
+  !costoProductoValido;
 
   return (
     <Modal
@@ -116,13 +122,16 @@ const ModalEdicionInsumo = ({
               <Form.Group className="mb-3">
                 <Form.Label>Costo del producto *</Form.Label>
                 <Form.Control
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                   name="costo_producto"
                   value={insumoEditar.costo_producto || ""}
                   onChange={manejoCambioInputEdicion}
+                  isInvalid={insumoEditar.costo_producto !== "" && !costoProductoValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El costo solo puede contener datos numéricos
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -130,13 +139,16 @@ const ModalEdicionInsumo = ({
               <Form.Group className="mb-3">
                 <Form.Label>Contenido total *</Form.Label>
                 <Form.Control
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                   name="contenido_total"
                   value={insumoEditar.contenido_total || ""}
                   onChange={manejoCambioInputEdicion}
+                  isInvalid={insumoEditar.contenido_total !== "" && !contenidoTotalValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El contenido total solo puede contener datos numéricos
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -161,40 +173,30 @@ const ModalEdicionInsumo = ({
 
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Stock</Form.Label>
+                <Form.Label>Stock *</Form.Label>
                 <Form.Control
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                   name="stock"
                   value={insumoEditar.stock || ""}
                   onChange={manejoCambioInputEdicion}
+                  isInvalid={insumoEditar.stock !== "" && !stockValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El stock solo puede contener datos numéricos
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
-
-            {/* 🔴 DESCRIPCIÓN */}
             <Col xs={12}>
               <Form.Group className="mb-3">
-                <Form.Label>Descripción *</Form.Label>
+                <Form.Label>Descripción</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={4}
                   name="descripcion"
                   value={insumoEditar.descripcion || ""}
                   onChange={manejoCambioInputEdicion}
-
-                  // 🔴 ERROR SI VACÍA O CON NÚMEROS
-                  isInvalid={
-                    insumoEditar.descripcion &&
-                    !descripcionValida
-                  }
                 />
-
-                <Form.Control.Feedback type="invalid">
-                  {insumoEditar.descripcion?.trim() === ""
-                    ? "La descripción es obligatoria"
-                    : "La descripción no debe contener números"}
-                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>

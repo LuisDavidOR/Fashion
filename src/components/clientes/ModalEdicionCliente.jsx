@@ -18,13 +18,15 @@ const ModalEdicionCliente = ({
     setDeshabilitado(false);
   };
 
-  // 🔴 VALIDACIÓN DE TELÉFONO
-  // Solo permite exactamente 8 números
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(clienteEditar.nombre);
+
+  const apellidoValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(clienteEditar.apellido);
+
+  //  VALIDACIÓN DE TELÉFONO
   const telefonoValido = /^[0-9]{8}$/.test(clienteEditar.telefono);
 
-  // 🔴 VALIDACIÓN DE CORREO
-  // Formato básico + dominios comunes
-  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu)$/i.test(
+  // VALIDACIÓN DE CORREO
+  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|ni|es|mx|us)$/i.test(
     clienteEditar.correo
   );
 
@@ -52,38 +54,75 @@ const ModalEdicionCliente = ({
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>Nombre</Form.Label>
+            <Form.Label>Nombre *</Form.Label>
             <Form.Control
               type="text"
               name="nombre"
               value={clienteEditar.nombre}
-              onChange={manejoCambioInputEdicion}
+              onChange={(e) => {
+                const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+                manejoCambioInputEdicion({
+                  target: {
+                    name: "nombre",
+                    value: soloLetras,
+                  },
+                });
+              }}
               placeholder="Ingresa el nombre del cliente"
+
+              isInvalid={clienteEditar.nombre && !nombreValido}
             />
+
+            <Form.Control.Feedback type="invalid">
+              El nombre solo debe contener letras
+            </Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Apellido</Form.Label>
+            <Form.Label>Apellido *</Form.Label>
             <Form.Control
               type="text"
               name="apellido"
               value={clienteEditar.apellido}
-              onChange={manejoCambioInputEdicion}
+              onChange={(e) => {
+                const soloLetras = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+                manejoCambioInputEdicion({
+                  target: {
+                    name: "apellido",
+                    value: soloLetras,
+                  },
+                });
+              }}
               placeholder="Ingresa el apellido del cliente"
+
+              isInvalid={clienteEditar.apellido && !apellidoValido}
             />
+
+            <Form.Control.Feedback type="invalid">
+              El apellido solo debe contener letras
+            </Form.Control.Feedback>
           </Form.Group>
 
           {/* 🔴 TELÉFONO CON VALIDACIÓN */}
           <Form.Group className="mb-3">
-            <Form.Label>Teléfono</Form.Label>
+            <Form.Label>Teléfono *</Form.Label>
             <Form.Control
               type="text"
               name="telefono"
               value={clienteEditar.telefono}
-              onChange={manejoCambioInputEdicion}
+              onChange={(e) => {
+                const soloNumeros = e.target.value.replace(/\D/g, "").slice(0, 8);
+                manejoCambioInputEdicion({
+                  target: {
+                    name: "telefono",
+                    value: soloNumeros,
+                  },
+                });
+              }}
+              maxLength={8}
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Ingresa el teléfono del cliente"
-
-              // 🔴 Activa borde rojo si es inválido
               isInvalid={clienteEditar.telefono && !telefonoValido}
             />
 
@@ -95,7 +134,7 @@ const ModalEdicionCliente = ({
 
           {/* 🔴 CORREO CON VALIDACIÓN */}
           <Form.Group className="mb-3">
-            <Form.Label>Correo</Form.Label>
+            <Form.Label>Correo *</Form.Label>
             <Form.Control
               type="email"
               name="correo"

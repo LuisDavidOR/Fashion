@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
+import { Container, Row, Col, Spinner, Alert, Form } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import ModalCalificacionServicio from "../components/catalogo/ModalCalificacionServicio";
 import TarjetaCatalogo from "../components/catalogo/TarjetaCatalogo";
@@ -11,7 +11,6 @@ const Catalogo = () => {
 
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("todas");
-
   const [busqueda, setBusqueda] = useState("");
 
   const [mostrarModalCalificacion, setMostrarModalCalificacion] = useState(false);
@@ -30,27 +29,37 @@ const Catalogo = () => {
   }, []);
 
   const cargarCategorias = async () => {
-    const { data, error } = await supabase
-      .from("Categorias")
-      .select("*")
-      .eq("estado", "activo")
-      .order("nombre", { ascending: true });
+      const { data, error } = await supabase
+        .from("Categorias")
+        .select("*")
+        .eq("estado", "activo")
+        .order("nombre", { ascending: true });
 
-    if (!error) setCategorias(data || []);
-  };
+      if (!error) setCategorias(data || []);
+    };
 
   const cargarCatalogo = async () => {
     try {
       setCargando(true);
 
+      // 1. Traer servicios activos
       const { data: serviciosData, error } = await supabase
         .from("Servicios")
-        .select("*, Categorias(nombre)")
-        .eq("estado", "activo");
+        .select(`
+          *,
+          Categorias!inner (
+            nombre,
+            estado
+          )
+        `)
+        .eq("estado", "activo")
+        .eq("Categorias.estado", "activo")
+        .order("nombre", { ascending: true });
 
       if (error) throw error;
 
-      const { data: calificacionesData } = await supabase
+      // 2. Traer calificaciones
+      const { data: calificacionesData, error: errorCalificaciones } = await supabase
         .from("Calificaciones")
         .select(`
           id_calificacion,
@@ -65,21 +74,29 @@ const Catalogo = () => {
           )
         `);
 
+      if (errorCalificaciones) {
+        console.error("Error cargando calificaciones:", errorCalificaciones.message);
+        console.log("Calificaciones:", calificacionesData);
+      }
+
+      // 3. Agrupar calificaciones
       const mapaCalificaciones = {};
 
       calificacionesData?.forEach((cal) => {
         if (!mapaCalificaciones[cal.id_servicio]) {
           mapaCalificaciones[cal.id_servicio] = [];
         }
+
         mapaCalificaciones[cal.id_servicio].push(cal);
       });
 
+      // 4. Calcular promedio
       const serviciosConRating = serviciosData.map((servicio) => {
         const calificaciones = mapaCalificaciones[servicio.id_servicio] || [];
 
         const promedio =
           calificaciones.length > 0
-            ? calificaciones.reduce((t, c) => t + Number(c.puntuacion), 0) /
+            ? calificaciones.reduce((total, cal) => total + Number(cal.puntuacion), 0) /
               calificaciones.length
             : 0;
 
@@ -100,72 +117,169 @@ const Catalogo = () => {
   };
 
   const guardarCalificacion = async () => {
-    if (!servicioSeleccionado) return;
+        try {
+          if (!servicioSeleccionado) return;
 
-    await supabase.from("Calificaciones").insert([
-      {
-        id_cliente: 1,
-        id_servicio: servicioSeleccionado.id_servicio,
-        puntuacion: parseInt(nuevaCalificacion.puntuacion),
-        comentario: nuevaCalificacion.comentario.trim() || null,
-      },
-    ]);
+          const idClienteDemo = 1;
 
-    setMostrarModalCalificacion(false);
-    await cargarCatalogo();
-  };
+          const { error } = await supabase.from("Calificaciones").insert([
+            {
+              id_cliente: idClienteDemo,
+              id_servicio: servicioSeleccionado.id_servicio,
+              puntuacion: parseInt(nuevaCalificacion.puntuacion),
+              comentario: nuevaCalificacion.comentario.trim() || null,
+            },
+          ]);
 
-  // 🔴 SOLO AQUÍ SE MODIFICÓ (agregada categoría a la búsqueda)
-  const serviciosFiltrados = servicios.filter((servicio) => {
-    const coincideCategoria =
-      categoriaSeleccionada === "todas" ||
-      String(servicio.id_categoria) === String(categoriaSeleccionada);
+          if (error) throw error;
 
-    const texto = busqueda.toLowerCase();
+          setMostrarModalCalificacion(false);
+          await cargarCatalogo();
+        } catch (err) {
+          console.error("Error al guardar calificación:", err.message);
+        }
+      };
 
-    const coincideBusqueda =
-      servicio.nombre.toLowerCase().includes(texto) ||
-      (servicio.descripcion || "").toLowerCase().includes(texto) ||
-      (servicio.Categorias?.nombre || "").toLowerCase().includes(texto);
+    const serviciosFiltrados = servicios.filter((servicio) => {
+      const coincideCategoria =
+        categoriaSeleccionada === "todas" ||
+        String(servicio.id_categoria) === String(categoriaSeleccionada);
 
-    return coincideCategoria && coincideBusqueda;
-  });
+      const textoBusqueda = busqueda.toLowerCase().trim();
 
-  const agruparPorCategoria = (listaServicios) => {
-    return listaServicios.reduce((acc, servicio) => {
-      const categoria = servicio.Categorias?.nombre || "Sin categoría";
+      const coincideBusqueda =
+        textoBusqueda === "" ||
+        servicio.nombre.toLowerCase().includes(textoBusqueda) ||
+        (servicio.descripcion || "").toLowerCase().includes(textoBusqueda) ||
+        (servicio.Categorias?.nombre || "").toLowerCase().includes(textoBusqueda);
 
-      if (!acc[categoria]) acc[categoria] = [];
+      return coincideCategoria && coincideBusqueda;
+    });
+    
+    const agruparPorCategoria = (listaServicios) => {
+      return listaServicios.reduce((acc, servicio) => {
+        const categoria = servicio.Categorias?.nombre || "Sin categoría";
 
-      acc[categoria].push(servicio);
-      return acc;
-    }, {});
-  };
+        if (!acc[categoria]) {
+          acc[categoria] = [];
+        }
 
-  const serviciosAgrupados = agruparPorCategoria(serviciosFiltrados);
+        acc[categoria].push(servicio);
+        return acc;
+      }, {});
+    };
+
+    const serviciosAgrupados = Object.fromEntries(
+      Object.entries(agruparPorCategoria(serviciosFiltrados)).sort(
+        ([categoriaA], [categoriaB]) =>
+          categoriaA.localeCompare(categoriaB)
+      )
+    );
 
   return (
     <Container className="mt-4">
       <h3 className="mb-4">
         <i className="bi bi-grid-fill me-2"></i> Catálogo de Servicios
-      </h3>
+          </h3>
+    
+      <div className="catalogo-categorias-section mb-4">
+        <div className="d-flex align-items-center justify-content-between mb-2">
+          <h6 className="catalogo-categorias-titulo mb-0">
+            Explorar por categoría
+          </h6>
 
-      {/* 🔍 BUSCADOR */}
+          {categoriaSeleccionada !== "todas" && (
+            <button
+              className="catalogo-limpiar-filtro"
+              onClick={() => setCategoriaSeleccionada("todas")}
+            >
+              Ver todas
+            </button>
+          )}
+        </div>
+
+        <div className="catalogo-categorias-wrapper">
+          <button
+            className="catalogo-flecha-scroll"
+            onClick={() =>
+              document
+                .querySelector(".catalogo-categorias-scroll")
+                ?.scrollBy({ left: -180, behavior: "smooth" })
+            }
+          >
+            <i className="bi bi-chevron-left"></i>
+          </button>
+
+          <div className="catalogo-categorias-scroll">
+            <button
+              className={
+                categoriaSeleccionada === "todas"
+                  ? "catalogo-categoria-card todas activa"
+                  : "catalogo-categoria-card todas"
+              }
+              onClick={() => setCategoriaSeleccionada("todas")}
+            >
+              <div className="catalogo-categoria-bg categoria-todas-bg"></div>
+              <div className="catalogo-categoria-overlay"></div>
+
+              <span>
+                <i className="bi bi-grid me-2"></i>
+                Todas
+              </span>
+            </button>
+
+            {categorias.map((categoria) => (
+              <button
+                key={categoria.id_categoria}
+                className={
+                  String(categoriaSeleccionada) === String(categoria.id_categoria)
+                    ? "catalogo-categoria-card activa"
+                    : "catalogo-categoria-card"
+                }
+                onClick={() => setCategoriaSeleccionada(categoria.id_categoria)}
+              >
+                <div
+                  className="catalogo-categoria-bg"
+                  style={{
+                    backgroundImage: categoria.url_imagen
+                      ? `url(${categoria.url_imagen})`
+                      : "none",
+                  }}
+                ></div>
+
+                <div className="catalogo-categoria-overlay"></div>
+
+                <span>{categoria.nombre}</span>
+              </button>
+            ))}
+          </div>
+
+          <button
+            className="catalogo-flecha-scroll"
+            onClick={() =>
+              document
+                .querySelector(".catalogo-categorias-scroll")
+                ?.scrollBy({ left: 180, behavior: "smooth" })
+            }
+          >
+            <i className="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
       <Row className="mb-4">
-        <Col md={6}>
-          <div className="buscador-minimal">
-            <i className="bi bi-search icono-buscador"></i>
-
-            <input
+        <Col xs={12} md={6}>
+          <Form.Group>
+            <Form.Control
               type="text"
-              placeholder="Buscar..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="input-buscador"
+              placeholder="Buscar servicio, descripción o categoría..."
             />
-          </div>
+          </Form.Group>
         </Col>
       </Row>
+    
 
       {cargando && (
         <Row className="text-center my-5">
@@ -182,13 +296,13 @@ const Catalogo = () => {
         </Alert>
       )}
 
-      {!cargando && serviciosFiltrados.length === 0 && (
+      {!cargando && servicios.length > 0 && serviciosFiltrados.length === 0 && (
         <Alert variant="warning" className="text-center">
-          No se encontraron resultados.
+          No se encontraron servicios que coincidan con la búsqueda.
         </Alert>
       )}
 
-      {!cargando && serviciosFiltrados.length > 0 && (
+      {!cargando && servicios.length > 0 && serviciosFiltrados.length > 0 && (
         <>
           {Object.entries(serviciosAgrupados).map(([categoria, servicios]) => (
             <section key={categoria} className="mb-5">
@@ -201,7 +315,7 @@ const Catalogo = () => {
 
               <div className="catalogo-scroll-horizontal">
                 {servicios.map((servicio) => (
-                  <div key={servicio.id_servicio}>
+                  <div className="catalogo-card-scroll" key={servicio.id_servicio}>
                     <TarjetaCatalogo
                       servicios={[servicio]}
                       abrirModalDetalle={(servicio) => {

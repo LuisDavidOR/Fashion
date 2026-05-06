@@ -20,27 +20,32 @@ const ModalRegistroInsumo = ({
     setDeshabilitado(false);
   };
 
-  // 🔴 VALIDACIÓN NOMBRE (solo letras)
   const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
     nuevoInsumo.nombre
   );
 
-  // 🔴 VALIDACIÓN DESCRIPCIÓN
-  // - Obligatoria (no vacía)
-  // - No permite números
-  const descripcionValida =
-    nuevoInsumo.descripcion.trim() !== "" &&
-    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(nuevoInsumo.descripcion);
+  const stockValido = /^[0-9]+$/.test(nuevoInsumo.stock);
+
+  const contenidoTotalValido = /^[0-9]+(\.[0-9]+)?$/.test(
+    nuevoInsumo.contenido_total
+  );
+
+  const costoProductoValido = /^[0-9]+(\.[0-9]+)?$/.test(
+    nuevoInsumo.costo_producto
+  );
 
   const camposVacios =
     nuevoInsumo.nombre.trim() === "" ||
     nuevoInsumo.costo_producto === "" ||
     nuevoInsumo.contenido_total === "" ||
-    nuevoInsumo.unidad_medida.trim() === "" ||
-    nuevoInsumo.descripcion.trim() === ""; // 🔴 AHORA DESCRIPCIÓN ES OBLIGATORIA
+    nuevoInsumo.unidad_medida.trim() === "";
 
-  // 🔴 ERRORES SOLO EN NOMBRE Y DESCRIPCIÓN
-  const hayErrores = !nombreValido || !descripcionValida;
+  // 🔴 ERRORES
+  const hayErrores =
+  !nombreValido ||
+  !stockValido ||
+  !contenidoTotalValido ||
+  !costoProductoValido;
 
   return (
     <Modal
@@ -83,14 +88,17 @@ const ModalRegistroInsumo = ({
               <Form.Group className="mb-3">
                 <Form.Label>Costo del producto *</Form.Label>
                 <Form.Control
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                   name="costo_producto"
                   value={nuevoInsumo.costo_producto}
                   onChange={manejoCambioInput}
                   placeholder="Ej: 350"
+                  isInvalid={nuevoInsumo.costo_producto !== "" && !costoProductoValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El costo solo puede contener datos numéricos
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -98,14 +106,17 @@ const ModalRegistroInsumo = ({
               <Form.Group className="mb-3">
                 <Form.Label>Contenido total *</Form.Label>
                 <Form.Control
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                   name="contenido_total"
                   value={nuevoInsumo.contenido_total}
                   onChange={manejoCambioInput}
-                  placeholder="Ej: 1000"
+                  placeholder="Ej: 10"
+                  isInvalid={nuevoInsumo.contenido_total !== "" && !contenidoTotalValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El contenido total solo puede contener datos numéricos
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -130,15 +141,19 @@ const ModalRegistroInsumo = ({
 
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Stock</Form.Label>
+                <Form.Label>Stock *</Form.Label>
                 <Form.Control
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
                   name="stock"
                   value={nuevoInsumo.stock}
                   onChange={manejoCambioInput}
                   placeholder="Ej: 10"
+                  isInvalid={nuevoInsumo.stock !== "" && !stockValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El stock solo puede contener datos numéricos
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -152,11 +167,9 @@ const ModalRegistroInsumo = ({
                 />
               </Form.Group>
             </Col>
-
-            {/* 🔴 DESCRIPCIÓN OBLIGATORIA */}
             <Col xs={12}>
               <Form.Group className="mb-3">
-                <Form.Label>Descripción *</Form.Label>
+                <Form.Label>Descripción</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={4}
@@ -164,21 +177,7 @@ const ModalRegistroInsumo = ({
                   value={nuevoInsumo.descripcion}
                   onChange={manejoCambioInput}
                   placeholder="Descripción del insumo"
-
-                  // 🔴 ERROR SI:
-                  // - Está vacía
-                  // - Tiene números
-                  isInvalid={
-                    nuevoInsumo.descripcion &&
-                    !descripcionValida
-                  }
                 />
-
-                <Form.Control.Feedback type="invalid">
-                  {nuevoInsumo.descripcion.trim() === ""
-                    ? "La descripción es obligatoria"
-                    : "La descripción no debe contener números"}
-                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -204,11 +203,6 @@ const ModalRegistroInsumo = ({
             color: "#ffffff",
           }}
           onClick={handleRegistrar}
-
-          // 🔴 BLOQUEADO SI:
-          // - Campos vacíos (incluye descripción)
-          // - Errores
-          // - Procesando
           disabled={camposVacios || hayErrores || deshabilitado}
         >
           Guardar

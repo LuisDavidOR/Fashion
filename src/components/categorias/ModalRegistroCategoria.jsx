@@ -21,22 +21,16 @@ const ModalRegistroCategoria = ({
   };
 
   // 🔴 VALIDACIÓN NOMBRE (solo letras)
-  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s&.,-]+$/.test(
     nuevaCategoria.nombre
   );
 
-  // 🔴 VALIDACIÓN DESCRIPCIÓN (sin números)
-  const descripcionValida =
-    nuevaCategoria.descripcion === "" ||
-    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(nuevaCategoria.descripcion);
-
-  // 🔴 CAMPOS VACÍOS (AHORA incluye descripción obligatoria)
+  // 🔴 CAMPOS VACÍOS 
   const camposVacios =
-    nuevaCategoria.nombre.trim() === "" ||
-    nuevaCategoria.descripcion.trim() === "";
+    nuevaCategoria.nombre.trim() === "";
 
   // 🔴 ERRORES
-  const hayErrores = !nombreValido || !descripcionValida;
+  const hayErrores = !nombreValido;
 
   return (
     <Modal
@@ -55,7 +49,6 @@ const ModalRegistroCategoria = ({
 
       <Modal.Body>
         <Form>
-          {/* 🔴 NOMBRE */}
           <Form.Group className="mb-3">
             <Form.Label>Nombre *</Form.Label>
             <Form.Control
@@ -67,7 +60,7 @@ const ModalRegistroCategoria = ({
               isInvalid={nuevaCategoria.nombre && !nombreValido}
             />
             <Form.Control.Feedback type="invalid">
-              El nombre solo debe contener letras
+              El nombre contiene caracteres no permitidos
             </Form.Control.Feedback>
           </Form.Group>
 
@@ -82,10 +75,8 @@ const ModalRegistroCategoria = ({
               Se recomienda una imagen horizontal o cuadrada.
             </Form.Text>
           </Form.Group>
-
-          {/* 🔴 DESCRIPCIÓN */}
           <Form.Group className="mb-3">
-            <Form.Label>Descripción *</Form.Label>
+            <Form.Label>Descripción</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -93,14 +84,7 @@ const ModalRegistroCategoria = ({
               value={nuevaCategoria.descripcion}
               onChange={manejoCambioInput}
               placeholder="Ingresa la descripción"
-              isInvalid={
-                nuevaCategoria.descripcion &&
-                !descripcionValida
-              }
             />
-            <Form.Control.Feedback type="invalid">
-              La descripción no debe contener números
-            </Form.Control.Feedback>
           </Form.Group>
         </Form>
       </Modal.Body>
