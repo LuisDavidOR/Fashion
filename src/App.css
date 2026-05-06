@@ -1490,3 +1490,40 @@ hr {
 .detalle-servicio-card strong {
   color: #2b211e;
 }
+
+/*DISEÑO PARA BUSCADOR*/
+/* 🔍 Contenedor */
+.buscador-minimal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #ddd;
+  transition: border-color 0.3s ease;
+}
+
+/* 🔍 Icono lupa */
+.icono-buscador {
+  font-size: 18px;
+  color: #999;
+  margin-right: 8px;
+}
+
+/* 🔍 Input */
+.input-buscador {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 8px 0;
+  background: transparent;
+  font-size: 14px;
+}
+
+/* ✨ Cuando haces focus */
+.buscador-minimal:focus-within {
+  border-bottom: 2px solid #7A564A;
+}
+
+/* ✨ Opcional: cambia color de lupa al enfocar */
+.buscador-minimal:focus-within .icono-buscador {
+  color: #7A564A;
+}

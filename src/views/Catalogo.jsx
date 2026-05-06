@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner, Alert, Form } from "react-bootstrap";
+import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import ModalCalificacionServicio from "../components/catalogo/ModalCalificacionServicio";
 import TarjetaCatalogo from "../components/catalogo/TarjetaCatalogo";
@@ -11,6 +11,8 @@ const Catalogo = () => {
 
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("todas");
+
+  const [busqueda, setBusqueda] = useState("");
 
   const [mostrarModalCalificacion, setMostrarModalCalificacion] = useState(false);
   const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
@@ -28,20 +30,19 @@ const Catalogo = () => {
   }, []);
 
   const cargarCategorias = async () => {
-      const { data, error } = await supabase
-        .from("Categorias")
-        .select("*")
-        .eq("estado", "activo")
-        .order("nombre", { ascending: true });
+    const { data, error } = await supabase
+      .from("Categorias")
+      .select("*")
+      .eq("estado", "activo")
+      .order("nombre", { ascending: true });
 
-      if (!error) setCategorias(data || []);
-    };
+    if (!error) setCategorias(data || []);
+  };
 
   const cargarCatalogo = async () => {
     try {
       setCargando(true);
 
-      // 1. Traer servicios activos
       const { data: serviciosData, error } = await supabase
         .from("Servicios")
         .select("*, Categorias(nombre)")
@@ -49,8 +50,7 @@ const Catalogo = () => {
 
       if (error) throw error;
 
-      // 2. Traer calificaciones
-      const { data: calificacionesData, error: errorCalificaciones } = await supabase
+      const { data: calificacionesData } = await supabase
         .from("Calificaciones")
         .select(`
           id_calificacion,
@@ -65,29 +65,21 @@ const Catalogo = () => {
           )
         `);
 
-      if (errorCalificaciones) {
-        console.error("Error cargando calificaciones:", errorCalificaciones.message);
-        console.log("Calificaciones:", calificacionesData);
-      }
-
-      // 3. Agrupar calificaciones
       const mapaCalificaciones = {};
 
       calificacionesData?.forEach((cal) => {
         if (!mapaCalificaciones[cal.id_servicio]) {
           mapaCalificaciones[cal.id_servicio] = [];
         }
-
         mapaCalificaciones[cal.id_servicio].push(cal);
       });
 
-      // 4. Calcular promedio
       const serviciosConRating = serviciosData.map((servicio) => {
         const calificaciones = mapaCalificaciones[servicio.id_servicio] || [];
 
         const promedio =
           calificaciones.length > 0
-            ? calificaciones.reduce((total, cal) => total + Number(cal.puntuacion), 0) /
+            ? calificaciones.reduce((t, c) => t + Number(c.puntuacion), 0) /
               calificaciones.length
             : 0;
 
@@ -108,142 +100,70 @@ const Catalogo = () => {
   };
 
   const guardarCalificacion = async () => {
-        try {
-          if (!servicioSeleccionado) return;
+    if (!servicioSeleccionado) return;
 
-          const idClienteDemo = 1;
+    await supabase.from("Calificaciones").insert([
+      {
+        id_cliente: 1,
+        id_servicio: servicioSeleccionado.id_servicio,
+        puntuacion: parseInt(nuevaCalificacion.puntuacion),
+        comentario: nuevaCalificacion.comentario.trim() || null,
+      },
+    ]);
 
-          const { error } = await supabase.from("Calificaciones").insert([
-            {
-              id_cliente: idClienteDemo,
-              id_servicio: servicioSeleccionado.id_servicio,
-              puntuacion: parseInt(nuevaCalificacion.puntuacion),
-              comentario: nuevaCalificacion.comentario.trim() || null,
-            },
-          ]);
+    setMostrarModalCalificacion(false);
+    await cargarCatalogo();
+  };
 
-          if (error) throw error;
+  const serviciosFiltrados = servicios.filter((servicio) => {
+    const coincideCategoria =
+      categoriaSeleccionada === "todas" ||
+      String(servicio.id_categoria) === String(categoriaSeleccionada);
 
-          setMostrarModalCalificacion(false);
-          await cargarCatalogo();
-        } catch (err) {
-          console.error("Error al guardar calificación:", err.message);
-        }
-      };
+    const texto = busqueda.toLowerCase();
 
-    const serviciosFiltrados =
-      categoriaSeleccionada === "todas"
-        ? servicios
-        : servicios.filter(
-          (servicio) =>
-            String(servicio.id_categoria) === String(categoriaSeleccionada)
-        );
-    
-    const agruparPorCategoria = (listaServicios) => {
-      return listaServicios.reduce((acc, servicio) => {
-        const categoria = servicio.Categorias?.nombre || "Sin categoría";
+    const coincideBusqueda =
+      servicio.nombre.toLowerCase().includes(texto) ||
+      (servicio.descripcion || "").toLowerCase().includes(texto);
 
-        if (!acc[categoria]) {
-          acc[categoria] = [];
-        }
+    return coincideCategoria && coincideBusqueda;
+  });
 
-        acc[categoria].push(servicio);
-        return acc;
-      }, {});
-    };
+  const agruparPorCategoria = (listaServicios) => {
+    return listaServicios.reduce((acc, servicio) => {
+      const categoria = servicio.Categorias?.nombre || "Sin categoría";
 
-    const serviciosAgrupados = agruparPorCategoria(serviciosFiltrados);
+      if (!acc[categoria]) acc[categoria] = [];
+
+      acc[categoria].push(servicio);
+      return acc;
+    }, {});
+  };
+
+  const serviciosAgrupados = agruparPorCategoria(serviciosFiltrados);
 
   return (
     <Container className="mt-4">
       <h3 className="mb-4">
         <i className="bi bi-grid-fill me-2"></i> Catálogo de Servicios
-          </h3>
-      <div className="catalogo-categorias-section mb-4">
-        <div className="d-flex align-items-center justify-content-between mb-2">
-          <h6 className="catalogo-categorias-titulo mb-0">
-            Explorar por categoría
-          </h6>
+      </h3>
 
-          {categoriaSeleccionada !== "todas" && (
-            <button
-              className="catalogo-limpiar-filtro"
-              onClick={() => setCategoriaSeleccionada("todas")}
-            >
-              Ver todas
-            </button>
-          )}
-        </div>
+      {/* 🔍 NUEVO BUSCADOR MINIMALISTA */}
+      <Row className="mb-4">
+        <Col md={6}>
+          <div className="buscador-minimal">
+            <i className="bi bi-search icono-buscador"></i>
 
-        <div className="catalogo-categorias-wrapper">
-          <button
-            className="catalogo-flecha-scroll"
-            onClick={() =>
-              document
-                .querySelector(".catalogo-categorias-scroll")
-                ?.scrollBy({ left: -180, behavior: "smooth" })
-            }
-          >
-            <i className="bi bi-chevron-left"></i>
-          </button>
-
-          <div className="catalogo-categorias-scroll">
-            <button
-              className={
-                categoriaSeleccionada === "todas"
-                  ? "catalogo-categoria-card todas activa"
-                  : "catalogo-categoria-card todas"
-              }
-              onClick={() => setCategoriaSeleccionada("todas")}
-            >
-              <div className="catalogo-categoria-bg categoria-todas-bg"></div>
-              <div className="catalogo-categoria-overlay"></div>
-
-              <span>
-                <i className="bi bi-grid me-2"></i>
-                Todas
-              </span>
-            </button>
-
-            {categorias.map((categoria) => (
-              <button
-                key={categoria.id_categoria}
-                className={
-                  String(categoriaSeleccionada) === String(categoria.id_categoria)
-                    ? "catalogo-categoria-card activa"
-                    : "catalogo-categoria-card"
-                }
-                onClick={() => setCategoriaSeleccionada(categoria.id_categoria)}
-              >
-                <div
-                  className="catalogo-categoria-bg"
-                  style={{
-                    backgroundImage: categoria.url_imagen
-                      ? `url(${categoria.url_imagen})`
-                      : "none",
-                  }}
-                ></div>
-
-                <div className="catalogo-categoria-overlay"></div>
-
-                <span>{categoria.nombre}</span>
-              </button>
-            ))}
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="input-buscador"
+            />
           </div>
-
-          <button
-            className="catalogo-flecha-scroll"
-            onClick={() =>
-              document
-                .querySelector(".catalogo-categorias-scroll")
-                ?.scrollBy({ left: 180, behavior: "smooth" })
-            }
-          >
-            <i className="bi bi-chevron-right"></i>
-          </button>
-        </div>
-      </div>
-    
+        </Col>
+      </Row>
 
       {cargando && (
         <Row className="text-center my-5">
@@ -260,7 +180,13 @@ const Catalogo = () => {
         </Alert>
       )}
 
-      {!cargando && servicios.length > 0 && (
+      {!cargando && serviciosFiltrados.length === 0 && (
+        <Alert variant="warning" className="text-center">
+          No se encontraron resultados.
+        </Alert>
+      )}
+
+      {!cargando && serviciosFiltrados.length > 0 && (
         <>
           {Object.entries(serviciosAgrupados).map(([categoria, servicios]) => (
             <section key={categoria} className="mb-5">
@@ -273,7 +199,7 @@ const Catalogo = () => {
 
               <div className="catalogo-scroll-horizontal">
                 {servicios.map((servicio) => (
-                  <div className="catalogo-card-scroll" key={servicio.id_servicio}>
+                  <div key={servicio.id_servicio}>
                     <TarjetaCatalogo
                       servicios={[servicio]}
                       abrirModalDetalle={(servicio) => {
