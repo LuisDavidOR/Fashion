@@ -19,12 +19,37 @@ const ModalEdicionEmpleado = ({
     setDeshabilitado(false);
   };
 
+  // 🔴 VALIDACIÓN NOMBRE Y APELLIDO
+  // Solo letras y espacios (no números ni caracteres raros)
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    empleadoEditar.nombre
+  );
+
+  const apellidoValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    empleadoEditar.apellido
+  );
+
+  // 🔴 VALIDACIÓN TELÉFONO (8 dígitos exactos)
+  const telefonoValido = /^[0-9]{8}$/.test(empleadoEditar.telefono);
+
+  // 🔴 VALIDACIÓN CORREO
+  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu)$/i.test(
+    empleadoEditar.correo
+  );
+
   const camposVacios =
     empleadoEditar.nombre.trim() === "" ||
     empleadoEditar.apellido.trim() === "" ||
     empleadoEditar.telefono.trim() === "" ||
     empleadoEditar.comision === "" ||
     empleadoEditar.correo.trim() === "";
+
+  // 🔴 ERRORES GENERALES
+  const hayErrores =
+    !nombreValido ||
+    !apellidoValido ||
+    !telefonoValido ||
+    !correoValido;
 
   return (
     <Modal
@@ -79,6 +104,7 @@ const ModalEdicionEmpleado = ({
               </Form.Group>
             </Col>
 
+            {/* 🔴 NOMBRE */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Nombre *</Form.Label>
@@ -87,10 +113,17 @@ const ModalEdicionEmpleado = ({
                   name="nombre"
                   value={empleadoEditar.nombre || ""}
                   onChange={manejoCambioInputEdicion}
+
+                  // 🔴 Marca error si contiene números
+                  isInvalid={empleadoEditar.nombre && !nombreValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El nombre solo debe contener letras
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
+            {/* 🔴 APELLIDO */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Apellido *</Form.Label>
@@ -99,10 +132,17 @@ const ModalEdicionEmpleado = ({
                   name="apellido"
                   value={empleadoEditar.apellido || ""}
                   onChange={manejoCambioInputEdicion}
+
+                  // 🔴 Marca error si contiene números
+                  isInvalid={empleadoEditar.apellido && !apellidoValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El apellido solo debe contener letras
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
+            {/* 🔴 TELÉFONO */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Teléfono *</Form.Label>
@@ -112,10 +152,15 @@ const ModalEdicionEmpleado = ({
                   value={empleadoEditar.telefono || ""}
                   onChange={manejoCambioInputEdicion}
                   maxLength={8}
+                  isInvalid={empleadoEditar.telefono && !telefonoValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El teléfono debe tener exactamente 8 dígitos
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
+            {/* 🔴 CORREO */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Correo *</Form.Label>
@@ -124,7 +169,11 @@ const ModalEdicionEmpleado = ({
                   name="correo"
                   value={empleadoEditar.correo || ""}
                   onChange={manejoCambioInputEdicion}
+                  isInvalid={empleadoEditar.correo && !correoValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  Ingresa un correo válido (ej: ejemplo@gmail.com)
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -170,7 +219,9 @@ const ModalEdicionEmpleado = ({
         <Button
           variant="primary"
           onClick={handleActualizar}
-          disabled={camposVacios || deshabilitado}
+
+          // 🔴 BLOQUEO SI HAY ERRORES O CAMPOS VACÍOS
+          disabled={camposVacios || hayErrores || deshabilitado}
         >
           Actualizar
         </Button>

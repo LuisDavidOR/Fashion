@@ -20,12 +20,37 @@ const ModalRegistroEmpleado = ({
     setDeshabilitado(false);
   };
 
+  // 🔴 VALIDACIÓN NOMBRE (solo letras y espacios)
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    nuevoEmpleado.nombre
+  );
+
+  // 🔴 VALIDACIÓN APELLIDO (solo letras y espacios)
+  const apellidoValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    nuevoEmpleado.apellido
+  );
+
+  // 🔴 VALIDACIÓN TELÉFONO (8 dígitos exactos)
+  const telefonoValido = /^[0-9]{8}$/.test(nuevoEmpleado.telefono);
+
+  // 🔴 VALIDACIÓN CORREO
+  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu)$/i.test(
+    nuevoEmpleado.correo
+  );
+
   const camposVacios =
     nuevoEmpleado.nombre.trim() === "" ||
     nuevoEmpleado.apellido.trim() === "" ||
     nuevoEmpleado.telefono.trim() === "" ||
     nuevoEmpleado.comision === "" ||
     nuevoEmpleado.correo.trim() === "";
+
+  // 🔴 DETECTA ERRORES
+  const hayErrores =
+    !nombreValido ||
+    !apellidoValido ||
+    !telefonoValido ||
+    !correoValido;
 
   return (
     <Modal
@@ -46,6 +71,7 @@ const ModalRegistroEmpleado = ({
       <Modal.Body>
         <Form>
           <Row>
+            {/* 🔴 NOMBRE */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Nombre *</Form.Label>
@@ -55,10 +81,17 @@ const ModalRegistroEmpleado = ({
                   value={nuevoEmpleado.nombre}
                   onChange={manejoCambioInput}
                   placeholder="Ingresa el nombre"
+
+                  // 🔴 Borde rojo si contiene números
+                  isInvalid={nuevoEmpleado.nombre && !nombreValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El nombre solo debe contener letras
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
+            {/* 🔴 APELLIDO */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Apellido *</Form.Label>
@@ -68,10 +101,17 @@ const ModalRegistroEmpleado = ({
                   value={nuevoEmpleado.apellido}
                   onChange={manejoCambioInput}
                   placeholder="Ingresa el apellido"
+
+                  // 🔴 Borde rojo si contiene números
+                  isInvalid={nuevoEmpleado.apellido && !apellidoValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El apellido solo debe contener letras
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
+            {/* 🔴 TELÉFONO */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Teléfono *</Form.Label>
@@ -82,10 +122,15 @@ const ModalRegistroEmpleado = ({
                   onChange={manejoCambioInput}
                   placeholder="Ingresa el teléfono de 8 dígitos"
                   maxLength={8}
+                  isInvalid={nuevoEmpleado.telefono && !telefonoValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El teléfono debe tener exactamente 8 dígitos
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
+            {/* 🔴 CORREO */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Correo *</Form.Label>
@@ -95,7 +140,11 @@ const ModalRegistroEmpleado = ({
                   value={nuevoEmpleado.correo}
                   onChange={manejoCambioInput}
                   placeholder="ejemplo@gmail.com"
+                  isInvalid={nuevoEmpleado.correo && !correoValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  Ingresa un correo válido (ej: ejemplo@gmail.com)
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -164,7 +213,7 @@ const ModalRegistroEmpleado = ({
             color: "#ffffff",
           }}
           onClick={handleRegistrar}
-          disabled={camposVacios || deshabilitado}
+          disabled={camposVacios || hayErrores || deshabilitado}
         >
           Guardar
         </Button>
