@@ -19,6 +19,19 @@ const ModalEdicionCategoria = ({
     setDeshabilitado(false);
   };
 
+  // 🔴 VALIDACIÓN NOMBRE (solo letras)
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    categoriaEditar.nombre
+  );
+
+  // 🔴 VALIDACIÓN DESCRIPCIÓN (opcional, sin números)
+  const descripcionValida =
+    categoriaEditar.descripcion === "" ||
+    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(categoriaEditar.descripcion);
+
+  // 🔴 ERRORES
+  const hayErrores = !nombreValido || !descripcionValida;
+
   return (
     <Modal
       show={mostrarModalEdicion}
@@ -66,6 +79,7 @@ const ModalEdicionCategoria = ({
             </Form.Text>
           </Form.Group>
 
+          {/* 🔴 NOMBRE */}
           <Form.Group className="mb-3">
             <Form.Label>Nombre *</Form.Label>
             <Form.Control
@@ -74,9 +88,16 @@ const ModalEdicionCategoria = ({
               value={categoriaEditar.nombre}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa el nombre"
+
+              // 🔴 ERROR SI TIENE NÚMEROS
+              isInvalid={categoriaEditar.nombre && !nombreValido}
             />
+            <Form.Control.Feedback type="invalid">
+              El nombre solo debe contener letras
+            </Form.Control.Feedback>
           </Form.Group>
 
+          {/* 🔴 DESCRIPCIÓN */}
           <Form.Group className="mb-3">
             <Form.Label>Descripción</Form.Label>
             <Form.Control
@@ -86,7 +107,16 @@ const ModalEdicionCategoria = ({
               value={categoriaEditar.descripcion}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa la descripción"
+
+              // 🔴 ERROR SI TIENE NÚMEROS
+              isInvalid={
+                categoriaEditar.descripcion &&
+                !descripcionValida
+              }
             />
+            <Form.Control.Feedback type="invalid">
+              La descripción no debe contener números
+            </Form.Control.Feedback>
           </Form.Group>
         </Form>
       </Modal.Body>
@@ -103,7 +133,13 @@ const ModalEdicionCategoria = ({
         <Button
           variant="primary"
           onClick={handleActualizar}
-          disabled={categoriaEditar.nombre.trim() === "" || deshabilitado}
+
+          // 🔴 BLOQUEO SOLO POR ERRORES + VACÍO
+          disabled={
+            categoriaEditar.nombre.trim() === "" ||
+            hayErrores ||
+            deshabilitado
+          }
         >
           Actualizar
         </Button>

@@ -20,6 +20,22 @@ const ModalRegistroCategoria = ({
     setDeshabilitado(false);
   };
 
+  // 🔴 VALIDACIÓN NOMBRE (solo letras)
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    nuevaCategoria.nombre
+  );
+
+  // 🔴 VALIDACIÓN DESCRIPCIÓN (opcional pero sin números)
+  const descripcionValida =
+    nuevaCategoria.descripcion === "" ||
+    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(nuevaCategoria.descripcion);
+
+  // 🔴 CAMPOS VACÍOS (tu lógica original)
+  const camposVacios = nuevaCategoria.nombre.trim() === "";
+
+  // 🔴 ERRORES
+  const hayErrores = !nombreValido || !descripcionValida;
+
   return (
     <Modal
       show={mostrarModal}
@@ -37,6 +53,7 @@ const ModalRegistroCategoria = ({
 
       <Modal.Body>
         <Form>
+          {/* 🔴 NOMBRE */}
           <Form.Group className="mb-3">
             <Form.Label>Nombre *</Form.Label>
             <Form.Control
@@ -45,7 +62,13 @@ const ModalRegistroCategoria = ({
               value={nuevaCategoria.nombre}
               onChange={manejoCambioInput}
               placeholder="Ingresa el nombre de categoría"
+
+              // 🔴 ERROR SI TIENE NÚMEROS
+              isInvalid={nuevaCategoria.nombre && !nombreValido}
             />
+            <Form.Control.Feedback type="invalid">
+              El nombre solo debe contener letras
+            </Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -60,6 +83,7 @@ const ModalRegistroCategoria = ({
             </Form.Text>
           </Form.Group>
 
+          {/* 🔴 DESCRIPCIÓN */}
           <Form.Group className="mb-3">
             <Form.Label>Descripción</Form.Label>
             <Form.Control
@@ -69,7 +93,16 @@ const ModalRegistroCategoria = ({
               value={nuevaCategoria.descripcion}
               onChange={manejoCambioInput}
               placeholder="Ingresa la descripción"
+
+              // 🔴 ERROR SI CONTIENE NÚMEROS
+              isInvalid={
+                nuevaCategoria.descripcion &&
+                !descripcionValida
+              }
             />
+            <Form.Control.Feedback type="invalid">
+              La descripción no debe contener números
+            </Form.Control.Feedback>
           </Form.Group>
         </Form>
       </Modal.Body>
@@ -93,7 +126,12 @@ const ModalRegistroCategoria = ({
             color: "#ffffff",
           }}
           onClick={handleRegistrar}
-          disabled={nuevaCategoria.nombre.trim() === "" || deshabilitado}
+
+          // 🔴 BLOQUEO SI:
+          // - Nombre vacío
+          // - Hay errores
+          // - Está procesando
+          disabled={camposVacios || hayErrores || deshabilitado}
         >
           Guardar
         </Button>
