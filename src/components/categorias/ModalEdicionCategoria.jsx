@@ -24,7 +24,7 @@ const ModalEdicionCategoria = ({
     categoriaEditar.nombre
   );
 
-  // 🔴 VALIDACIÓN DESCRIPCIÓN (opcional, sin números)
+  // 🔴 VALIDACIÓN DESCRIPCIÓN (sin números)
   const descripcionValida =
     categoriaEditar.descripcion === "" ||
     /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(categoriaEditar.descripcion);
@@ -88,8 +88,6 @@ const ModalEdicionCategoria = ({
               value={categoriaEditar.nombre}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa el nombre"
-
-              // 🔴 ERROR SI TIENE NÚMEROS
               isInvalid={categoriaEditar.nombre && !nombreValido}
             />
             <Form.Control.Feedback type="invalid">
@@ -99,7 +97,7 @@ const ModalEdicionCategoria = ({
 
           {/* 🔴 DESCRIPCIÓN */}
           <Form.Group className="mb-3">
-            <Form.Label>Descripción</Form.Label>
+            <Form.Label>Descripción *</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -107,8 +105,6 @@ const ModalEdicionCategoria = ({
               value={categoriaEditar.descripcion}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa la descripción"
-
-              // 🔴 ERROR SI TIENE NÚMEROS
               isInvalid={
                 categoriaEditar.descripcion &&
                 !descripcionValida
@@ -133,10 +129,9 @@ const ModalEdicionCategoria = ({
         <Button
           variant="primary"
           onClick={handleActualizar}
-
-          // 🔴 BLOQUEO SOLO POR ERRORES + VACÍO
           disabled={
             categoriaEditar.nombre.trim() === "" ||
+            categoriaEditar.descripcion.trim() === "" || // 🔴 NUEVO
             hayErrores ||
             deshabilitado
           }

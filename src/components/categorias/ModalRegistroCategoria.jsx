@@ -25,13 +25,15 @@ const ModalRegistroCategoria = ({
     nuevaCategoria.nombre
   );
 
-  // 🔴 VALIDACIÓN DESCRIPCIÓN (opcional pero sin números)
+  // 🔴 VALIDACIÓN DESCRIPCIÓN (sin números)
   const descripcionValida =
     nuevaCategoria.descripcion === "" ||
     /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(nuevaCategoria.descripcion);
 
-  // 🔴 CAMPOS VACÍOS (tu lógica original)
-  const camposVacios = nuevaCategoria.nombre.trim() === "";
+  // 🔴 CAMPOS VACÍOS (AHORA incluye descripción obligatoria)
+  const camposVacios =
+    nuevaCategoria.nombre.trim() === "" ||
+    nuevaCategoria.descripcion.trim() === "";
 
   // 🔴 ERRORES
   const hayErrores = !nombreValido || !descripcionValida;
@@ -62,8 +64,6 @@ const ModalRegistroCategoria = ({
               value={nuevaCategoria.nombre}
               onChange={manejoCambioInput}
               placeholder="Ingresa el nombre de categoría"
-
-              // 🔴 ERROR SI TIENE NÚMEROS
               isInvalid={nuevaCategoria.nombre && !nombreValido}
             />
             <Form.Control.Feedback type="invalid">
@@ -85,7 +85,7 @@ const ModalRegistroCategoria = ({
 
           {/* 🔴 DESCRIPCIÓN */}
           <Form.Group className="mb-3">
-            <Form.Label>Descripción</Form.Label>
+            <Form.Label>Descripción *</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -93,8 +93,6 @@ const ModalRegistroCategoria = ({
               value={nuevaCategoria.descripcion}
               onChange={manejoCambioInput}
               placeholder="Ingresa la descripción"
-
-              // 🔴 ERROR SI CONTIENE NÚMEROS
               isInvalid={
                 nuevaCategoria.descripcion &&
                 !descripcionValida
@@ -126,11 +124,6 @@ const ModalRegistroCategoria = ({
             color: "#ffffff",
           }}
           onClick={handleRegistrar}
-
-          // 🔴 BLOQUEO SI:
-          // - Nombre vacío
-          // - Hay errores
-          // - Está procesando
           disabled={camposVacios || hayErrores || deshabilitado}
         >
           Guardar

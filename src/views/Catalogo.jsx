@@ -115,6 +115,7 @@ const Catalogo = () => {
     await cargarCatalogo();
   };
 
+  // 🔴 SOLO AQUÍ SE MODIFICÓ (agregada categoría a la búsqueda)
   const serviciosFiltrados = servicios.filter((servicio) => {
     const coincideCategoria =
       categoriaSeleccionada === "todas" ||
@@ -124,7 +125,8 @@ const Catalogo = () => {
 
     const coincideBusqueda =
       servicio.nombre.toLowerCase().includes(texto) ||
-      (servicio.descripcion || "").toLowerCase().includes(texto);
+      (servicio.descripcion || "").toLowerCase().includes(texto) ||
+      (servicio.Categorias?.nombre || "").toLowerCase().includes(texto);
 
     return coincideCategoria && coincideBusqueda;
   });
@@ -148,7 +150,7 @@ const Catalogo = () => {
         <i className="bi bi-grid-fill me-2"></i> Catálogo de Servicios
       </h3>
 
-      {/* 🔍 NUEVO BUSCADOR MINIMALISTA */}
+      {/* 🔍 BUSCADOR */}
       <Row className="mb-4">
         <Col md={6}>
           <div className="buscador-minimal">
