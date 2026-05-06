@@ -20,11 +20,27 @@ const ModalRegistroInsumo = ({
     setDeshabilitado(false);
   };
 
+  // 🔴 VALIDACIÓN NOMBRE (solo letras)
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    nuevoInsumo.nombre
+  );
+
+  // 🔴 VALIDACIÓN DESCRIPCIÓN
+  // - Obligatoria (no vacía)
+  // - No permite números
+  const descripcionValida =
+    nuevoInsumo.descripcion.trim() !== "" &&
+    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(nuevoInsumo.descripcion);
+
   const camposVacios =
     nuevoInsumo.nombre.trim() === "" ||
     nuevoInsumo.costo_producto === "" ||
     nuevoInsumo.contenido_total === "" ||
-    nuevoInsumo.unidad_medida.trim() === "";
+    nuevoInsumo.unidad_medida.trim() === "" ||
+    nuevoInsumo.descripcion.trim() === ""; // 🔴 AHORA DESCRIPCIÓN ES OBLIGATORIA
+
+  // 🔴 ERRORES SOLO EN NOMBRE Y DESCRIPCIÓN
+  const hayErrores = !nombreValido || !descripcionValida;
 
   return (
     <Modal
@@ -45,6 +61,7 @@ const ModalRegistroInsumo = ({
       <Modal.Body>
         <Form>
           <Row>
+            {/* 🔴 NOMBRE */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Nombre *</Form.Label>
@@ -54,7 +71,11 @@ const ModalRegistroInsumo = ({
                   value={nuevoInsumo.nombre}
                   onChange={manejoCambioInput}
                   placeholder="Ej: Shampoo profesional"
+                  isInvalid={nuevoInsumo.nombre && !nombreValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El nombre solo debe contener letras
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -132,9 +153,10 @@ const ModalRegistroInsumo = ({
               </Form.Group>
             </Col>
 
+            {/* 🔴 DESCRIPCIÓN OBLIGATORIA */}
             <Col xs={12}>
               <Form.Group className="mb-3">
-                <Form.Label>Descripción</Form.Label>
+                <Form.Label>Descripción *</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={4}
@@ -142,7 +164,21 @@ const ModalRegistroInsumo = ({
                   value={nuevoInsumo.descripcion}
                   onChange={manejoCambioInput}
                   placeholder="Descripción del insumo"
+
+                  // 🔴 ERROR SI:
+                  // - Está vacía
+                  // - Tiene números
+                  isInvalid={
+                    nuevoInsumo.descripcion &&
+                    !descripcionValida
+                  }
                 />
+
+                <Form.Control.Feedback type="invalid">
+                  {nuevoInsumo.descripcion.trim() === ""
+                    ? "La descripción es obligatoria"
+                    : "La descripción no debe contener números"}
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -168,7 +204,12 @@ const ModalRegistroInsumo = ({
             color: "#ffffff",
           }}
           onClick={handleRegistrar}
-          disabled={camposVacios || deshabilitado}
+
+          // 🔴 BLOQUEADO SI:
+          // - Campos vacíos (incluye descripción)
+          // - Errores
+          // - Procesando
+          disabled={camposVacios || hayErrores || deshabilitado}
         >
           Guardar
         </Button>
