@@ -26,6 +26,19 @@ const ModalEdicionServicio = ({
     servicioEditar.duracion === "" ||
     servicioEditar.id_categoria === "";
 
+  // 🔴 VALIDACIÓN NOMBRE (sin números)
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    servicioEditar.nombre
+  );
+
+  // 🔴 VALIDACIÓN DESCRIPCIÓN (opcional, sin números)
+  const descripcionValida =
+    servicioEditar.descripcion === "" ||
+    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(servicioEditar.descripcion);
+
+  // 🔴 ERRORES
+  const hayErrores = !nombreValido || !descripcionValida;
+
   return (
     <Modal
       show={mostrarModalEdicion}
@@ -79,6 +92,7 @@ const ModalEdicionServicio = ({
               </Form.Group>
             </Col>
 
+            {/* 🔴 NOMBRE */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Nombre *</Form.Label>
@@ -87,7 +101,14 @@ const ModalEdicionServicio = ({
                   name="nombre"
                   value={servicioEditar.nombre || ""}
                   onChange={manejoCambioInputEdicion}
+
+                  isInvalid={
+                    servicioEditar.nombre && !nombreValido
+                  }
                 />
+                <Form.Control.Feedback type="invalid">
+                  El nombre no debe contener números
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -136,6 +157,7 @@ const ModalEdicionServicio = ({
               </Form.Group>
             </Col>
 
+            {/* 🔴 DESCRIPCIÓN */}
             <Col xs={12}>
               <Form.Group className="mb-3">
                 <Form.Label>Descripción</Form.Label>
@@ -145,7 +167,15 @@ const ModalEdicionServicio = ({
                   name="descripcion"
                   value={servicioEditar.descripcion || ""}
                   onChange={manejoCambioInputEdicion}
+
+                  isInvalid={
+                    servicioEditar.descripcion &&
+                    !descripcionValida
+                  }
                 />
+                <Form.Control.Feedback type="invalid">
+                  La descripción no debe contener números
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -164,7 +194,9 @@ const ModalEdicionServicio = ({
         <Button
           variant="primary"
           onClick={handleActualizar}
-          disabled={camposVacios || deshabilitado}
+
+          // 🔴 BLOQUEO SOLO POR VALIDACIÓN
+          disabled={camposVacios || hayErrores || deshabilitado}
         >
           Actualizar
         </Button>

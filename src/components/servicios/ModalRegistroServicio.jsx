@@ -21,11 +21,24 @@ const ModalRegistroServicio = ({
     setDeshabilitado(false);
   };
 
+  // 🔴 VALIDACIÓN NOMBRE (sin números)
+  const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(
+    nuevoServicio.nombre
+  );
+
+  // 🔴 VALIDACIÓN DESCRIPCIÓN (opcional, sin números)
+  const descripcionValida =
+    nuevoServicio.descripcion === "" ||
+    /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s.,]+$/.test(nuevoServicio.descripcion);
+
   const camposVacios =
     nuevoServicio.nombre.trim() === "" ||
     nuevoServicio.precio === "" ||
     nuevoServicio.duracion === "" ||
     nuevoServicio.id_categoria === "";
+
+  // 🔴 ERRORES SOLO DE LO PEDIDO
+  const hayErrores = !nombreValido || !descripcionValida;
 
   return (
     <Modal
@@ -46,6 +59,7 @@ const ModalRegistroServicio = ({
       <Modal.Body>
         <Form>
           <Row>
+            {/* 🔴 NOMBRE */}
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label>Nombre *</Form.Label>
@@ -55,7 +69,12 @@ const ModalRegistroServicio = ({
                   value={nuevoServicio.nombre}
                   onChange={manejoCambioInput}
                   placeholder="Ej: Corte de cabello"
+
+                  isInvalid={nuevoServicio.nombre && !nombreValido}
                 />
+                <Form.Control.Feedback type="invalid">
+                  El nombre no debe contener números
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 
@@ -120,6 +139,7 @@ const ModalRegistroServicio = ({
               </Form.Group>
             </Col>
 
+            {/* 🔴 DESCRIPCIÓN */}
             <Col xs={12}>
               <Form.Group className="mb-3">
                 <Form.Label>Descripción</Form.Label>
@@ -130,7 +150,15 @@ const ModalRegistroServicio = ({
                   value={nuevoServicio.descripcion}
                   onChange={manejoCambioInput}
                   placeholder="Describe brevemente el servicio"
+
+                  isInvalid={
+                    nuevoServicio.descripcion &&
+                    !descripcionValida
+                  }
                 />
+                <Form.Control.Feedback type="invalid">
+                  La descripción no debe contener números
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
@@ -156,7 +184,9 @@ const ModalRegistroServicio = ({
             color: "#ffffff",
           }}
           onClick={handleRegistrar}
-          disabled={camposVacios || deshabilitado}
+
+          // 🔴 BLOQUEO SOLO POR NOMBRE/DESCRIPCIÓN
+          disabled={camposVacios || hayErrores || deshabilitado}
         >
           Guardar
         </Button>
