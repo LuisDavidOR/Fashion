@@ -8,17 +8,33 @@ const TarjetaInsumo = ({
   abrirModalEliminacion,
   cambiarEstadoInsumo,
 }) => {
-  const obtenerEstadoStock = (stock) => {
+  const obtenerEstadoStock = (stock, restante, total) => {
     if (stock === null || stock === undefined) return "Sin stock";
+
     if (Number(stock) <= 0) return "Agotado";
+
+    const porcentajeRestante =
+      total > 0 ? (Number(restante) / Number(total)) * 100 : 0;
+
+    if (porcentajeRestante <= 20) return "Por agotarse";
+
     if (Number(stock) <= 5) return "Stock bajo";
+
     return "Disponible";
   };
 
-  const obtenerColorStock = (stock) => {
+  const obtenerColorStock = (stock, restante, total) => {
     if (stock === null || stock === undefined) return "secondary";
+
     if (Number(stock) <= 0) return "danger";
+
+    const porcentajeRestante =
+      total > 0 ? (Number(restante) / Number(total)) * 100 : 0;
+
+    if (porcentajeRestante <= 20) return "warning";
+
     if (Number(stock) <= 5) return "warning";
+
     return "success";
   };
 
@@ -58,8 +74,18 @@ const TarjetaInsumo = ({
               <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
                 <h5 className="fw-bold mb-0 text-truncate">{insumo.nombre}</h5>
 
-                <Badge bg={obtenerColorStock(insumo.stock)}>
-                  {obtenerEstadoStock(insumo.stock)}
+                <Badge
+                  bg={obtenerColorStock(
+                    insumo.stock,
+                    insumo.contenido_restante,
+                    insumo.contenido_total
+                  )}
+                >
+                  {obtenerEstadoStock(
+                    insumo.stock,
+                    insumo.contenido_restante,
+                    insumo.contenido_total
+                  )}
                 </Badge>
               </div>
 
@@ -74,13 +100,69 @@ const TarjetaInsumo = ({
                 </div>
 
                 <div>
+                  <i className="bi bi-calculator me-2"></i>
+                  Costo por {insumo.unidad_medida}: C${" "}
+                  {(
+                    Number(insumo.costo_producto) / Number(insumo.contenido_total)
+                  ).toFixed(2)}
+                </div>
+
+                <div>
                   <i className="bi bi-box-seam me-2"></i>
-                  Contenido: {insumo.contenido_total} {insumo.unidad_medida}
+                  Contenido total: {insumo.contenido_total} {insumo.unidad_medida}
+                </div>
+
+                <div>
+                  <i className="bi bi-droplet-half me-2"></i>
+                  Restante actual:{" "}
+                  {insumo.contenido_restante ?? insumo.contenido_total} {insumo.unidad_medida}
                 </div>
 
                 <div>
                   <i className="bi bi-archive me-2"></i>
                   Stock: {insumo.stock ?? "No definido"}
+                </div>
+
+                <div className="mt-2">
+                  <small className="text-muted d-block mb-1">
+                    Uso del envase actual:{" "}
+                    {(
+                      (Number(insumo.contenido_restante ?? 0) /
+                        Number(insumo.contenido_total || 1)) *
+                      100
+                    ).toFixed(0)}
+                    %
+                  </small>
+
+                  <div
+                    style={{
+                      height: "8px",
+                      backgroundColor: "#e9ecef",
+                      borderRadius: "10px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${Math.min(
+                          (
+                            (Number(insumo.contenido_restante ?? 0) /
+                              Number(insumo.contenido_total || 1)) *
+                            100
+                          ),
+                          100
+                        )}%`,
+                        height: "100%",
+                        backgroundColor:
+                          Number(insumo.contenido_restante) /
+                            Number(insumo.contenido_total) <=
+                          0.2
+                            ? "#dc3545"
+                            : "#198754",
+                        transition: "width 0.3s ease",
+                      }}
+                    ></div>
+                  </div>
                 </div>
               </div>
 

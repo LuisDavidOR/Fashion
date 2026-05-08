@@ -7,6 +7,7 @@ import ModalRegistroServicio from "../components/servicios/ModalRegistroServicio
 import ModalEdicionServicio from "../components/servicios/ModalEdicionServicio";
 import ModalEliminacionServicio from "../components/servicios/ModalEliminacionServicio";
 import ModalEstadoServicio from "../components/servicios/ModalEstadoServicio";
+import ModalInsumosServicio from "../components/servicios/ModalInsumosServicio";
 
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
@@ -31,6 +32,10 @@ const Servicios = () => {
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
   const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
   const [mostrarModalEstado, setMostrarModalEstado] = useState(false);
+
+  const [mostrarModalInsumos, setMostrarModalInsumos] = useState(false);
+  const [insumos, setInsumos] = useState([]);
+  const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
 
   const [servicioAEliminar, setServicioAEliminar] = useState(null);
   const [servicioEstado, setServicioEstado] = useState(null);
@@ -63,6 +68,7 @@ const Servicios = () => {
   useEffect(() => {
     cargarServicios();
     cargarCategorias();
+    cargarInsumos();
   }, []);
 
   useEffect(() => {
@@ -174,13 +180,42 @@ const Servicios = () => {
     }
   };
 
+  const cargarInsumos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("Insumos")
+        .select("*")
+        .eq("estado", "activo")
+        .order("nombre", { ascending: true });
+
+      if (error) throw error;
+
+      setInsumos(data || []);
+    } catch (error) {
+      console.error("Error al cargar insumos:", error.message);
+    }
+  };
+
   const cargarServicios = async () => {
     try {
       setCargando(true);
 
       const { data, error } = await supabase
         .from("Servicios")
-        .select("*, Categorias(nombre)")
+        .select(`
+          *,
+          Categorias(nombre),
+          Servicio_Insumo(
+            id_insumo,
+            cantidad_usada,
+            Insumos(
+              nombre,
+              costo_producto,
+              contenido_total,
+              unidad_medida
+            )
+          )
+        `)
         .order("id_servicio", { ascending: true });
 
       if (error) {
@@ -236,6 +271,8 @@ const Servicios = () => {
     }
   };
 
+  //ABRIR MODALES
+  
   const abrirModalEdicion = (servicio) => {
     setServicioEditar({
       id_servicio: servicio.id_servicio,
@@ -259,6 +296,11 @@ const Servicios = () => {
   const abrirModalEstado = (servicio) => {
     setServicioEstado(servicio);
     setMostrarModalEstado(true);
+  };
+
+  const abrirModalInsumos = (servicio) => {
+    setServicioSeleccionado(servicio);
+    setMostrarModalInsumos(true);
   };
 
   const agregarServicio = async () => {
@@ -571,6 +613,7 @@ const Servicios = () => {
           servicios={serviciosPaginados}
           abrirModalEdicion={abrirModalEdicion}
           abrirModalEliminacion={abrirModalEliminacion}
+          abrirModalInsumos={abrirModalInsumos}
           cambiarEstadoServicio={abrirModalEstado}
         />
       )}
@@ -608,6 +651,15 @@ const Servicios = () => {
         setMostrarModalEstado={setMostrarModalEstado}
         servicio={servicioEstado}
         cambiarEstadoServicio={cambiarEstadoServicio}
+      />
+
+      <ModalInsumosServicio
+        mostrarModalInsumos={mostrarModalInsumos}
+        setMostrarModalInsumos={setMostrarModalInsumos}
+        servicioSeleccionado={servicioSeleccionado}
+        insumos={insumos}
+        setToast={setToast}
+        cargarServicios={cargarServicios}
       />
 
       {serviciosFiltrados.length > 0 && (
