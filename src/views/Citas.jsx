@@ -125,7 +125,18 @@ const Citas = () => {
   const cargarServicios = async () => {
     const { data, error } = await supabase
       .from("Servicios")
-      .select("id_servicio, nombre, precio")
+      .select(`
+        id_servicio,
+        nombre,
+        precio,
+        Servicio_Insumo (
+          cantidad_usada,
+          Insumos (
+            costo_producto,
+            contenido_total
+          )
+        )
+      `)
       .eq("estado", "activo")
       .order("nombre", { ascending: true });
 
@@ -175,6 +186,21 @@ const Citas = () => {
       return;
     }
 
+    const costoInsumo =
+      servicio.Servicio_Insumo?.reduce((total, relacion) => {
+        const insumo = relacion.Insumos;
+
+        if (!insumo || !insumo.contenido_total) return total;
+
+        const costoPorUnidad =
+          Number(insumo.costo_producto) / Number(insumo.contenido_total);
+
+        const costoUsado =
+          costoPorUnidad * Number(relacion.cantidad_usada);
+
+        return total + costoUsado;
+      }, 0) || 0;
+
     const subtotal = parseFloat(servicio.precio);
 
     setDetalleCita((prev) => [
@@ -184,7 +210,7 @@ const Citas = () => {
         nombre: servicio.nombre,
         precio: subtotal,
         costo_empleado: 0,
-        costo_insumo: 0,
+        costo_insumo: costoInsumo,
         subtotal: subtotal,
       },
     ]);

@@ -105,6 +105,10 @@ const TablaCitas = ({ citas, citaExpandida, setCitaExpandida }) => {
                                     Precio base: C${" "}
                                     {Number(detalle.Servicios?.precio || 0).toFixed(2)}
                                   </p>
+                                  <p className="mb-0 text-muted small">
+                                    Costo insumos: C${" "}
+                                    {Number(detalle.costo_insumo || 0).toFixed(2)}
+                                  </p>
                                 </div>
 
                                 <div className="text-end">
