@@ -6,134 +6,43 @@ import { useAuth } from "../context/AuthContext";
 
 const Inicio = () => {
   const { rol } = useAuth();
-    const opcionesPorRol = {
-      admin: [
-        {
-          titulo: "Categorías",
-          descripcion: "Organiza los servicios del salón por categorías.",
-          icono: "bi-bookmark-heart-fill",
-          ruta: "/categorias",
-        },
-        {
-          titulo: "Servicios",
-          descripcion: "Administra precios, duración e imágenes de servicios.",
-          icono: "bi-scissors",
-          ruta: "/servicios",
-        },
-        {
-          titulo: "Clientes",
-          descripcion: "Gestiona la información de tus clientes registrados.",
-          icono: "bi-people-fill",
-          ruta: "/clientes",
-        },
-        {
-          titulo: "Empleados",
-          descripcion: "Controla empleados, especialidades, comisión y fotos.",
-          icono: "bi-person-badge-fill",
-          ruta: "/empleados",
-        },
-        {
-          titulo: "Citas",
-          descripcion: "Consulta y administra las citas del salón.",
-          icono: "bi-calendar-check-fill",
-          ruta: "/citas",
-        },
-        {
-          titulo: "Insumos",
-          descripcion: "Controla productos, costos, stock e inventario.",
-          icono: "bi-box-seam-fill",
-          ruta: "/insumos",
-        },
-        {
-          titulo: "Catálogo",
-          descripcion: "Vista elegante para mostrar servicios al cliente.",
-          icono: "bi-grid-fill",
-          ruta: "/catalogo",
-        },
-      ],
 
-      cliente: [
-        {
-          titulo: "Catálogo",
-          descripcion: "Explora nuestros servicios disponibles.",
-          icono: "bi-grid-fill",
-          ruta: "/catalogo",
-        },
-        {
-          titulo: "Mis citas",
-          descripcion: "Consulta el estado de tus citas.",
-          icono: "bi-calendar-heart-fill",
-          ruta: "/citas",
-        },
-      ],
-
-      empleado: [
-        {
-          titulo: "Citas disponibles",
-          descripcion: "Revisa citas pendientes para aceptar.",
-          icono: "bi-calendar-check-fill",
-          ruta: "/citas",
-        },
-        {
-          titulo: "Catálogo",
-          descripcion: "Consulta los servicios disponibles.",
-          icono: "bi-grid-fill",
-          ruta: "/catalogo",
-        },
-      ],
-
-      invitado: [
-        {
-          titulo: "Catálogo",
-          descripcion: "Explora nuestros servicios.",
-          icono: "bi-grid-fill",
-          ruta: "/catalogo",
-        },
-        {
-          titulo: "Iniciar sesión",
-          descripcion: "Accede para agendar citas.",
-          icono: "bi-person-fill-lock",
-          ruta: "/login",
-        },
-      ],
-    };
-
-    const opciones = opcionesPorRol[rol] || opcionesPorRol.invitado;
   const contenidoHeroPorRol = {
     admin: {
       etiqueta: "Sistema de Gestión",
       titulo: "Bienvenido a Salón Fashion",
-      descripcion: "Administra tu salón de belleza de forma moderna, rápida y elegante.",
+      descripcion:
+        "Administra la operación del salón con una experiencia moderna, organizada y elegante.",
       botonPrincipal: "Ver Catálogo",
       rutaPrincipal: "/catalogo",
       botonSecundario: "Gestionar Citas",
       rutaSecundaria: "/citas",
     },
-
     cliente: {
       etiqueta: "Área de Cliente",
       titulo: "Bienvenido a tu espacio Fashion",
-      descripcion: "Agenda tus citas, consulta tus servicios y comparte tu experiencia.",
+      descripcion:
+        "Explora servicios, agenda tus citas y disfruta una experiencia pensada para ti.",
       botonPrincipal: "Ver Catálogo",
       rutaPrincipal: "/catalogo",
       botonSecundario: "Mis Citas",
       rutaSecundaria: "/citas",
     },
-
     empleado: {
       etiqueta: "Área de Empleado",
       titulo: "Panel de trabajo Fashion",
-      descripcion: "Consulta citas disponibles, acepta servicios y revisa tus asignaciones.",
+      descripcion:
+        "Consulta tus citas, revisa servicios y acompaña a cada cliente con atención profesional.",
       botonPrincipal: "Ver Citas",
       rutaPrincipal: "/citas",
       botonSecundario: "Ver Catálogo",
       rutaSecundaria: "/catalogo",
     },
-
     invitado: {
       etiqueta: "Bienvenido",
       titulo: "Descubre Salón Fashion",
-      descripcion: "Explora nuestros servicios y crea una cuenta para agendar tu próxima experiencia.",
+      descripcion:
+        "Explora nuestros servicios y conoce una experiencia de belleza moderna, cómoda y personalizada.",
       botonPrincipal: "Ver Catálogo",
       rutaPrincipal: "/catalogo",
       botonSecundario: "Iniciar Sesión",
@@ -143,13 +52,37 @@ const Inicio = () => {
 
   const contenidoHero = contenidoHeroPorRol[rol] || contenidoHeroPorRol.invitado;
 
+  const serviciosDestacados = [
+    {
+      titulo: "Cuidado capilar",
+      descripcion: "Servicios enfocados en realzar tu estilo y cuidar la salud de tu cabello.",
+      icono: "bi-scissors",
+      imagen:
+        "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=900&q=80",
+    },
+    {
+      titulo: "Manicure y estética",
+      descripcion: "Detalles, color y elegancia para complementar tu imagen personal.",
+      icono: "bi-stars",
+      imagen:
+        "https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&w=900&q=80",
+    },
+    {
+      titulo: "Experiencia personalizada",
+      descripcion: "Atención cercana, cómoda y adaptada a las necesidades de cada cliente.",
+      icono: "bi-heart-fill",
+      imagen:
+        "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=900&q=80",
+    },
+  ];
+
   return (
     <Container className="inicio-container">
       <section className="inicio-hero">
         <div>
           <span className="inicio-etiqueta">{contenidoHero.etiqueta}</span>
-            <h1>{contenidoHero.titulo}</h1>
-            <p>{contenidoHero.descripcion}</p>
+          <h1>{contenidoHero.titulo}</h1>
+          <p>{contenidoHero.descripcion}</p>
 
           <div className="inicio-acciones">
             <Button
@@ -175,43 +108,124 @@ const Inicio = () => {
         </div>
       </section>
 
-      <div className="inicio-seccion-titulo">
-        <h3>Accesos rápidos</h3>
-        <p>Selecciona una sección para comenzar a trabajar.</p>
-      </div>
+      <section className="my-5">
+        <Row className="align-items-center g-4">
+          <Col lg={6}>
+            <div className="inicio-seccion-titulo text-start">
+              <span className="inicio-etiqueta">Sobre nosotros</span>
+              <h3>Belleza, estilo y bienestar en un solo lugar</h3>
+              <p>
+                Salón Fashion ofrece una experiencia enfocada en el cuidado
+                personal, la comodidad y la atención profesional. Nuestro objetivo
+                es que cada cliente se sienta bien atendido desde que explora un
+                servicio hasta que finaliza su cita.
+              </p>
+            </div>
 
-      <Row className="g-4">
-        {opciones.map((opcion, index) => (
-          <Col xs={12} sm={6} lg={4} xl={3} key={opcion.titulo}>
-            <Card
-              className="inicio-card h-100"
-              style={{
-                animationDelay: `${index * 0.07}s`,
-                animationFillMode: "both",
-              }}
-            >
-              <Card.Body className="p-4">
-                <div className="inicio-card-icono">
-                  <i className={`bi ${opcion.icono}`}></i>
-                </div>
+            <Row className="g-3 mt-2">
+              <Col sm={6}>
+                <Card className="inicio-card h-100">
+                  <Card.Body className="p-4">
+                    <div className="inicio-card-icono">
+                      <i className="bi bi-person-heart"></i>
+                    </div>
+                    <h5 className="fw-bold mt-3">Atención cercana</h5>
+                    <p>Nos enfocamos en brindar un trato amable y personalizado.</p>
+                  </Card.Body>
+                </Card>
+              </Col>
 
-                <h5 className="fw-bold mt-3">{opcion.titulo}</h5>
-
-                <p>{opcion.descripcion}</p>
-
-                <Button
-                  as={Link}
-                  to={opcion.ruta}
-                  className="btn-inicio-card"
-                >
-                  Abrir
-                  <i className="bi bi-arrow-right ms-2"></i>
-                </Button>
-              </Card.Body>
-            </Card>
+              <Col sm={6}>
+                <Card className="inicio-card h-100">
+                  <Card.Body className="p-4">
+                    <div className="inicio-card-icono">
+                      <i className="bi bi-gem"></i>
+                    </div>
+                    <h5 className="fw-bold mt-3">Calidad y detalle</h5>
+                    <p>Cuidamos cada servicio para lograr resultados elegantes.</p>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
           </Col>
-        ))}
-      </Row>
+
+          <Col lg={6}>
+            <div className="rounded-4 overflow-hidden shadow">
+              <img
+                src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=1200&q=80"
+                alt="Interior de salón de belleza"
+                className="img-fluid w-100"
+                style={{ height: "420px", objectFit: "cover" }}
+              />
+            </div>
+          </Col>
+        </Row>
+      </section>
+
+      <section className="my-5">
+        <div className="inicio-seccion-titulo">
+          <span className="inicio-etiqueta">Nuestra experiencia</span>
+          <h3>Servicios pensados para resaltar tu estilo</h3>
+          <p>
+            Combinamos organización, atención profesional y una presentación
+            moderna para que cada visita sea más cómoda y especial.
+          </p>
+        </div>
+
+        <Row className="g-4">
+          {serviciosDestacados.map((servicio, index) => (
+            <Col md={4} key={servicio.titulo}>
+              <Card
+                className="inicio-card h-100 overflow-hidden"
+                style={{
+                  animationDelay: `${index * 0.07}s`,
+                  animationFillMode: "both",
+                }}
+              >
+                <img
+                  src={servicio.imagen}
+                  alt={servicio.titulo}
+                  style={{
+                    width: "100%",
+                    height: "210px",
+                    objectFit: "cover",
+                  }}
+                />
+
+                <Card.Body className="p-4">
+                  <div className="inicio-card-icono">
+                    <i className={`bi ${servicio.icono}`}></i>
+                  </div>
+
+                  <h5 className="fw-bold mt-3">{servicio.titulo}</h5>
+                  <p>{servicio.descripcion}</p>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </section>
+
+      <section className="inicio-hero my-5">
+        <div>
+          <span className="inicio-etiqueta">Salón Fashion</span>
+          <h2>Una forma más moderna de vivir la belleza</h2>
+          <p>
+            Explora nuestro catálogo, conoce los servicios disponibles y disfruta
+            una atención organizada desde el primer momento.
+          </p>
+
+          <div className="inicio-acciones">
+            <Button as={Link} to="/catalogo" className="btn-inicio-principal">
+              Explorar servicios
+            </Button>
+          </div>
+        </div>
+
+        <div className="inicio-hero-icono">
+          <i className="bi bi-flower1"></i>
+        </div>
+      </section>
     </Container>
   );
 };
