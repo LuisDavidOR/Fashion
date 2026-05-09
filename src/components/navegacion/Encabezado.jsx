@@ -185,6 +185,7 @@ const Encabezado = () => {
           className="text-dark fw-bold d-flex align-items-center"
           style={{cursor: "pointer"}}
         >
+          {/*
           <img
             alt=""
             src={logo}
@@ -192,6 +193,7 @@ const Encabezado = () => {
             height="45"
             className="d-inline-block me-2"
           />
+          */}
           <strong>
             <h4 className="mb-0">Salón Fashion</h4>
           </strong>
