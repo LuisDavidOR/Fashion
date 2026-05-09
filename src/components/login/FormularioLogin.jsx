@@ -9,7 +9,8 @@ const FormularioLogin = ({
   setContrasena,
   iniciarSesion,
   irRegistro,
-  ingresarComoInvitado
+  ingresarComoInvitado,
+  cargandoLogin
 }) => {
   // Estado para controlar la visibilidad de la contraseña
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
@@ -24,32 +25,36 @@ const FormularioLogin = ({
     },
     titulo: {
       fontFamily: "'Playfair Display', serif",
-      fontSize: "2.5rem",
-      fontWeight: "500",
+      fontSize: "2.2rem",
+      fontWeight: "600",
       color: "#000",
       marginBottom: "0.5rem",
       textAlign: "center",
     },
     subtitulo: {
+      fontFamily: "'Poppins', sans-serif",
+      fontWeight: "400",
       color: "#666",
-      fontSize: "1rem",
-      marginBottom: "1.4rem",
+      fontSize: "0.9rem",
+      marginBottom: "1rem",
       textAlign: "center",
     },
     label: {
       fontSize: "0.9rem",
       color: "#333",
       marginBottom: "5px",
+      fontFamily: "'Poppins', sans-serif",
     },
     input: {
       border: "none",
       borderBottom: "1px solid #ccc",
       borderRadius: "0",
-      padding: "10px 0",
+      padding: "7px 0",
       paddingRight: "40px", // Espacio para que el texto de la contraseña no choque con el ojo
       boxShadow: "none",
       backgroundColor: "transparent",
-      fontSize: "1rem",
+      fontSize: "0.9rem",
+      fontFamily: "'Poppins', sans-serif",
       width: "100%"
     },
     inputContenedor: {
@@ -75,8 +80,9 @@ const FormularioLogin = ({
       backgroundColor: "#555",
       border: "none",
       borderRadius: "30px",
-      padding: "12px",
-      fontSize: "1.1rem",
+      padding: "10px",
+      fontSize: "1rem",
+      fontFamily: "'Poppins', sans-serif",
       marginTop: "0.8rem",
       fontWeight: "400"
     }
@@ -86,16 +92,20 @@ const FormularioLogin = ({
     <Card style={estilos.card} className="p-0">
       <Card.Body className="p-0">
         <h1 style={estilos.titulo}>Bienvenido</h1>
-        <p style={estilos.subtitulo}>Accede a tu cuenta para agendar tu próxima cita.</p>
+        <p style={estilos.subtitulo}>Tu experiencia de belleza comienza aquí.</p>
 
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error && (
+          <Alert variant="danger" className="py-2 px-3 mb-3" style={{ fontSize: "0.9rem" }}>
+            {error}
+          </Alert>
+        )}
 
         <Form>
           <Form.Group className="mb-3" controlId="usuario">
             <Form.Label style={estilos.label}>Correo electrónico</Form.Label>
             <Form.Control
               type="email"
-              placeholder="ejemplo@fashion.com"
+              placeholder="Ingresa tu correo electrónico"
               style={estilos.input}
               value={usuario}
               onChange={(e) => setUsuario(e.target.value)}
@@ -108,7 +118,7 @@ const FormularioLogin = ({
             <div style={estilos.inputContenedor}>
               <Form.Control
                 type={mostrarContrasena ? "text" : "password"}
-                placeholder=".........."
+                placeholder="**************"
                 style={estilos.input}
                 value={contrasena}
                 onChange={(e) => setContrasena(e.target.value)}
@@ -125,12 +135,13 @@ const FormularioLogin = ({
             </div>
           </Form.Group>
 
-          <Button 
-            style={estilos.boton} 
-            className="w-100" 
+          <Button
+            style={estilos.boton}
+            className="w-100"
             onClick={iniciarSesion}
+            disabled={cargandoLogin}
           >
-            Iniciar Sesión
+            {cargandoLogin ? "Iniciando sesión..." : "Iniciar Sesión"}
           </Button>
           
           <div className="text-center mt-3">

@@ -10,6 +10,7 @@ const Login = () => {
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState(null);
+  const [cargandoLogin, setCargandoLogin] = useState(false);
   const navegar = useNavigate();
 
   useEffect(() => {
@@ -22,16 +23,24 @@ const Login = () => {
   }, []);
 
   const iniciarSesion = async () => {
+    if (cargandoLogin) return;
+
     try {
       setError(null);
+      setCargandoLogin(true);
 
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: usuario,
+        email: usuario.trim(),
         password: contrasena,
       });
 
       if (error) {
-        setError("Usuario o contraseña incorrectos");
+        if (error.status === 429) {
+          setError("Demasiados intentos. Espera unos minutos antes de volver a intentar.");
+        } else {
+          setError("Usuario o contraseña incorrectos");
+        }
+
         return;
       }
 
@@ -41,6 +50,8 @@ const Login = () => {
     } catch (err) {
       setError("Error al conectar con el servidor");
       console.error("Error en la solicitud: ", err);
+    } finally {
+      setCargandoLogin(false);
     }
   };
 
@@ -156,6 +167,7 @@ const Login = () => {
             iniciarSesion={iniciarSesion}
             irRegistro={irRegistro}
             ingresarComoInvitado={ingresarComoInvitado}
+            cargandoLogin={cargandoLogin}
           />
         </div>
 
