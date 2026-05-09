@@ -2,13 +2,20 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Container, Nav, Navbar, Offcanvas } from "react-bootstrap";
 import logo from "../../assets/logo.png";
-import { supabase } from "../../database/supabaseconfig";
+import { useAuth } from "../../context/AuthContext";
 
 const Encabezado = () => {
 
   const [mostrarMenu, setMostrarMenu] = useState(false);
   const navigate = useNavigate();
   const location = useLocation(); //Para detectar la ruta actual
+
+  const { usuario, rol, cerrarSesion } = useAuth();
+
+  const esAdmin = usuario && rol === "admin";
+  const esCliente = usuario && rol === "cliente";
+  const esEmpleado = usuario && rol === "empleado";
+  const esInvitado = !usuario;
 
   const manejarToggle = () => setMostrarMenu(!mostrarMenu);
 
@@ -17,163 +24,162 @@ const Encabezado = () => {
     setMostrarMenu(false);
   };
 
-  const cerrarSesion = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
-      localStorage.removeItem("usuario-supabase");
-      setMostrarMenu(false);
-      navigate("/login");
-    } catch (err) {
-      console.error("Error cerrando sesión: ", err.message);
-    }
+  const manejarCerrarSesion = async () => {
+    await cerrarSesion();
+    setMostrarMenu(false);
+    navigate("/login");
   };
 
   //Detectar rutas especiales
   const esLogin = location.pathname === "/login";
-  const esCatalogo = 
-    location.pathname === "/catalogo" &&
-    localStorage.getItem("usuario-supabase") === null;
 
   //Contenido del menú
   let contenidoMenu;
 
   if (esLogin) {
+    contenidoMenu = null;
+  }
+  else if (esInvitado) {
     contenidoMenu = (
       <Nav className="ms-auto pe-2">
+
+        <Nav.Link
+          onClick={() => manejarNavegacion("/")}
+          className={mostrarMenu ? "color-texto-marca" : "text-white"}
+        >
+          {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null}
+          <strong>Inicio</strong>
+        </Nav.Link>
+
+        <Nav.Link
+          onClick={() => manejarNavegacion("/catalogo")}
+          className={mostrarMenu ? "color-texto-marca" : "text-white"}
+        >
+          {mostrarMenu ? <i className="bi-images me-2"></i> : null}
+          <strong>Catálogo</strong>
+        </Nav.Link>
+
         <Nav.Link
           onClick={() => manejarNavegacion("/login")}
           className={mostrarMenu ? "color-texto-marca" : "text-white"}
         >
-          <i className="bi-person-fill-lock me-2"></i>
-          Iniciar sesión
+          {mostrarMenu ? (
+            <i className="bi-person-fill-lock me-2"></i>
+          ) : null}
+          <strong>Iniciar sesión</strong>
         </Nav.Link>
+
       </Nav>
     );
   } else {
-    if (esCatalogo) {
-      contenidoMenu = (
+    contenidoMenu = (
+      <>
         <Nav className="ms-auto pe-2">
+          <Nav.Link
+            onClick={() => manejarNavegacion("/")}
+            className={mostrarMenu ? "color-texto-marca" : "text-white"}
+          >
+            {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null}
+            <strong>Inicio</strong>
+          </Nav.Link>
+
+          <Nav.Link
+            onClick={() => manejarNavegacion("/categorias")}
+            className={mostrarMenu ? "color-texto-marca" : "text-white"}
+          >
+            {mostrarMenu ? <i className="bi-bookmark-fill me-2"></i> : null}
+            <strong>Categorías</strong>
+          </Nav.Link>
+
+          <Nav.Link
+            onClick={() => manejarNavegacion("/servicios")}
+            className={mostrarMenu ? "color-texto-marca" : "text-white"}
+          >
+            {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+            <strong>Servicios</strong>
+          </Nav.Link>
+
+          <Nav.Link
+            onClick={() => manejarNavegacion("/clientes")}
+            className={mostrarMenu ? "color-texto-marca" : "text-white"}
+          >
+            {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+            <strong>Clientes</strong>
+          </Nav.Link>
+
+          <Nav.Link
+            onClick={() => manejarNavegacion("/empleados")}
+            className={mostrarMenu ? "color-texto-marca" : "text-white"}
+          >
+            {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+            <strong>Empleados</strong>
+          </Nav.Link>
+
+          <Nav.Link
+            onClick={() => manejarNavegacion("/citas")}
+            className={mostrarMenu ? "color-texto-marca" : "text-white"}
+          >
+            {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+            <strong>Citas</strong>
+          </Nav.Link>
+
+          <Nav.Link
+            onClick={() => manejarNavegacion("/insumos")}
+            className={mostrarMenu ? "color-texto-marca" : "text-white"}
+          >
+            {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+            <strong>Insumos</strong>
+          </Nav.Link>
+
+          <Nav.Link
+            onClick={() => manejarNavegacion("/usuarios")}
+            className={mostrarMenu ? "color-texto-marca" : "text-white"}
+          >
+            {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
+            <strong>Usuarios</strong>
+          </Nav.Link>
+
+          {/*Opción para ir al catálogo público desde admin */}
           <Nav.Link
             onClick={() => manejarNavegacion("/catalogo")}
             className={mostrarMenu ? "color-texto-marca" : "text-white"}
           >
-            <i className="bi-images me-2"></i>
-            <strong>Catálogo</strong>
+            {mostrarMenu ? <i className="bi-images me-2"></i> : null}
+            <strong>Catalogo</strong>
           </Nav.Link>
-        </Nav>
-      );
-    } else {
-      contenidoMenu = (
-        <>
-          <Nav className="ms-auto pe-2">
+
+          {/*Icono cerrar sesión en barra superior */}
+          {mostrarMenu ? null : (
             <Nav.Link
-              onClick={() => manejarNavegacion("/")}
+              onClick={manejarCerrarSesion}
               className={mostrarMenu ? "color-texto-marca" : "text-white"}
             >
-              {mostrarMenu ? <i className="bi-house-fill me-2"></i> : null}
-              <strong>Inicio</strong>
+              <i className="bi-box-arrow-right me-2"></i>
             </Nav.Link>
-
-            <Nav.Link
-              onClick={() => manejarNavegacion("/categorias")}
-              className={mostrarMenu ? "color-texto-marca" : "text-white"}
-            >
-              {mostrarMenu ? <i className="bi-bookmark-fill me-2"></i> : null}
-              <strong>Categorías</strong>
-            </Nav.Link>
-
-            <Nav.Link
-              onClick={() => manejarNavegacion("/servicios")}
-              className={mostrarMenu ? "color-texto-marca" : "text-white"}
-            >
-              {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
-              <strong>Servicios</strong>
-            </Nav.Link>
-
-            <Nav.Link
-              onClick={() => manejarNavegacion("/clientes")}
-              className={mostrarMenu ? "color-texto-marca" : "text-white"}
-            >
-              {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
-              <strong>Clientes</strong>
-            </Nav.Link>
-
-            <Nav.Link
-              onClick={() => manejarNavegacion("/empleados")}
-              className={mostrarMenu ? "color-texto-marca" : "text-white"}
-            >
-              {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
-              <strong>Empleados</strong>
-            </Nav.Link>
-
-            <Nav.Link
-              onClick={() => manejarNavegacion("/citas")}
-              className={mostrarMenu ? "color-texto-marca" : "text-white"}
-            >
-              {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
-              <strong>Citas</strong>
-            </Nav.Link>
-
-            <Nav.Link
-              onClick={() => manejarNavegacion("/insumos")}
-              className={mostrarMenu ? "color-texto-marca" : "text-white"}
-            >
-              {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
-              <strong>Insumos</strong>
-            </Nav.Link>
-
-            <Nav.Link
-              onClick={() => manejarNavegacion("/usuarios")}
-              className={mostrarMenu ? "color-texto-marca" : "text-white"}
-            >
-              {mostrarMenu ? <i className="bi-bag-heart-fill me-2"></i> : null}
-              <strong>Usuarios</strong>
-            </Nav.Link>
-
-            {/*Opción para ir al catálogo público desde admin */}
-            <Nav.Link
-              onClick={() => manejarNavegacion("/catalogo")}
-              className={mostrarMenu ? "color-texto-marca" : "text-white"}
-            >
-              {mostrarMenu ? <i className="bi-images me-2"></i> : null}
-              <strong>Catalogo</strong>
-            </Nav.Link>
-
-            {/*Icono cerrar sesión en barra superior */}
-            {mostrarMenu ? null : (
-              <Nav.Link
-                onClick={cerrarSesion}
-                className={mostrarMenu ? "color-texto-marca" : "text-white"}
-              >
-                <i className="bi-box-arrow-right me-2"></i>
-              </Nav.Link>
-            )}
-
-            <hr />
-          </Nav>
-
-          {/*Información del usuario y boton cerrar sesión */}
-          {mostrarMenu && (
-            <div className="mt-3 p-3 rounded bg-light text-dark">
-              <p className="mb-2">
-                <i className="bi-envelope-fill me-2"></i>
-                {localStorage.getItem("usuario-supabase")?.toLowerCase() || "Usuario"}
-              </p>
-
-              <button
-                className="btn btn-outline-danger mt-3 w-100"
-                onClick={cerrarSesion}
-              >
-                <i className="bi-box-arrow-right me-2"></i>
-                Cerrar sesión
-              </button>
-            </div>
           )}
-        </>
-      );
-    }
+
+          <hr />
+        </Nav>
+
+        {/*Información del usuario y boton cerrar sesión */}
+        {mostrarMenu && (
+          <div className="mt-3 p-3 rounded bg-light text-dark">
+            <p className="mb-2">
+              <i className="bi-envelope-fill me-2"></i>
+              {usuario?.email?.toLowerCase() || "Usuario"}
+            </p>
+
+            <button
+              className="btn btn-outline-danger mt-3 w-100"
+              onClick={cerrarSesion}
+            >
+              <i className="bi-box-arrow-right me-2"></i>
+              Cerrar sesión
+            </button>
+          </div>
+        )}
+      </>
+    );
   }
 
   return (
@@ -181,7 +187,7 @@ const Encabezado = () => {
       <Container>
 
         <Navbar.Brand
-          onClick={() => manejarNavegacion(esCatalogo ? "/catalogo" : "/")}
+          onClick={() => manejarNavegacion(usuario ? "/" : "/catalogo")}
           className="text-dark fw-bold d-flex align-items-center"
           style={{cursor: "pointer"}}
         >

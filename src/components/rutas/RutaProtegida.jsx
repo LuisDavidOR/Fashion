@@ -1,15 +1,34 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-const RutaProtegida = ({ children }) => {
-  //Verifica si el usuario está autenticado usando localStorage
-  const estaLogueado = !!localStorage.getItem("usuario-supabase");
+import { useAuth } from "../../context/AuthContext";
 
-  //Log para depuración
-  console.log("Usuario autenticado: ", estaLogueado);
+const RutaProtegida = ({ children, rolesPermitidos = [] }) => {
+  const { usuario, perfil, rol, cargando } = useAuth();
 
-  //Si está autenticado, redirige a la página de login
-  return estaLogueado ? children : <Navigate to="/login" replace />;
+  if (cargando) {
+    return <h3>Cargando...</h3>;
+  }
+
+  // Si no hay sesión
+  if (!usuario) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Si hay sesión, pero NO existe en tabla Usuarios
+  if (!perfil) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Si se especifican roles y el rol no coincide
+  if (
+    rolesPermitidos.length > 0 &&
+    !rolesPermitidos.includes(rol)
+  ) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 export default RutaProtegida;

@@ -1,11 +1,20 @@
 import React, { useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
 
-const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena, iniciarSesion }) => {
+const FormularioLogin = ({
+  usuario,
+  contrasena,
+  error,
+  setUsuario,
+  setContrasena,
+  iniciarSesion,
+  irRegistro,
+  ingresarComoInvitado
+}) => {
   // Estado para controlar la visibilidad de la contraseña
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
 
-  // Estilos personalizados para imitar Figma
+  // Estilos personalizados
   const estilos = {
     card: {
       border: "none",
@@ -14,18 +23,18 @@ const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena
       backgroundColor: "transparent",
     },
     titulo: {
-      fontFamily: "'Playfair Display', serif", // Asegúrate de tener una fuente Serif o similar
+      fontFamily: "'Playfair Display', serif",
       fontSize: "2.5rem",
       fontWeight: "500",
       color: "#000",
       marginBottom: "0.5rem",
-      textAlign: "center", // Centrado solicitado
+      textAlign: "center",
     },
     subtitulo: {
       color: "#666",
       fontSize: "1rem",
-      marginBottom: "2.5rem",
-      textAlign: "center", // Centrado solicitado
+      marginBottom: "1.4rem",
+      textAlign: "center",
     },
     label: {
       fontSize: "0.9rem",
@@ -65,10 +74,10 @@ const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena
     boton: {
       backgroundColor: "#555",
       border: "none",
-      borderRadius: "30px", // Botón muy redondeado como en la imagen
+      borderRadius: "30px",
       padding: "12px",
       fontSize: "1.1rem",
-      marginTop: "2rem",
+      marginTop: "0.8rem",
       fontWeight: "400"
     }
   };
@@ -82,7 +91,7 @@ const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena
         {error && <Alert variant="danger">{error}</Alert>}
 
         <Form>
-          <Form.Group className="mb-4" controlId="usuario">
+          <Form.Group className="mb-3" controlId="usuario">
             <Form.Label style={estilos.label}>Correo electrónico</Form.Label>
             <Form.Control
               type="email"
@@ -94,7 +103,7 @@ const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena
             />
           </Form.Group>
 
-          <Form.Group className="mb-4" controlId="contrasena">
+          <Form.Group className="mb-3" controlId="contrasena">
             <Form.Label style={estilos.label}>Contraseña</Form.Label>
             <div style={estilos.inputContenedor}>
               <Form.Control
@@ -123,6 +132,36 @@ const FormularioLogin = ({ usuario, contrasena, error, setUsuario, setContrasena
           >
             Iniciar Sesión
           </Button>
+          
+          <div className="text-center mt-3">
+            <p className="mb-1" style={{ fontSize: "0.95rem" }}>
+              ¿No tienes cuenta?{" "}
+              <span
+                onClick={irRegistro}
+                style={{
+                  color: "#3b82f6",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                }}
+              >
+                Regístrate
+              </span>
+            </p>
+
+            <p
+              onClick={ingresarComoInvitado}
+              style={{
+                color: "#3b82f6",
+                cursor: "pointer",
+                fontWeight: "500",
+                fontSize: "0.95rem",
+                marginBottom: 0,
+              }}
+            >
+              Ingresar como invitado
+            </p>
+          </div>
+
         </Form>
       </Card.Body>
     </Card>
