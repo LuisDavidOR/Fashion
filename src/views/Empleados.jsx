@@ -292,17 +292,6 @@ const Empleados = () => {
         return;
       }
 
-      const comision = parseFloat(nuevoEmpleado.comision);
-
-      if (comision < 0 || comision > 100) {
-        setToast({
-          mostrar: true,
-          mensaje: "La comisión debe estar entre 0% y 100%.",
-          tipo: "advertencia",
-        });
-        return;
-      }
-
       if (!validarTelefono(nuevoEmpleado.telefono)) {
         setToast({
           mostrar: true,
@@ -398,17 +387,6 @@ const Empleados = () => {
           tipo: "advertencia",
         });
 
-        return;
-      }
-
-      const comision = parseFloat(empleadoEditar.comision);
-
-      if (comision < 0 || comision > 100) {
-        setToast({
-          mostrar: true,
-          mensaje: "La comisión debe estar entre 0% y 100%.",
-          tipo: "advertencia",
-        });
         return;
       }
 
@@ -691,8 +669,6 @@ const Empleados = () => {
       <div className="contenedor-tabla-paginacion">
         {!cargando && empleadosPaginados.length > 0 && (
           <Row>
-            
-
             <Col lg={12}>
             <TarjetaEmpleado
               empleados={empleadosPaginados}

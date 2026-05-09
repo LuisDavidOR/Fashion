@@ -14,6 +14,9 @@
     detalleCita,
     agregarServicioDetalle,
     eliminarServicioDetalle,
+    rol,
+    esAdmin,
+    esCliente,
   }) => {
     const [deshabilitado, setDeshabilitado] = useState(false);
     const [servicioSeleccionado, setServicioSeleccionado] = useState("");
@@ -36,9 +39,16 @@
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Agregar Cita</Modal.Title>
+          <Modal.Title>
+          {esCliente ? "Agendar cita" : "Agregar cita"}
+        </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {esCliente && (
+            <p className="text-muted mb-3">
+              Selecciona la fecha, hora y los servicios que deseas agendar. Tu cita quedará pendiente hasta que un empleado la acepte.
+            </p>
+          )}
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Fecha</Form.Label>
@@ -60,22 +70,25 @@
                 placeholder="Ingresa la hora de la cita"
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Cliente</Form.Label>
-              <Form.Select
-                name="id_cliente"
-                value={nuevaCita.id_cliente}
-                onChange={manejoCambioInput}
-              >
-                <option value="">Seleccione un cliente</option>
+           {esAdmin && (
+          <Form.Group className="mb-3">
+            <Form.Label>Cliente</Form.Label>
+            <Form.Select
+              name="id_cliente"
+              value={nuevaCita.id_cliente}
+              onChange={manejoCambioInput}
+            >
+              <option value="">Seleccione un cliente</option>
 
-                {clientes.map((cat) => (
-                  <option key={cat.id_cliente} value={cat.id_cliente}>
-                    {cat.nombre} {cat.apellido}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+              {clientes.map((cat) => (
+                <option key={cat.id_cliente} value={cat.id_cliente}>
+                  {cat.nombre} {cat.apellido}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        )}
+            {esAdmin && (
             <Form.Group className="mb-3">
               <Form.Label>Empleado</Form.Label>
               <Form.Select
@@ -92,6 +105,7 @@
                 ))}
               </Form.Select>
             </Form.Group>
+          )}
 
             <hr />
 
@@ -191,16 +205,25 @@
             }}
             onClick={handleRegistrar}
             disabled={
-              nuevaCita.fecha.trim() === "" ||
-              nuevaCita.hora.trim() === "" ||
-              nuevaCita.id_cliente === "" ||
-              nuevaCita.id_empleado === "" ||
-              detalleCita.length === 0 ||
-              deshabilitado
-            }
+            nuevaCita.fecha.trim() === "" ||
+            nuevaCita.hora.trim() === "" ||
+            detalleCita.length === 0 ||
+            deshabilitado ||
+            (
+              esAdmin &&
+              (
+                nuevaCita.id_cliente === "" ||
+                nuevaCita.id_empleado === ""
+              )
+            )
+          }
           >
-            Guardar
-          </Button>
+          {deshabilitado
+            ? "Guardando..."
+            : esCliente
+              ? "Agendar cita"
+              : "Guardar"}
+        </Button>
         </Modal.Footer>
       </Modal>
     );

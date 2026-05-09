@@ -191,17 +191,29 @@ const Encabezado = () => {
           className="text-dark fw-bold d-flex align-items-center"
           style={{cursor: "pointer"}}
         >
-          {/*
+          {
           <img
-            alt=""
+            alt="Logo Fashion"
             src={logo}
-            width="45"
-            height="45"
+            width="42"
+            height="42"
             className="d-inline-block me-2"
+            style={{
+              objectFit: "contain",
+              borderRadius: "10px",
+            }}
           />
-          */}
+          }
           <strong>
-            <h4 className="mb-0">Salón Fashion</h4>
+            <h4
+            className="mb-0"
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: "600",
+            }}
+          >
+            Salón Fashion
+          </h4>
           </strong>
         </Navbar.Brand>
 

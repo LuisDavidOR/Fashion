@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
+import { useAuth } from "../context/AuthContext";
 
 import ModalRegistroCita from "../components/citas/ModalRegistroCita";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import TablaCitas from "../components/citas/TablaCitas";
 
+
 const Citas = () => {
 
+  const { rol, perfil } = useAuth();
+  const esAdmin = rol === "admin";
+  const esCliente = rol === "cliente";
+  const esEmpleado = rol === "empleado";
   const [toast, setToast] = useState({mostrar: false, mensaje: "", tipo: ""});
   const [mostrarModal, setMostrarModal] = useState(false);
   const [nuevaCita, setNuevaCita] = useState({
@@ -41,13 +47,15 @@ const Citas = () => {
       try {
         setCargandoCitas(true);
 
-        const { data, error } = await supabase
+        let consulta = supabase
           .from("Citas")
           .select(`
             id_cita,
             fecha,
             hora,
             estado_cita,
+            id_cliente,
+            id_empleado,
             Clientes (
               nombre,
               apellido
@@ -66,7 +74,19 @@ const Citas = () => {
                 precio
               )
             )
-          `)
+          `);
+
+        if (esCliente && perfil?.id_cliente) {
+          consulta = consulta.eq("id_cliente", perfil.id_cliente);
+        }
+
+        if (esEmpleado && perfil?.id_empleado) {
+          consulta = consulta.or(
+            `estado_cita.eq.pendiente,id_empleado.eq.${perfil.id_empleado}`
+          );
+        }
+
+        const { data, error } = await consulta
           .order("fecha", { ascending: false })
           .order("hora", { ascending: false });
 
@@ -152,11 +172,14 @@ const Citas = () => {
   };
 
   useEffect(() => {
-    cargarClientes();
-    cargarEmpleados();
-    cargarServicios();
+  cargarClientes();
+  cargarEmpleados();
+  cargarServicios();
+
+  if (rol && perfil !== undefined) {
     cargarCitas();
-  }, []);
+  }
+}, [rol, perfil]);
 
   const manejoCambioInput = (e) => {
     const { name, value } = e.target;
@@ -227,18 +250,34 @@ const Citas = () => {
   const agregarCita = async () => {
     try {
       if (
-        !nuevaCita.fecha.trim() ||
-        !nuevaCita.hora.trim() ||
-        !nuevaCita.id_cliente ||
-        !nuevaCita.id_empleado
-      ) {
-        setToast({
-          mostrar: true,
-          mensaje: "Debe llenar todos los campos.",
-          tipo: "advertencia",
-        });
-        return;
-      }
+      !nuevaCita.fecha.trim() ||
+      !nuevaCita.hora.trim()
+    ) {
+      setToast({
+        mostrar: true,
+        mensaje: "Debe seleccionar fecha y hora.",
+        tipo: "advertencia",
+      });
+      return;
+    }
+
+    if (esAdmin && (!nuevaCita.id_cliente || !nuevaCita.id_empleado)) {
+      setToast({
+        mostrar: true,
+        mensaje: "Debe seleccionar cliente y empleado.",
+        tipo: "advertencia",
+      });
+      return;
+    }
+
+    if (esCliente && !perfil?.id_cliente) {
+      setToast({
+        mostrar: true,
+        mensaje: "No se encontró el cliente asociado a tu cuenta.",
+        tipo: "error",
+      });
+      return;
+    }
 
       if (detalleCita.length === 0) {
         setToast({
@@ -249,16 +288,28 @@ const Citas = () => {
         return;
       }
 
+      const idClienteCita = esCliente
+        ? perfil.id_cliente
+        : nuevaCita.id_cliente;
+
+      const idEmpleadoCita = esCliente
+        ? null
+        : nuevaCita.id_empleado || null;
+
+      const estadoCita = esCliente
+        ? "pendiente"
+        : nuevaCita.estado_cita;
+
       const { data: citaInsertada, error: errorCita } = await supabase
         .from("Citas")
         .insert([
           {
             fecha: nuevaCita.fecha,
             hora: nuevaCita.hora,
-            id_cliente: nuevaCita.id_cliente,
-            id_empleado: nuevaCita.id_empleado,
-            estado_cita: nuevaCita.estado_cita,
-          },
+            id_cliente: idClienteCita,
+            id_empleado: idEmpleadoCita,
+            estado_cita: estadoCita,
+          }
         ])
         .select("id_cita")
         .single();
@@ -318,23 +369,40 @@ const Citas = () => {
     }
   };
 
+  const tituloVista = esAdmin
+    ? "Gestión de citas"
+    : esCliente
+      ? "Mis citas"
+      : "Citas disponibles";
+
+  const descripcionSinCitas = esAdmin
+    ? "No hay citas registradas."
+    : esCliente
+      ? "Aún no tienes citas registradas."
+      : "No hay citas pendientes o asignadas.";
+
+  const puedeCrearCita = esAdmin || esCliente;
+
   return (
     
     <Container className="mt-3">
       <Row className="align-items-center mb-3">
         <Col xs={9} sm={7} lg={7} className="d-flex align-items-center">
           <h3 className="mb-0">
-            <i className="bi-bookmark-plus-fill me-2"></i> Citas
+            <i className="bi-calendar-check-fill me-2"></i>
+            {tituloVista}
           </h3>
         </Col>
         <Col xs={3} sm={5} md={5} lg={5} className="text-end">
-          <Button
-            onClick={() => setMostrarModal(true)}
-            size="md"
-          >
-            <i className="bi-plus-lg"></i>
-            <span className="d-none d-ms-inline ms-2">Nueva Cita</span>
-          </Button>
+          {puedeCrearCita && (
+            <Button
+              onClick={() => setMostrarModal(true)}
+              size="md"
+            >
+              <i className="bi-plus-lg"></i>
+              <span className="d-none d-sm-inline ms-2">Nueva Cita</span>
+            </Button>
+          )}
         </Col>
       </Row>
 
@@ -350,7 +418,7 @@ const Citas = () => {
       ) : citas.length === 0 ? (
         <Alert variant="info" className="text-center">
           <i className="bi bi-info-circle me-2"></i>
-          No hay citas registradas.
+          {descripcionSinCitas}
         </Alert>
       ) : (
         <TablaCitas
@@ -361,6 +429,9 @@ const Citas = () => {
       )}
 
       <ModalRegistroCita
+        rol={rol}
+        esAdmin={esAdmin}
+        esCliente={esCliente}
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}
         nuevaCita={nuevaCita}
