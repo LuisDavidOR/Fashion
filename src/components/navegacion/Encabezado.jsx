@@ -83,85 +83,78 @@ const Encabezado = () => {
             <strong>Inicio</strong>
           </Nav.Link>
 
-          <Nav.Link
-            onClick={() => manejarNavegacion("/categorias")}
-            className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
-          >
-            {mostrarMenu ? <i className="bi-tags-fill me-2"></i> : null}
-            <strong>Categorías</strong>
-          </Nav.Link>
+          {esAdmin && (
+            <>
+              <Nav.Link
+                onClick={() => manejarNavegacion("/categorias")}
+                className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+              >
+                {mostrarMenu ? <i className="bi-tags-fill me-2"></i> : null}
+                <strong>Categorías</strong>
+              </Nav.Link>
 
-          <Nav.Link
-            onClick={() => manejarNavegacion("/servicios")}
-            className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
-          >
-            {mostrarMenu ? <i className="bi-scissors me-2"></i> : null}
-            <strong>Servicios</strong>
-          </Nav.Link>
+              <Nav.Link
+                onClick={() => manejarNavegacion("/servicios")}
+                className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+              >
+                {mostrarMenu ? <i className="bi-scissors me-2"></i> : null}
+                <strong>Servicios</strong>
+              </Nav.Link>
 
-          <Nav.Link
-            onClick={() => manejarNavegacion("/clientes")}
-            className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
-          >
-            {mostrarMenu ? <i className="bi-people-fill me-2"></i> : null}
-            <strong>Clientes</strong>
-          </Nav.Link>
+              <Nav.Link
+                onClick={() => manejarNavegacion("/clientes")}
+                className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+              >
+                {mostrarMenu ? <i className="bi-people-fill me-2"></i> : null}
+                <strong>Clientes</strong>
+              </Nav.Link>
 
-          <Nav.Link
-            onClick={() => manejarNavegacion("/empleados")}
-            className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
-          >
-            {mostrarMenu ? <i className="bi-person-badge-fill me-2"></i> : null}
-            <strong>Empleados</strong>
-          </Nav.Link>
+              <Nav.Link
+                onClick={() => manejarNavegacion("/empleados")}
+                className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+              >
+                {mostrarMenu ? <i className="bi-person-badge-fill me-2"></i> : null}
+                <strong>Empleados</strong>
+              </Nav.Link>
 
-          <Nav.Link
-            onClick={() => manejarNavegacion("/citas")}
-            className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
-          >
-            {mostrarMenu ? <i className="bi-calendar-check-fill me-2"></i> : null}
-            <strong>Citas</strong>
-          </Nav.Link>
+              <Nav.Link
+                onClick={() => manejarNavegacion("/insumos")}
+                className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+              >
+                {mostrarMenu ? <i className="bi-box-seam-fill me-2"></i> : null}
+                <strong>Insumos</strong>
+              </Nav.Link>
+            </>
+          )}
 
-          <Nav.Link
-            onClick={() => manejarNavegacion("/insumos")}
-            className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
-          >
-            {mostrarMenu ? <i className="bi-box-seam-fill me-2"></i> : null}
-            <strong>Insumos</strong>
-          </Nav.Link>
+          {(esAdmin || esCliente || esEmpleado) && (
+            <Nav.Link
+              onClick={() => manejarNavegacion("/citas")}
+              className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+            >
+              {mostrarMenu ? <i className="bi-calendar-check-fill me-2"></i> : null}
+              <strong>{esCliente ? "Mis Citas" : "Citas"}</strong>
+            </Nav.Link>
+          )}
 
-          <Nav.Link
-            onClick={() => manejarNavegacion("/usuarios")}
-            className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
-          >
-            {mostrarMenu ? <i className="bi-person-lock me-2"></i> : null}
-            <strong>Usuarios</strong>
-          </Nav.Link>
-
-          {/*Opción para ir al catálogo público desde admin */}
           <Nav.Link
             onClick={() => manejarNavegacion("/catalogo")}
             className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
           >
             {mostrarMenu ? <i className="bi-grid-fill me-2"></i> : null}
-            <strong>Catalogo</strong>
+            <strong>Catálogo</strong>
           </Nav.Link>
 
-          {/*Icono cerrar sesión en barra superior */}
-          {mostrarMenu ? null : (
+          {!mostrarMenu && (
             <Nav.Link
               onClick={manejarCerrarSesion}
-              className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+              className="navbar-fashion-link"
             >
               <i className="bi-box-arrow-right me-2"></i>
             </Nav.Link>
           )}
-
-          <hr />
         </Nav>
 
-        {/*Información del usuario y boton cerrar sesión */}
         {mostrarMenu && (
           <div className="mt-3 p-3 rounded bg-light text-dark">
             <p className="mb-2">
@@ -171,7 +164,7 @@ const Encabezado = () => {
 
             <button
               className="btn btn-outline-danger mt-3 w-100"
-              onClick={cerrarSesion}
+              onClick={manejarCerrarSesion}
             >
               <i className="bi-box-arrow-right me-2"></i>
               Cerrar sesión

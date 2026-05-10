@@ -34,6 +34,12 @@ const ModalRegistroEmpleado = ({
     nuevoEmpleado.correo
   );
 
+  const comisionValida =
+    nuevoEmpleado.comision !== "" &&
+    !isNaN(parseFloat(nuevoEmpleado.comision)) &&
+    parseFloat(nuevoEmpleado.comision) >= 0 &&
+    parseFloat(nuevoEmpleado.comision) <= 100;
+
   const camposVacios =
     nuevoEmpleado.nombre.trim() === "" ||
     nuevoEmpleado.apellido.trim() === "" ||
@@ -46,7 +52,8 @@ const ModalRegistroEmpleado = ({
     !nombreValido ||
     !apellidoValido ||
     !telefonoValido ||
-    !correoValido;
+    !correoValido ||
+    !comisionValida;
 
   return (
     <Modal
@@ -195,7 +202,12 @@ const ModalRegistroEmpleado = ({
                   value={nuevoEmpleado.comision}
                   onChange={manejoCambioInput}
                   placeholder="Ej: 10"
+                  isInvalid={nuevoEmpleado.comision !== "" && !comisionValida}
                 />
+
+                <Form.Control.Feedback type="invalid">
+                  La comisión debe estar entre 0% y 100%.
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
 

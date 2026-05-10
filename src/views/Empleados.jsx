@@ -292,6 +292,22 @@ const Empleados = () => {
         return;
       }
 
+      const comisionNuevoEmpleado = parseFloat(nuevoEmpleado.comision);
+
+      if (
+        isNaN(comisionNuevoEmpleado) ||
+        comisionNuevoEmpleado < 0 ||
+        comisionNuevoEmpleado > 100
+      ) {
+        setToast({
+          mostrar: true,
+          mensaje: "La comisión debe ser un número entre 0% y 100%.",
+          tipo: "advertencia",
+        });
+
+        return;
+      }
+
       if (!validarTelefono(nuevoEmpleado.telefono)) {
         setToast({
           mostrar: true,

@@ -33,6 +33,12 @@ const ModalEdicionEmpleado = ({
     empleadoEditar.correo
   );
 
+  const comisionValida =
+    empleadoEditar.comision !== "" &&
+    !isNaN(parseFloat(empleadoEditar.comision)) &&
+    parseFloat(empleadoEditar.comision) >= 0 &&
+    parseFloat(empleadoEditar.comision) <= 100;
+
   const camposVacios =
     empleadoEditar.nombre.trim() === "" ||
     empleadoEditar.apellido.trim() === "" ||
@@ -45,7 +51,8 @@ const ModalEdicionEmpleado = ({
     !nombreValido ||
     !apellidoValido ||
     !telefonoValido ||
-    !correoValido;
+    !correoValido ||
+    !comisionValida;
 
   return (
     <Modal
@@ -222,7 +229,11 @@ const ModalEdicionEmpleado = ({
                   name="comision"
                   value={empleadoEditar.comision || ""}
                   onChange={manejoCambioInputEdicion}
+                  isInvalid={empleadoEditar.comision !== "" && !comisionValida}
                 />
+                <Form.Control.Feedback type="invalid">
+                  La comisión debe estar entre 0% y 100%.
+                </Form.Control.Feedback>
               </Form.Group>
             </Col>
           </Row>
