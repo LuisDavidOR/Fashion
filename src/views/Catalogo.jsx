@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner, Alert, Form } from "react-bootstrap";
+import { Container, Row, Col, Spinner, Alert, Form, Modal, Button } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import ModalCalificacionServicio from "../components/catalogo/ModalCalificacionServicio";
 import TarjetaCatalogo from "../components/catalogo/TarjetaCatalogo";
 import ModalDetalleServicio from "../components/catalogo/ModalDetalleServicio";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Catalogo = () => {
+  const navigate = useNavigate();
+  const { usuario, rol, perfil } = useAuth();
+
   const [servicios, setServicios] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -19,9 +24,13 @@ const Catalogo = () => {
     puntuacion: 5,
     comentario: "",
   });
+  const [calificacionExistente, setCalificacionExistente] = useState(null);
 
   const [mostrarModalDetalle, setMostrarModalDetalle] = useState(false);
   const [servicioDetalle, setServicioDetalle] = useState(null);
+
+  const [mostrarModalAcceso, setMostrarModalAcceso] = useState(false);
+  const [mensajeAcceso, setMensajeAcceso] = useState("");
 
   useEffect(() => {
     cargarCategorias();
@@ -116,65 +125,96 @@ const Catalogo = () => {
     }
   };
 
+  const validarClienteParaCalificar = () => {
+    if (!usuario) {
+      setMensajeAcceso("Debes iniciar sesión para calificar un servicio.");
+      setMostrarModalAcceso(true);
+      return false;
+    }
+
+    if (rol !== "cliente" || !perfil?.id_cliente) {
+      setMensajeAcceso("Solo los clientes pueden calificar servicios.");
+      setMostrarModalAcceso(true);
+      return false;
+    }
+
+    return true;
+  };
+
   const guardarCalificacion = async () => {
-        try {
-          if (!servicioSeleccionado) return;
+    try {
+      if (!servicioSeleccionado) return;
 
-          const idClienteDemo = 1;
+      if (!validarClienteParaCalificar()) return;
 
-          const { error } = await supabase.from("Calificaciones").insert([
-            {
-              id_cliente: idClienteDemo,
-              id_servicio: servicioSeleccionado.id_servicio,
-              puntuacion: parseInt(nuevaCalificacion.puntuacion),
-              comentario: nuevaCalificacion.comentario.trim() || null,
-            },
-          ]);
+      if (calificacionExistente) {
+        const { error } = await supabase
+          .from("Calificaciones")
+          .update({
+            puntuacion: parseInt(nuevaCalificacion.puntuacion),
+            comentario: nuevaCalificacion.comentario.trim() || null,
+          })
+          .eq("id_calificacion", calificacionExistente.id_calificacion);
 
-          if (error) throw error;
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("Calificaciones").insert([
+          {
+            id_cliente: perfil.id_cliente,
+            id_servicio: servicioSeleccionado.id_servicio,
+            puntuacion: parseInt(nuevaCalificacion.puntuacion),
+            comentario: nuevaCalificacion.comentario.trim() || null,
+            respuesta: null,
+          },
+        ]);
 
-          setMostrarModalCalificacion(false);
-          await cargarCatalogo();
-        } catch (err) {
-          console.error("Error al guardar calificación:", err.message);
-        }
-      };
+        if (error) throw error;
+      }
 
-    const serviciosFiltrados = servicios.filter((servicio) => {
-      const coincideCategoria =
-        categoriaSeleccionada === "todas" ||
-        String(servicio.id_categoria) === String(categoriaSeleccionada);
+      setMostrarModalCalificacion(false);
+      setCalificacionExistente(null);
 
-      const textoBusqueda = busqueda.toLowerCase().trim();
+      await cargarCatalogo();
+    } catch (err) {
+      console.error("Error al guardar calificación:", err.message);
+    }
+  };
 
-      const coincideBusqueda =
-        textoBusqueda === "" ||
-        servicio.nombre.toLowerCase().includes(textoBusqueda) ||
-        (servicio.descripcion || "").toLowerCase().includes(textoBusqueda) ||
-        (servicio.Categorias?.nombre || "").toLowerCase().includes(textoBusqueda);
+  const serviciosFiltrados = servicios.filter((servicio) => {
+    const coincideCategoria =
+      categoriaSeleccionada === "todas" ||
+      String(servicio.id_categoria) === String(categoriaSeleccionada);
 
-      return coincideCategoria && coincideBusqueda;
-    });
+    const textoBusqueda = busqueda.toLowerCase().trim();
+
+    const coincideBusqueda =
+      textoBusqueda === "" ||
+      servicio.nombre.toLowerCase().includes(textoBusqueda) ||
+      (servicio.descripcion || "").toLowerCase().includes(textoBusqueda) ||
+      (servicio.Categorias?.nombre || "").toLowerCase().includes(textoBusqueda);
+
+    return coincideCategoria && coincideBusqueda;
+  });
     
-    const agruparPorCategoria = (listaServicios) => {
-      return listaServicios.reduce((acc, servicio) => {
-        const categoria = servicio.Categorias?.nombre || "Sin categoría";
+  const agruparPorCategoria = (listaServicios) => {
+    return listaServicios.reduce((acc, servicio) => {
+      const categoria = servicio.Categorias?.nombre || "Sin categoría";
 
-        if (!acc[categoria]) {
-          acc[categoria] = [];
-        }
+      if (!acc[categoria]) {
+        acc[categoria] = [];
+      }
 
-        acc[categoria].push(servicio);
-        return acc;
-      }, {});
-    };
+      acc[categoria].push(servicio);
+      return acc;
+    }, {});
+  };
 
-    const serviciosAgrupados = Object.fromEntries(
-      Object.entries(agruparPorCategoria(serviciosFiltrados)).sort(
-        ([categoriaA], [categoriaB]) =>
-          categoriaA.localeCompare(categoriaB)
-      )
-    );
+  const serviciosAgrupados = Object.fromEntries(
+    Object.entries(agruparPorCategoria(serviciosFiltrados)).sort(
+      ([categoriaA], [categoriaB]) =>
+        categoriaA.localeCompare(categoriaB)
+    )
+  );
 
   return (
     <Container className="mt-4">
@@ -323,11 +363,21 @@ const Catalogo = () => {
                         setMostrarModalDetalle(true);
                       }}
                       abrirModalCalificacion={(servicio) => {
+                        if (!validarClienteParaCalificar()) return;
+
+                        const miCalificacion = servicio.calificaciones?.find(
+                          (calificacion) =>
+                            Number(calificacion.id_cliente) === Number(perfil.id_cliente)
+                        );
+
                         setServicioSeleccionado(servicio);
+                        setCalificacionExistente(miCalificacion || null);
+
                         setNuevaCalificacion({
-                          puntuacion: 5,
-                          comentario: "",
+                          puntuacion: miCalificacion ? miCalificacion.puntuacion : 5,
+                          comentario: miCalificacion?.comentario || "",
                         });
+
                         setMostrarModalCalificacion(true);
                       }}
                     />
@@ -346,6 +396,7 @@ const Catalogo = () => {
         nuevaCalificacion={nuevaCalificacion}
         setNuevaCalificacion={setNuevaCalificacion}
         guardarCalificacion={guardarCalificacion}
+        calificacionExistente={calificacionExistente}
       />
 
       <ModalDetalleServicio
@@ -353,6 +404,44 @@ const Catalogo = () => {
         setMostrarModal={setMostrarModalDetalle}
         servicio={servicioDetalle}
       />
+
+      <Modal
+        show={mostrarModalAcceso}
+        onHide={() => setMostrarModalAcceso(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Acceso requerido</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <p className="mb-0">{mensajeAcceso}</p>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setMostrarModalAcceso(false)}
+          >
+            Cancelar
+          </Button>
+
+          {!usuario && (
+            <Button
+              style={{
+                backgroundColor: "#7A564A",
+                borderColor: "#7A564A",
+              }}
+              onClick={() => {
+                setMostrarModalAcceso(false);
+                navigate("/login");
+              }}
+            >
+              Iniciar sesión
+            </Button>
+          )}
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

@@ -8,6 +8,7 @@ const ModalCalificacionServicio = ({
   nuevaCalificacion,
   setNuevaCalificacion,
   guardarCalificacion,
+  calificacionExistente,
 }) => {
   const [deshabilitado, setDeshabilitado] = useState(false);
 
@@ -28,7 +29,9 @@ const ModalCalificacionServicio = ({
       keyboard={false}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Calificar servicio</Modal.Title>
+        <Modal.Title>
+          {calificacionExistente ? "Editar calificación" : "Calificar servicio"}
+        </Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -87,7 +90,7 @@ const ModalCalificacionServicio = ({
           onClick={handleGuardar}
           disabled={deshabilitado}
         >
-          Guardar calificación
+          {calificacionExistente ? "Actualizar calificación" : "Guardar calificación"}
         </Button>
       </Modal.Footer>
     </Modal>
