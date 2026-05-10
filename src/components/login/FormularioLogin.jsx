@@ -46,36 +46,46 @@ const FormularioLogin = ({
       fontFamily: "'Poppins', sans-serif",
     },
     input: {
-      border: "none",
-      borderBottom: "1px solid #ccc",
-      borderRadius: "0",
-      padding: "7px 0",
-      paddingRight: "40px", // Espacio para que el texto de la contraseña no choque con el ojo
-      boxShadow: "none",
-      backgroundColor: "transparent",
-      fontSize: "0.9rem",
-      fontFamily: "'Poppins', sans-serif",
-      width: "100%"
-    },
+        border: "1px solid rgba(255,255,255,0.25)",
+        borderRadius: "999px", // forma cápsula
+        padding: "12px 18px",
+        paddingRight: "50px",
+        boxShadow: "none",
+        background: "rgba(255,255,255,0.12)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        color: "#4d4d4d",
+        fontSize: "0.95rem",
+        fontFamily: "'Poppins', sans-serif",
+        width: "100%",
+        transition: "all 0.25s ease",
+      },
     inputContenedor: {
       position: "relative",
       display: "flex",
       alignItems: "center"
     },
-    ojoBoton: {
-      position: "absolute",
-      right: "0",
-      background: "none",
-      border: "none",
-      color: "#666",
-      cursor: "pointer",
-      padding: "10px 5px",
-      fontSize: "1.1rem",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      boxShadow: "none"
+    inputFocus: {
+      borderColor: "#b88a78",
+      boxShadow: "0 0 0 4px rgba(184, 138, 120, 0.15)",
     },
+    ojoBoton: {
+    position: "absolute",
+    right: "14px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    color: "#666",
+    cursor: "pointer",
+    padding: "0",
+    fontSize: "1.1rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "none",
+    zIndex: 2,
+  },
     boton: {
       backgroundColor: "#555",
       border: "none",
@@ -109,6 +119,16 @@ const FormularioLogin = ({
               style={estilos.input}
               value={usuario}
               onChange={(e) => setUsuario(e.target.value)}
+              onFocus={(e) => {
+                  e.target.style.borderColor = "#b88a78";
+                  e.target.style.boxShadow =
+                    "0 0 0 4px rgba(184,138,120,0.15)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor =
+                    "rgba(255,255,255,0.25)";
+                  e.target.style.boxShadow = "none";
+                }}
               required
             />
           </Form.Group>
@@ -122,6 +142,16 @@ const FormularioLogin = ({
                 style={estilos.input}
                 value={contrasena}
                 onChange={(e) => setContrasena(e.target.value)}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#b88a78";
+                  e.target.style.boxShadow =
+                    "0 0 0 4px rgba(184,138,120,0.15)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor =
+                    "rgba(255,255,255,0.25)";
+                  e.target.style.boxShadow = "none";
+                }}
                 required
               />
               <button

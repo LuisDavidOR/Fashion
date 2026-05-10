@@ -89,14 +89,6 @@ padding: 20px;
 }
 
 /* LINKS NAVBAR (cuando NO está el menú abierto) */
-.navbar-dark .navbar-nav .nav-link {
-  color: #1D1E1D !important;
-  transition: 0.3s;
-}
-
-.navbar-dark .navbar-nav .nav-link:hover {
-  color: #ffffff !important;
-}
 
 /* OFFCANVAS (MENÚ LATERAL) */
 .offcanvas {
@@ -1651,4 +1643,256 @@ button {
   bottom: 6%;
   right: 5%;
   font-size: 62px;
+}
+
+/* NAVBAR DISEÑO FASHION */
+.navbar-fashion {
+  background: rgba(122, 86, 74, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  box-shadow:
+  0 6px 25px rgba(122, 86, 74, 0.18);
+}
+
+.navbar-fashion .container {
+  min-height: 64px;
+}
+
+.navbar-fashion-brand {
+  cursor: pointer;
+  text-decoration: none;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+.navbar-fashion-brand:hover {
+  transform: translateY(-1px);
+}
+
+.navbar-fashion-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.4px;
+  position: relative;
+  transition: all 0.35s ease;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.15),
+    0 8px 24px rgba(255,255,255,0.08);
+}
+
+.navbar-fashion-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 0%;
+  height: 2px;
+  border-radius: 50px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.85),
+    rgba(246,214,202,1)
+  );
+  transition: width 0.35s ease;
+}
+
+.navbar-fashion-brand:hover .navbar-fashion-title {
+  color: #f7ded5;
+  letter-spacing: 1px;
+}
+
+.navbar-fashion-brand:hover .navbar-fashion-title::after {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .navbar-fashion-title {
+    font-size: 1.65rem;
+  }
+}
+
+.navbar-fashion-link {
+  position: relative;
+
+  color: #ffffff !important; /* blanco puro */
+
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+
+  margin: 0 12px;
+  padding: 8px 0 !important;
+
+  letter-spacing: 0.3px;
+  transition: all 0.35s ease;
+
+  text-shadow:
+    0 1px 2px rgba(0,0,0,0.15);
+}
+
+  /* Línea elegante igual al título */
+  .navbar-fashion-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+
+    width: 0%;
+    height: 2px;
+    border-radius: 50px;
+
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.85),
+      rgba(246,214,202,1)
+    );
+
+    transition: width 0.35s ease;
+  }
+
+  /* Hover elegante */
+  .navbar-fashion-link:hover {
+  color: #f7ded5 !important;
+  letter-spacing: 0.8px;
+  transform: translateY(-1px);
+}
+
+  .navbar-fashion-link:hover::after {
+    width: 100%;
+  }
+
+.navbar-fashion-link-offcanvas {
+  color: #7a564a !important;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 10px 8px !important;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.navbar-fashion-link-offcanvas:hover {
+  background: rgba(122, 86, 74, 0.1);
+  transform: translateX(4px);
+}
+
+.navbar-toggler {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.offcanvas-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  color: #7a564a;
+}
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-caps-lock-indicator {
+  visibility: hidden;
+  display: none !important;
+}
+
+.navbar-fashion-brand img {
+  transition: transform 0.35s ease;
+}
+
+.navbar-fashion-brand:hover img {
+  transform: rotate(-4deg) scale(1.05);
+}
+
+/* FORZAR COLOR BLANCO EN LINKS DEL NAVBAR FASHION */
+.navbar-fashion .navbar-nav .nav-link.navbar-fashion-link {
+  color: #ffffff !important;
+}
+
+.navbar-fashion .navbar-nav .nav-link.navbar-fashion-link strong {
+  color: #ffffff !important;
+}
+
+.navbar-fashion .navbar-nav .nav-link.navbar-fashion-link:hover,
+.navbar-fashion .navbar-nav .nav-link.navbar-fashion-link:hover strong {
+  color: #f7ded5 !important;
+}
+
+/* BOTONES HERO INICIO */
+.btn-hero {
+  border-radius: 18px !important;
+  padding: 12px 24px !important;
+
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+
+  transition: all 0.35s ease !important;
+  transform: translateY(0);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover general */
+.btn-hero:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+}
+
+/* Click */
+.btn-hero:active {
+  transform: scale(0.97);
+}
+
+/* Efecto brillo */
+.btn-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+
+  width: 80%;
+  height: 100%;
+
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.35),
+    transparent
+  );
+
+  transition: left 0.7s ease;
+}
+
+.btn-hero:hover::before {
+  left: 130%;
+}
+
+/* Botón principal */
+.btn-hero-primary {
+  background: #fff !important;
+  color: #7a564a !important;
+  border: none !important;
+}
+
+.btn-hero-primary:hover {
+  background: #fff7f4 !important;
+}
+
+/* Botón secundario */
+.btn-hero-secondary {
+  background: transparent !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.45) !important;
+}
+
+.btn-hero-secondary:hover {
+  background: rgba(255,255,255,0.08) !important;
 }

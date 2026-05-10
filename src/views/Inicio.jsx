@@ -86,20 +86,20 @@ const Inicio = () => {
 
           <div className="inicio-acciones">
             <Button
-              as={Link}
-              to={contenidoHero.rutaPrincipal}
-              className="btn-inicio-principal"
-            >
-              {contenidoHero.botonPrincipal}
-            </Button>
+            as={Link}
+            to={contenidoHero.rutaPrincipal}
+            className="btn-hero btn-hero-primary"
+          >
+            {contenidoHero.botonPrincipal}
+          </Button>
 
             <Button
-              as={Link}
-              to={contenidoHero.rutaSecundaria}
-              className="btn-inicio-secundario"
-            >
-              {contenidoHero.botonSecundario}
-            </Button>
+            as={Link}
+            to={contenidoHero.rutaSecundaria}
+            className="btn-hero btn-hero-secondary"
+          >
+            {contenidoHero.botonSecundario}
+          </Button>
           </div>
         </div>
 
@@ -216,9 +216,9 @@ const Inicio = () => {
           </p>
 
           <div className="inicio-acciones">
-            <Button as={Link} to="/catalogo" className="btn-inicio-principal">
-              Explorar servicios
-            </Button>
+            <Button as={Link} to="/catalogo" className="btn-hero btn-hero-primary">
+            Explorar servicios
+          </Button>
           </div>
         </div>
 
