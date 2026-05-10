@@ -14,6 +14,8 @@ import Pagina404 from "./views/Pagina404";
 import Login from "./views/Login";
 import Servicios from "./views/Servicios";
 import Insumos from './views/Insumos';
+import Registro from './views/Registro';
+
 import RutaProtegida from "./components/rutas/RutaProtegida";
 import ScrollToTop from './components/ScrollToTop';
 const App = () => {
@@ -26,6 +28,7 @@ const App = () => {
           <ScrollToTop />
           <Routes>
             <Route path='/login' element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
 
             <Route path='/' element={<Inicio />} />
 

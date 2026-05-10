@@ -1896,3 +1896,12 @@ input[type="password"]::-webkit-caps-lock-indicator {
 .btn-hero-secondary:hover {
   background: rgba(255,255,255,0.08) !important;
 }
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+}

@@ -35,8 +35,16 @@ const Login = () => {
       });
 
       if (error) {
+        const mensajeError = error.message?.toLowerCase() || "";
+
         if (error.status === 429) {
-          setError("Demasiados intentos. Espera unos minutos antes de volver a intentar.");
+          setError(
+            "Demasiados intentos. Espera unos minutos antes de volver a intentar."
+          );
+        } else if (mensajeError.includes("email not confirmed")) {
+          setError(
+            "Debes confirmar tu correo antes de iniciar sesión."
+          );
         } else {
           setError("Usuario o contraseña incorrectos");
         }

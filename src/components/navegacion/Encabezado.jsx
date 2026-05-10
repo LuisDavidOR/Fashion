@@ -31,12 +31,13 @@ const Encabezado = () => {
   };
 
   //Detectar rutas especiales
-  const esLogin = location.pathname === "/login";
+  const esRutaAuth =
+    location.pathname === "/login" || location.pathname === "/registro";
 
   //Contenido del menú
   let contenidoMenu;
 
-  if (esLogin) {
+  if (esRutaAuth) {
     contenidoMenu = null;
   }
   else if (esInvitado) {
@@ -203,7 +204,7 @@ const Encabezado = () => {
         </Navbar.Brand>
 
         {/* Botón del menú */}
-        {!esLogin && (
+        {!esRutaAuth && (
           <Navbar.Toggle
             aria-controls="menu-offcanvas"
             onClick={manejarToggle}
