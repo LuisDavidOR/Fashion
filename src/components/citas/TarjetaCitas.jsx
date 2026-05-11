@@ -100,11 +100,17 @@ const TarjetaCitas = ({ citas }) => {
                   </div>
 
                   <div>
-                    <i className="bi bi-person-heart"></i>
+                    <i
+                      className={
+                        cita.Empleados?.nombre
+                          ? "bi bi-person-check"
+                          : "bi bi-hourglass-split"
+                      }
+                    ></i>
                     <span>
-                      {cita.Empleados
+                      {cita.Empleados?.nombre
                         ? `${cita.Empleados.nombre} ${cita.Empleados.apellido}`
-                        : "Empleado por asignar"}
+                        : "Pendiente de asignación"}
                     </span>
                   </div>
                 </div>
@@ -189,11 +195,11 @@ const TarjetaCitas = ({ citas }) => {
                 </div>
 
                 <div>
-                  <span>Empleado</span>
+                  <span>Empleado asignado</span>
                   <strong>
-                    {citaSeleccionada.Empleados
+                    {citaSeleccionada.Empleados?.nombre
                       ? `${citaSeleccionada.Empleados.nombre} ${citaSeleccionada.Empleados.apellido}`
-                      : "Por asignar"}
+                      : "Pendiente de asignación"}
                   </strong>
                 </div>
               </div>

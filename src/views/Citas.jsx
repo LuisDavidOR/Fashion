@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Spinner, Alert, Modal } from "react-bootstrap";
+import { Container, Row, Col, Button, Spinner, Alert, Modal, Badge } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +36,9 @@ const Citas = () => {
   const [mostrarModalAcceso, setMostrarModalAcceso] = useState(false);
   const [horariosNoDisponibles, setHorariosNoDisponibles] = useState([]);
   const [cargandoHorarios, setCargandoHorarios] = useState(false);
+  const [aceptandoCita, setAceptandoCita] = useState(null);
+  const [completandoCita, setCompletandoCita] = useState(null);
+  const [vistaEmpleado, setVistaEmpleado] = useState("disponibles");
 
   const limpiarCita = () => {
     setNuevaCita({
@@ -704,12 +707,199 @@ const Citas = () => {
     }
   };
 
+  const aceptarCita = async (cita) => {
+    try {
+      if (!esEmpleado || !perfil?.id_empleado) {
+        setToast({
+          mostrar: true,
+          mensaje: "No tienes permisos para aceptar citas.",
+          tipo: "advertencia",
+        });
+        return;
+      }
+
+      setAceptandoCita(cita.id_cita);
+
+      const { data: empleado, error: errorEmpleado } = await supabase
+        .from("Empleados")
+        .select("id_empleado, comision")
+        .eq("id_empleado", perfil.id_empleado)
+        .single();
+
+      if (errorEmpleado || !empleado) {
+        setToast({
+          mostrar: true,
+          mensaje: "No se pudo obtener la comisión del empleado.",
+          tipo: "error",
+        });
+        return;
+      }
+
+      const { data: citaActualizada, error: errorCita } = await supabase
+        .from("Citas")
+        .update({
+          id_empleado: perfil.id_empleado,
+          estado_cita: "aceptado",
+        })
+        .eq("id_cita", cita.id_cita)
+        .eq("estado_cita", "pendiente")
+        .is("id_empleado", null)
+        .select("id_cita")
+        .single();
+
+      if (errorCita || !citaActualizada) {
+        setToast({
+          mostrar: true,
+          mensaje: "Esta cita ya fue aceptada por otro empleado o no está disponible.",
+          tipo: "advertencia",
+        });
+        await cargarCitas();
+        setVistaEmpleado("asignadas");
+        return;
+      }
+
+      const detallesActualizados = cita.Detalle_cita.map((detalle) => ({
+        id_detalle_cita: detalle.id_detalle_cita,
+        costo_empleado:
+          Number(detalle.subtotal || 0) * (Number(empleado.comision || 0) / 100),
+      }));
+
+      for (const detalle of detallesActualizados) {
+        const { error: errorDetalle } = await supabase
+          .from("Detalle_cita")
+          .update({
+            costo_empleado: detalle.costo_empleado,
+          })
+          .eq("id_detalle_cita", detalle.id_detalle_cita);
+
+        if (errorDetalle) {
+          console.error("Error actualizando costo empleado:", errorDetalle.message);
+        }
+      }
+
+      setToast({
+        mostrar: true,
+        mensaje: "Cita aceptada correctamente.",
+        tipo: "exito",
+      });
+
+      await cargarCitas();
+      setVistaEmpleado("asignadas");
+    } catch (err) {
+      console.error("Error al aceptar cita:", err.message);
+
+      setToast({
+        mostrar: true,
+        mensaje: "Error inesperado al aceptar la cita.",
+        tipo: "error",
+      });
+    } finally {
+      setAceptandoCita(null);
+    }
+  };
+
+  const completarCita = async (cita) => {
+    try {
+      setCompletandoCita(cita.id_cita);
+
+      const { data: detalles, error: errorDetalles } = await supabase
+        .from("Detalle_cita")
+        .select(`
+          id_detalle_cita,
+          id_servicio,
+          Servicios (
+            Servicio_Insumo (
+              cantidad_usada,
+              id_insumo,
+              Insumos (
+                id_insumo,
+                contenido_restante
+              )
+            )
+          )
+        `)
+        .eq("id_cita", cita.id_cita);
+
+      if (errorDetalles) {
+        console.error(errorDetalles.message);
+        setToast({
+          mostrar: true,
+          mensaje: "Error al obtener los insumos de la cita.",
+          tipo: "error",
+        });
+        return;
+      }
+
+      for (const detalle of detalles || []) {
+        const relaciones = detalle.Servicios?.Servicio_Insumo || [];
+
+        for (const relacion of relaciones) {
+          const insumo = relacion.Insumos;
+
+          if (!insumo) continue;
+
+          const nuevoContenido =
+            Number(insumo.contenido_restante || 0) -
+            Number(relacion.cantidad_usada || 0);
+
+          const { error: errorInsumo } = await supabase
+            .from("Insumos")
+            .update({
+              contenido_restante: nuevoContenido < 0 ? 0 : nuevoContenido,
+            })
+            .eq("id_insumo", insumo.id_insumo);
+
+          if (errorInsumo) {
+            console.error("Error descontando insumo:", errorInsumo.message);
+          }
+        }
+      }
+
+      const { error: errorCita } = await supabase
+        .from("Citas")
+        .update({
+          estado_cita: "completada",
+        })
+        .eq("id_cita", cita.id_cita)
+        .eq("estado_cita", "aceptado");
+
+      if (errorCita) {
+        console.error(errorCita.message);
+        setToast({
+          mostrar: true,
+          mensaje: "Error al completar la cita.",
+          tipo: "error",
+        });
+        return;
+      }
+
+      setToast({
+        mostrar: true,
+        mensaje: "Cita completada e inventario actualizado.",
+        tipo: "exito",
+      });
+
+      await cargarCitas();
+    } catch (err) {
+      console.error("Error al completar cita:", err.message);
+      setToast({
+        mostrar: true,
+        mensaje: "Error inesperado al completar la cita.",
+        tipo: "error",
+      });
+    } finally {
+      setCompletandoCita(null);
+    }
+  };
+
   const tituloVista = esAdmin
     ? "Gestión de citas"
     : esCliente
       ? "Mis citas"
       : esEmpleado
-        ? "Citas disponibles"
+        ? vistaEmpleado === "disponibles"
+          ? "Citas disponibles"
+          : "Mis citas asignadas"
         : "Agenda tu cita";
 
   const descripcionSinCitas = esAdmin
@@ -721,6 +911,14 @@ const Citas = () => {
       : "Inicia sesión para agendar y dar seguimiento a tus citas.";
 
   const puedeCrearCita = esAdmin || esCliente || esInvitado;
+
+  const citasDisponiblesEmpleado = citas.filter(
+    (cita) => cita.estado_cita === "pendiente" && !cita.id_empleado
+  );
+
+  const citasAsignadasEmpleado = citas.filter(
+    (cita) => String(cita.id_empleado) === String(perfil?.id_empleado)
+  );
 
   return (
     
@@ -763,6 +961,72 @@ const Citas = () => {
         </Alert>
       ) : esCliente ? (
         <TarjetaCitas citas={citas} />
+      ) : esEmpleado ? (
+        <>
+          <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap">
+            <Button
+              variant={vistaEmpleado === "disponibles" ? "dark" : "outline-dark"}
+              className="px-4 rounded-pill"
+              onClick={() => {
+                setVistaEmpleado("disponibles");
+                setCitaExpandida(null);
+              }}
+            >
+              <i className="bi bi-calendar-plus me-2"></i>
+              Citas disponibles
+              <Badge bg="light" text="dark" className="ms-2">
+                {citasDisponiblesEmpleado.length}
+              </Badge>
+            </Button>
+
+            <Button
+              variant={vistaEmpleado === "asignadas" ? "dark" : "outline-dark"}
+              className="px-4 rounded-pill"
+              onClick={() => {
+                setVistaEmpleado("asignadas");
+                setCitaExpandida(null);
+              }}
+            >
+              <i className="bi bi-person-check me-2"></i>
+              Mis citas
+              <Badge bg="light" text="dark" className="ms-2">
+                {citasAsignadasEmpleado.length}
+              </Badge>
+            </Button>
+          </div>
+
+          {vistaEmpleado === "disponibles" ? (
+            citasDisponiblesEmpleado.length === 0 ? (
+              <Alert variant="info" className="text-center">
+                No hay citas pendientes disponibles por el momento.
+              </Alert>
+            ) : (
+              <TablaCitas
+                citas={citasDisponiblesEmpleado}
+                citaExpandida={citaExpandida}
+                setCitaExpandida={setCitaExpandida}
+                esEmpleado={true}
+                aceptarCita={aceptarCita}
+                aceptandoCita={aceptandoCita}
+                vistaEmpleado="disponibles"
+              />
+            )
+          ) : citasAsignadasEmpleado.length === 0 ? (
+            <Alert variant="secondary" className="text-center">
+              Aún no tienes citas asignadas.
+            </Alert>
+          ) : (
+            <TablaCitas
+              citas={citasAsignadasEmpleado}
+              citaExpandida={citaExpandida}
+              setCitaExpandida={setCitaExpandida}
+              esEmpleado={true}
+              completarCita={completarCita}
+              completandoCita={completandoCita}
+              vistaEmpleado="asignadas"
+            />
+          )}
+        </>
       ) : (
         <TablaCitas
           citas={citas}
