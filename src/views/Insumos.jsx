@@ -303,6 +303,7 @@ const Insumos = () => {
           descripcion: nuevoInsumo.descripcion.trim() || null,
           costo_producto: parseFloat(nuevoInsumo.costo_producto),
           contenido_total: parseFloat(nuevoInsumo.contenido_total),
+          contenido_restante: parseFloat(nuevoInsumo.contenido_total),
           unidad_medida: nuevoInsumo.unidad_medida.trim(),
           stock: nuevoInsumo.stock === "" ? null : parseInt(nuevoInsumo.stock),
           url_imagen: urlImagen || null,
