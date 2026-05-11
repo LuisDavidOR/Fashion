@@ -56,9 +56,92 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      const rolesPermitidos = ["admin", "cliente", "empleado"];
+
+      if (data.estado?.toLowerCase().trim() !== "activo") {
+        sessionStorage.setItem(
+          "mensaje-login",
+          "Tu usuario está inactivo. Contacta al administrador."
+        );
+
+        await supabase.auth.signOut();
+
+        setUsuario(null);
+        setPerfil(null);
+        setRol("invitado");
+        return;
+      }
+
+      if (!rolesPermitidos.includes(data.rol)) {
+        sessionStorage.setItem(
+          "mensaje-login",
+          "Tu rol no es válido. Contacta al administrador."
+        );
+
+        await supabase.auth.signOut();
+
+        setUsuario(null);
+        setPerfil(null);
+        setRol("invitado");
+        return;
+      }
+
+      if (data.rol === "cliente") {
+        const { data: cliente, error: errorCliente } = await supabase
+          .from("Clientes")
+          .select("id_cliente, estado")
+          .eq("id_cliente", data.id_cliente)
+          .maybeSingle();
+
+        if (
+          errorCliente ||
+          !cliente ||
+          cliente.estado?.toLowerCase().trim() !== "activo"
+        ) {
+          sessionStorage.setItem(
+            "mensaje-login",
+            "Tu perfil de cliente está inactivo. Contacta al administrador."
+          );
+
+          await supabase.auth.signOut();
+
+          setUsuario(null);
+          setPerfil(null);
+          setRol("invitado");
+          return;
+        }
+      }
+
+      if (data.rol === "empleado") {
+        const { data: empleado, error: errorEmpleado } = await supabase
+          .from("Empleados")
+          .select("id_empleado, estado")
+          .eq("id_empleado", data.id_empleado)
+          .maybeSingle();
+
+        if (
+          errorEmpleado ||
+          !empleado ||
+          empleado.estado?.toLowerCase().trim() !== "activo"
+        ) {
+          sessionStorage.setItem(
+            "mensaje-login",
+            "Tu acceso como empleado está inactivo. Contacta al administrador."
+          );
+
+          await supabase.auth.signOut();
+
+          setUsuario(null);
+          setPerfil(null);
+          setRol("invitado");
+          return;
+        }
+      }
+
       setUsuario(user);
       setPerfil(data);
       setRol(data.rol);
+
     } catch (error) {
       console.error("Error general auth:", error);
       setUsuario(null);

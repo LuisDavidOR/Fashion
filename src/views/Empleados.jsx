@@ -360,7 +360,7 @@ const Empleados = () => {
 
       if (data?.error) {
         console.error("Error devuelto por Edge Function:", data.error);
-        
+
         setToast({
           mostrar: true,
           mensaje: data.error,
@@ -671,18 +671,37 @@ const Empleados = () => {
       const nuevoEstado =
         empleadoEstado.estado === "activo" ? "inactivo" : "activo";
 
-      const { error } = await supabase
+      const { error: errorEmpleado } = await supabase
         .from("Empleados")
         .update({ estado: nuevoEstado })
         .eq("id_empleado", empleadoEstado.id_empleado);
 
-      if (error) {
-        console.error("Error al cambiar estado:", error.message);
+      if (errorEmpleado) {
+        console.error("Error al cambiar estado:", errorEmpleado.message);
 
         setToast({
           mostrar: true,
           mensaje: "Error al cambiar el estado del empleado.",
           tipo: "error",
+        });
+
+        return;
+      }
+
+      const { error: errorUsuario } = await supabase
+        .from("Usuarios")
+        .update({ estado: nuevoEstado })
+        .eq("id_empleado", empleadoEstado.id_empleado)
+        .eq("rol", "empleado");
+
+      if (errorUsuario) {
+        console.error("Error al sincronizar usuario:", errorUsuario.message);
+
+        setToast({
+          mostrar: true,
+          mensaje:
+            "El empleado cambió de estado, pero no se pudo sincronizar el usuario.",
+          tipo: "advertencia",
         });
 
         return;

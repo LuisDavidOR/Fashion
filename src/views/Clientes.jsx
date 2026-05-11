@@ -398,18 +398,37 @@ const Clientes = () => {
       const nuevoEstado =
         clienteEstado.estado === "activo" ? "inactivo" : "activo";
 
-      const { error } = await supabase
+      const { error: errorCliente } = await supabase
         .from("Clientes")
         .update({ estado: nuevoEstado })
         .eq("id_cliente", clienteEstado.id_cliente);
 
-      if (error) {
-        console.error("Error al cambiar estado del cliente:", error.message);
+      if (errorCliente) {
+        console.error("Error al cambiar estado del cliente:", errorCliente.message);
 
         setToast({
           mostrar: true,
           mensaje: "Error al cambiar el estado del cliente.",
           tipo: "error",
+        });
+
+        return;
+      }
+
+      const { error: errorUsuario } = await supabase
+        .from("Usuarios")
+        .update({ estado: nuevoEstado })
+        .eq("id_cliente", clienteEstado.id_cliente)
+        .eq("rol", "cliente");
+
+      if (errorUsuario) {
+        console.error("Error al sincronizar usuario:", errorUsuario.message);
+
+        setToast({
+          mostrar: true,
+          mensaje:
+            "El cliente cambió de estado, pero no se pudo sincronizar el usuario.",
+          tipo: "advertencia",
         });
 
         return;

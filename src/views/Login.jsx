@@ -38,13 +38,9 @@ const Login = () => {
         const mensajeError = error.message?.toLowerCase() || "";
 
         if (error.status === 429) {
-          setError(
-            "Demasiados intentos. Espera unos minutos antes de volver a intentar."
-          );
+          setError("Demasiados intentos. Espera unos minutos antes de volver a intentar.");
         } else if (mensajeError.includes("email not confirmed")) {
-          setError(
-            "Debes confirmar tu correo antes de iniciar sesión."
-          );
+          setError("Debes confirmar tu correo antes de iniciar sesión.");
         } else {
           setError("Usuario o contraseña incorrectos");
         }
@@ -52,9 +48,35 @@ const Login = () => {
         return;
       }
 
-      if (data.user) {
-        navegar("/");
+      if (!data.user) return;
+
+      const { data: perfilUsuario, error: errorPerfil } = await supabase
+        .from("Usuarios")
+        .select("id_usuario, rol, estado, id_cliente, id_empleado")
+        .eq("auth_id", data.user.id)
+        .maybeSingle();
+
+      if (errorPerfil || !perfilUsuario) {
+        await supabase.auth.signOut();
+        setError("Tu cuenta aún no tiene acceso al sistema. Contacta al administrador.");
+        return;
       }
+
+      if (perfilUsuario.estado?.toLowerCase().trim() !== "activo") {
+        await supabase.auth.signOut();
+        setError("Tu usuario está inactivo. Contacta al administrador.");
+        return;
+      }
+
+      const rolesPermitidos = ["admin", "cliente", "empleado"];
+
+      if (!rolesPermitidos.includes(perfilUsuario.rol)) {
+        await supabase.auth.signOut();
+        setError("Tu rol no es válido. Contacta al administrador.");
+        return;
+      }
+
+      navegar("/");
     } catch (err) {
       setError("Error al conectar con el servidor");
       console.error("Error en la solicitud: ", err);
