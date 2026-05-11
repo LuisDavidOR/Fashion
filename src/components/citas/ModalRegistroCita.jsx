@@ -1,33 +1,98 @@
-  import React, {useState} from "react";
-  import { Modal, Form, Button, Table } from "react-bootstrap";
+import React, {useState} from "react";
+import { Modal, Form, Button, Table } from "react-bootstrap";
 
-  const ModalRegistroCita = ({
-    mostrarModal,
-    setMostrarModal,
-    nuevaCita,
-    manejoCambioInput,
-    agregarCita,
-    limpiarCita,
-    clientes,
-    empleados,
-    servicios,
-    detalleCita,
-    agregarServicioDetalle,
-    eliminarServicioDetalle,
-    rol,
-    esAdmin,
-    esCliente,
-  }) => {
-    const [deshabilitado, setDeshabilitado] = useState(false);
-    const [servicioSeleccionado, setServicioSeleccionado] = useState("");
+import ModalSeleccionServicios from "./ModalSeleccionServicios";
 
-    const handleRegistrar = async () => {
-      if (deshabilitado) return;
-      setDeshabilitado(true);
-      await agregarCita();
-      setDeshabilitado(false);
-    };
-    return (
+const ModalRegistroCita = ({
+  mostrarModal,
+  setMostrarModal,
+  nuevaCita,
+  manejoCambioInput,
+  agregarCita,
+  limpiarCita,
+  clientes,
+  empleados,
+  servicios,
+  detalleCita,
+  agregarServicioDetalle,
+  eliminarServicioDetalle,
+  rol,
+  esAdmin,
+  esCliente,
+  horariosNoDisponibles,
+  cargandoHorarios,
+}) => {
+  const [deshabilitado, setDeshabilitado] = useState(false);
+  const [mostrarModalServicios, setMostrarModalServicios] = useState(false);
+
+  const calcularTotal = () => {
+    return detalleCita.reduce(
+      (total, item) => total + Number(item.subtotal || 0),
+      0
+    );
+  };
+
+  const calcularDuracionTotal = () => {
+    return detalleCita.reduce(
+      (total, item) => total + Number(item.duracion || 0),
+      0
+    );
+  };
+
+  const formatearDuracion = (minutos) => {
+    const horas = Math.floor(minutos / 60);
+    const mins = minutos % 60;
+
+    if (horas > 0 && mins > 0) {
+      return `${horas} h ${mins} min`;
+    }
+
+    if (horas > 0) {
+      return `${horas} h`;
+    }
+
+    return `${mins} min`;
+  };
+
+  const obtenerFechaHoy = () => {
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, "0");
+    const day = String(hoy.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const generarHorasDisponibles = () => {
+    const horas = [];
+
+    for (let hora = 8; hora <= 19; hora++) {
+      for (let minuto of [0, 30]) {
+        const valor = `${String(hora).padStart(2, "0")}:${String(minuto).padStart(2, "0")}`;
+        const hora12 = hora % 12 === 0 ? 12 : hora % 12;
+        const periodo = hora < 12 ? "AM" : "PM";
+        const etiqueta = `${hora12}:${String(minuto).padStart(2, "0")} ${periodo}`;
+
+        horas.push({ valor, etiqueta });
+      }
+    }
+
+    return horas;
+  };
+
+  const horasDisponibles = generarHorasDisponibles();
+
+  const horasManana = horasDisponibles.filter((hora) => hora.valor < "12:00");
+  const horasTarde = horasDisponibles.filter((hora) => hora.valor >= "12:00");
+
+  const handleRegistrar = async () => {
+    if (deshabilitado) return;
+    setDeshabilitado(true);
+    await agregarCita();
+    setDeshabilitado(false);
+  };
+  return (
+    <>
       <Modal
         show={mostrarModal}
         onHide={() => {
@@ -50,27 +115,108 @@
             </p>
           )}
           <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Fecha</Form.Label>
-              <Form.Control
-                type="date"
-                name="fecha"
-                value={nuevaCita.fecha}
-                onChange={manejoCambioInput}
-                placeholder="Ingresa la fecha de la cita"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Hora</Form.Label>
-              <Form.Control
-                type="time"
-                name="hora"
-                value={nuevaCita.hora}
-                onChange={manejoCambioInput}
-                placeholder="Ingresa la hora de la cita"
-              />
-            </Form.Group>
-           {esAdmin && (
+            <div className="nota-cita-tiempo">
+              <i className="bi bi-info-circle me-2"></i>
+              Puedes agendar con al menos 1 hora de anticipación.
+            </div>
+
+            <div className="agenda-selector-box">
+              <Form.Group className="mb-3">
+                <Form.Label className="agenda-label">
+                  <i className="bi bi-calendar-event me-2"></i>
+                  Fecha de la cita
+                </Form.Label>
+
+                <Form.Control
+                  type="date"
+                  name="fecha"
+                  min={obtenerFechaHoy()}
+                  value={nuevaCita.fecha}
+                  onChange={manejoCambioInput}
+                  className="agenda-fecha-input"
+                />
+              </Form.Group>
+
+              <div>
+                <div className="agenda-label mb-2">
+                  <i className="bi bi-clock me-2"></i>
+                  Horarios disponibles
+                </div>
+
+                <div className="agenda-periodo">
+                  <span>Mañana</span>
+                  <div className="agenda-horas-grid">
+                    {horasManana.map((hora) => {
+                      const noDisponible =
+                        horariosNoDisponibles?.includes(hora.valor);
+
+                      return (
+                        <button
+                          type="button"
+                          key={hora.valor}
+                          disabled={noDisponible}
+                          className={
+                            noDisponible
+                              ? "agenda-hora-chip no-disponible"
+                              : nuevaCita.hora === hora.valor
+                                ? "agenda-hora-chip seleccionado"
+                                : "agenda-hora-chip"
+                          }
+                          onClick={() =>
+                            !noDisponible &&
+                            manejoCambioInput({
+                              target: {
+                                name: "hora",
+                                value: hora.valor,
+                              },
+                            })
+                          }
+                        >
+                          {hora.etiqueta}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="agenda-periodo mt-3">
+                  <span>Tarde</span>
+                  <div className="agenda-horas-grid">
+                    {horasTarde.map((hora) => {
+                      const noDisponible =
+                        horariosNoDisponibles?.includes(hora.valor);
+
+                      return (
+                        <button
+                          type="button"
+                          key={hora.valor}
+                          disabled={noDisponible}
+                          className={
+                            noDisponible
+                              ? "agenda-hora-chip no-disponible"
+                              : nuevaCita.hora === hora.valor
+                                ? "agenda-hora-chip seleccionado"
+                                : "agenda-hora-chip"
+                          }
+                          onClick={() =>
+                            !noDisponible &&
+                            manejoCambioInput({
+                              target: {
+                                name: "hora",
+                                value: hora.valor,
+                              },
+                            })
+                          }
+                        >
+                          {hora.etiqueta}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {esAdmin && (
           <Form.Group className="mb-3">
             <Form.Label>Cliente</Form.Label>
             <Form.Select
@@ -111,42 +257,29 @@
 
             <h5>Detalle de servicios</h5>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Servicio</Form.Label>
-
-              <div className="d-flex gap-2">
-                <Form.Select
-                  value={servicioSeleccionado}
-                  onChange={(e) => setServicioSeleccionado(e.target.value)}
-                >
-                  <option value="">Seleccione un servicio</option>
-
-                  {servicios.map((servicio) => (
-                    <option key={servicio.id_servicio} value={servicio.id_servicio}>
-                      {servicio.nombre} - C$ {servicio.precio}
-                    </option>
-                  ))}
-                </Form.Select>
-
-                <Button
-                  variant="success"
-                  onClick={() => {
-                    agregarServicioDetalle(servicioSeleccionado);
-                    setServicioSeleccionado("");
-                  }}
-                  disabled={servicioSeleccionado === ""}
-                >
-                  Agregar
-                </Button>
+            <div className="bloque-servicios-cita mb-3">
+              <div>
+                <h5 className="mb-1">Servicios seleccionados</h5>
+                <p className="text-muted small mb-0">
+                  Agrega uno o varios servicios para calcular duración y total.
+                </p>
               </div>
-            </Form.Group>
+
+              <Button
+                className="btn-buscar-servicios-cita"
+                onClick={() => setMostrarModalServicios(true)}
+              >
+                <i className="bi bi-search me-2"></i>
+                Buscar servicios
+              </Button>
+            </div>
 
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
                   <th>Servicio</th>
+                  <th>Duración</th>
                   <th>Precio</th>
-                  <th>Subtotal</th>
                   <th>Acción</th>
                 </tr>
               </thead>
@@ -162,7 +295,7 @@
                   detalleCita.map((item) => (
                     <tr key={item.id_servicio}>
                       <td>{item.nombre}</td>
-                      <td>C$ {item.precio.toFixed(2)}</td>
+                      <td>{item.duracion} min</td>
                       <td>C$ {item.subtotal.toFixed(2)}</td>
                       <td>
                         <Button
@@ -179,12 +312,21 @@
               </tbody>
             </Table>
 
-            <h5 className="text-end">
-              Total: C${" "}
-              {detalleCita
-                .reduce((total, item) => total + Number(item.subtotal), 0)
-                .toFixed(2)}
-            </h5>
+            <div className="resumen-cita mt-3">
+              <div>
+                <span className="text-muted">Duración estimada</span>
+                <h6 className="mb-0">
+                  {formatearDuracion(calcularDuracionTotal())}
+                </h6>
+              </div>
+
+              <div className="text-end">
+                <span className="text-muted">Total</span>
+                <h5 className="mb-0">
+                  C$ {calcularTotal().toFixed(2)}
+                </h5>
+              </div>
+            </div>
           </Form>
         </Modal.Body>
         <Modal.Footer>
@@ -226,7 +368,17 @@
         </Button>
         </Modal.Footer>
       </Modal>
-    );
-  };
 
-  export default ModalRegistroCita;
+      <ModalSeleccionServicios
+        mostrarModalServicios={mostrarModalServicios}
+        setMostrarModalServicios={setMostrarModalServicios}
+        servicios={servicios}
+        detalleCita={detalleCita}
+        agregarServicioDetalle={agregarServicioDetalle}
+        eliminarServicioDetalle={eliminarServicioDetalle}
+      />
+    </>
+  );
+};
+
+export default ModalRegistroCita;

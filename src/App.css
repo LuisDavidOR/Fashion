@@ -1905,3 +1905,337 @@ body,
   min-height: 100%;
   overflow-x: hidden;
 }
+
+.resumen-cita {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(122, 86, 74, 0.08);
+  border: 1px solid rgba(122, 86, 74, 0.15);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+@media (max-width: 576px) {
+  .resumen-cita {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .resumen-cita .text-end {
+    text-align: left !important;
+  }
+}
+
+
+.mini-servicio-card {
+  background: #ffffff;
+  border: 1px solid rgba(122, 86, 74, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  height: 100%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-servicio-img-wrap {
+  width: 100%;
+  height: 135px;
+  background: #f4efed;
+  overflow: hidden;
+}
+
+.mini-servicio-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mini-servicio-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #7a564a;
+  font-size: 2rem;
+}
+
+.mini-servicio-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.mini-servicio-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  min-height: 38px;
+}
+
+.mini-servicio-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: auto;
+}
+
+.btn-agregar-servicio-mini {
+  background-color: #7a564a !important;
+  border-color: #7a564a !important;
+  color: #fff !important;
+}
+
+.btn-quitar-servicio-mini {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: #fff !important;
+}
+
+@media (max-width: 576px) {
+  .mini-servicio-img-wrap {
+    height: 120px;
+  }
+
+  .mini-servicio-title {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-body .d-flex.justify-content-between.align-items-center {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+}
+
+.bloque-servicios-cita {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-buscar-servicios-cita {
+  background-color: #7a564a !important;
+  border-color: #7a564a !important;
+  color: #fff !important;
+  white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+  .bloque-servicios-cita {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-buscar-servicios-cita {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .mini-servicio-card {
+    border-radius: 14px;
+  }
+
+  .mini-servicio-img-wrap {
+    height: 95px;
+  }
+
+  .mini-servicio-body {
+    padding: 10px;
+  }
+
+  .mini-servicio-title {
+    font-size: 0.9rem;
+    min-height: 42px;
+  }
+
+  .mini-servicio-info {
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.8rem;
+  }
+
+  .btn-agregar-servicio-mini,
+  .btn-quitar-servicio-mini {
+    font-size: 0.85rem !important;
+    padding: 6px !important;
+  }
+}
+
+.nota-cita-tiempo {
+  background: rgba(122, 86, 74, 0.08);
+  border: 1px solid rgba(122, 86, 74, 0.14);
+  color: #6b4b42;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  margin-bottom: 14px;
+}
+
+.bloque-fecha-hora-cita {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.campo-fecha-hora-cita label {
+  font-weight: 700;
+  color: #5f4038;
+  margin-bottom: 8px;
+  font-size: 0.92rem;
+}
+
+.input-fecha-hora-cita {
+  height: 46px;
+  border-radius: 14px !important;
+  border: 1px solid rgba(122, 86, 74, 0.18) !important;
+  padding: 10px 12px !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(122, 86, 74, 0.08);
+  font-weight: 600;
+}
+
+.input-fecha-hora-cita:focus {
+  border-color: #7a564a !important;
+  box-shadow: 0 0 0 0.2rem rgba(122, 86, 74, 0.16) !important;
+}
+
+@media (max-width: 576px) {
+  .bloque-fecha-hora-cita {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.input-fecha-profesional {
+  color: #2b1c17 !important;
+}
+
+.input-fecha-profesional:invalid {
+  color: #8a7a74 !important;
+}
+
+.input-fecha-hora-cita option {
+  font-weight: 500;
+}
+
+.agenda-selector-box {
+  background: #fffaf8;
+  border: 1px solid rgba(122, 86, 74, 0.12);
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 22px rgba(122, 86, 74, 0.06);
+}
+
+.agenda-label {
+  font-weight: 700;
+  color: #5f4038;
+  font-size: 0.95rem;
+}
+
+.agenda-fecha-input {
+  height: 46px;
+  border-radius: 14px !important;
+  border: 1px solid rgba(122, 86, 74, 0.18) !important;
+  background: #ffffff !important;
+  font-weight: 600;
+  padding: 10px 12px !important;
+}
+
+.agenda-fecha-input:focus {
+  border-color: #7a564a !important;
+  box-shadow: 0 0 0 0.2rem rgba(122, 86, 74, 0.16) !important;
+}
+
+.agenda-horas-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.agenda-hora-chip {
+  border: 1px solid rgba(122, 86, 74, 0.22);
+  background: #ffffff;
+  color: #5f4038;
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.agenda-hora-chip:hover {
+  background: rgba(122, 86, 74, 0.08);
+  transform: translateY(-1px);
+}
+
+.agenda-hora-chip.seleccionado {
+  background: #7a564a;
+  border-color: #7a564a;
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(122, 86, 74, 0.28);
+}
+
+@media (max-width: 576px) {
+  .agenda-selector-box {
+    padding: 12px;
+  }
+
+  .agenda-horas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .agenda-hora-chip {
+    font-size: 0.84rem;
+    padding: 8px 6px;
+  }
+}
+
+.agenda-periodo > span {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #7a564a;
+  background: rgba(122, 86, 74, 0.1);
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+
+.agenda-horas-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.agenda-hora-chip {
+  padding: 7px 8px;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 576px) {
+  .agenda-horas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.agenda-hora-chip.no-disponible {
+  background: #2f2f2f !important;
+  border-color: #2f2f2f !important;
+  color: #ffffff !important;
+  opacity: 0.55;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.agenda-hora-chip.no-disponible:hover {
+  transform: none;
+}
