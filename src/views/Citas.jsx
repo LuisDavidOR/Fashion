@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import ModalRegistroCita from "../components/citas/ModalRegistroCita";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import TablaCitas from "../components/citas/TablaCitas";
-
+import TarjetaCitas from "../components/citas/TarjetaCitas";
 
 const Citas = () => {
 
@@ -761,6 +761,8 @@ const Citas = () => {
           <i className="bi bi-info-circle me-2"></i>
           {descripcionSinCitas}
         </Alert>
+      ) : esCliente ? (
+        <TarjetaCitas citas={citas} />
       ) : (
         <TablaCitas
           citas={citas}
