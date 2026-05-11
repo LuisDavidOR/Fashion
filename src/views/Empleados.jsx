@@ -6,6 +6,7 @@ import ModalRegistroEmpleado from "../components/empleados/ModalRegistroEmpleado
 import ModalEdicionEmpleado from "../components/empleados/ModalEdicionEmpleado";
 import ModalEliminacionEmpleado from "../components/empleados/ModalEliminacionEmpleado";
 import ModalEstadoEmpleado from "../components/empleados/ModalEstadoEmpleado";
+import ModalAccesoEmpleado from "../components/empleados/ModalAccesoEmpleado";
 import TablaEmpleados from "../components/empleados/TablaEmpleados";
 import TarjetaEmpleado from "../components/empleados/TarjetaEmpleado";
 
@@ -38,6 +39,14 @@ const Empleados = () => {
 
   const [empleadoAEliminar, setEmpleadoAEliminar] = useState(null);
   const [empleadoEstado, setEmpleadoEstado] = useState(null);
+
+  const [mostrarModalAcceso, setMostrarModalAcceso] = useState(false);
+  const [empleadoAcceso, setEmpleadoAcceso] = useState(null);
+
+  const [datosAcceso, setDatosAcceso] = useState({
+    contrasena: "",
+    confirmarContrasena: "",
+  });
 
   const [nuevoEmpleado, setNuevoEmpleado] = useState({
     nombre: "",
@@ -192,6 +201,15 @@ const Empleados = () => {
         .select("*")
         .order("id_empleado", { ascending: true });
 
+      const { data: usuariosEmpleados, error: errorUsuarios } = await supabase
+        .from("Usuarios")
+        .select("id_usuario, id_empleado, correo, rol")
+        .eq("rol", "empleado");
+
+      if (errorUsuarios) {
+        console.error("Error al cargar usuarios empleados:", errorUsuarios.message);
+      }
+
       if (error) {
         console.error("Error al cargar empleados:", error.message);
 
@@ -204,7 +222,21 @@ const Empleados = () => {
         return;
       }
 
-      setEmpleados(data || []);
+      const empleadosConAcceso = (data || []).map((empleado) => {
+        const usuarioEmpleado = usuariosEmpleados?.find(
+          (usuario) => Number(usuario.id_empleado) === Number(empleado.id_empleado)
+        );
+
+        return {
+          ...empleado,
+          tieneAcceso: !!usuarioEmpleado,
+          usuarioSistema: usuarioEmpleado || null,
+        };
+      });
+
+      setEmpleados(empleadosConAcceso);
+
+      
     } catch (err) {
       console.error("Excepción al cargar empleados:", err.message);
 
@@ -272,6 +304,94 @@ const Empleados = () => {
   const abrirModalEstado = (empleado) => {
     setEmpleadoEstado(empleado);
     setMostrarModalEstado(true);
+  };
+
+  //Modal para que el empleado pueda tener su usuario
+  const abrirModalAccesoEmpleado = (empleado) => {
+    setEmpleadoAcceso(empleado);
+    setDatosAcceso({
+      contrasena: "",
+      confirmarContrasena: "",
+    });
+    setMostrarModalAcceso(true);
+  };
+
+  const crearAccesoEmpleado = async () => {
+    if (!empleadoAcceso) return;
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        setToast({
+          mostrar: true,
+          mensaje: "No se encontró una sesión activa de administrador.",
+          tipo: "error",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke(
+        "crear-acceso-empleado",
+        {
+          body: {
+            correo: empleadoAcceso.correo,
+            contrasena: datosAcceso.contrasena,
+            id_empleado: empleadoAcceso.id_empleado,
+          },
+          headers: {
+            Authorization: `Bearer ${sessionData.session.access_token}`,
+          },
+        }
+      );
+
+      if (error) {
+        console.error("Error al crear acceso:", error);
+
+        setToast({
+          mostrar: true,
+          mensaje: error.message || "Error al crear acceso del empleado.",
+          tipo: "error",
+        });
+
+        return;
+      }
+
+      if (data?.error) {
+        console.error("Error devuelto por Edge Function:", data.error);
+        
+        setToast({
+          mostrar: true,
+          mensaje: data.error,
+          tipo: "advertencia",
+        });
+        return;
+      }
+
+      setToast({
+        mostrar: true,
+        mensaje: "Acceso de empleado creado correctamente.",
+        tipo: "exito",
+      });
+
+      setMostrarModalAcceso(false);
+      setEmpleadoAcceso(null);
+      setDatosAcceso({
+        contrasena: "",
+        confirmarContrasena: "",
+      });
+
+      await cargarEmpleados();
+    } catch (err) {
+      console.error("Excepción al crear acceso:", err.message);
+
+      setToast({
+        mostrar: true,
+        mensaje: "Error inesperado al crear acceso.",
+        tipo: "error",
+      });
+    }
   };
 
   const agregarEmpleado = async () => {
@@ -691,6 +811,7 @@ const Empleados = () => {
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
               cambiarEstadoEmpleado={abrirModalEstado}
+              abrirModalAccesoEmpleado={abrirModalAccesoEmpleado}
             />
           </Col>
           </Row>
@@ -739,6 +860,15 @@ const Empleados = () => {
           establecerRegistrosPorPagina={establecerRegistrosPorPagina}
         />
       )}
+
+      <ModalAccesoEmpleado
+        mostrarModalAcceso={mostrarModalAcceso}
+        setMostrarModalAcceso={setMostrarModalAcceso}
+        empleadoAcceso={empleadoAcceso}
+        datosAcceso={datosAcceso}
+        setDatosAcceso={setDatosAcceso}
+        crearAccesoEmpleado={crearAccesoEmpleado}
+      />
 
       <NotificacionOperacion
         mostrar={toast.mostrar}

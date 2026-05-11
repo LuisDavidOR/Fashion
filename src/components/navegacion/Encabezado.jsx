@@ -61,6 +61,14 @@ const Encabezado = () => {
         </Nav.Link>
 
         <Nav.Link
+          onClick={() => manejarNavegacion("/citas")}
+          className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+        >
+          {mostrarMenu ? <i className="bi-calendar-check-fill me-2"></i> : null}
+          <strong>Agendar cita</strong>
+        </Nav.Link>
+
+        <Nav.Link
           onClick={() => manejarNavegacion("/login")}
           className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
         >

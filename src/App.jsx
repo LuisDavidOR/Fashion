@@ -34,11 +34,12 @@ const App = () => {
 
             <Route path='/catalogo' element={<Catalogo />} />
 
+            <Route path="/citas" element={<Citas />} />
+
             <Route path='/categorias' element={<RutaProtegida rolesPermitidos={["admin"]}><Categorias /></RutaProtegida>} />
             <Route path='/servicios' element={<RutaProtegida rolesPermitidos={["admin"]}><Servicios /></RutaProtegida>} />
             <Route path='/empleados' element={<RutaProtegida rolesPermitidos={["admin"]}><Empleados /></RutaProtegida>} />
             <Route path='/clientes' element={<RutaProtegida rolesPermitidos={["admin"]}><Clientes /></RutaProtegida>} />
-            <Route path='/citas' element={<RutaProtegida rolesPermitidos={["admin", "cliente", "empleado"]}><Citas /></RutaProtegida>} />
             <Route path='/insumos' element={<RutaProtegida rolesPermitidos={["admin"]}><Insumos /></RutaProtegida>} />
 
             <Route path='*' element={<Pagina404/>} />

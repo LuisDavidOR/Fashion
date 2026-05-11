@@ -7,6 +7,7 @@ const TarjetaEmpleado = ({
   abrirModalEdicion,
   abrirModalEliminacion,
   cambiarEstadoEmpleado,
+  abrirModalAccesoEmpleado,
 }) => {
   return (
     <Row className="g-4 justify-content-center">
@@ -47,6 +48,12 @@ const TarjetaEmpleado = ({
                 {empleado.estado === "activo" ? "Activo" : "Inactivo"}
               </Badge>
 
+              <div className="mb-3">
+                <Badge bg={empleado.tieneAcceso ? "primary" : "warning"}>
+                  {empleado.tieneAcceso ? "Con acceso" : "Sin acceso"}
+                </Badge>
+              </div>
+
               <div className="empleado-info text-start mb-3">
                 <div>
                   <i className="bi bi-telephone me-2"></i>
@@ -67,6 +74,18 @@ const TarjetaEmpleado = ({
               </div>
 
               <div className="d-flex justify-content-center gap-2">
+
+                {!empleado.tieneAcceso && empleado.estado === "activo" && (
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => abrirModalAccesoEmpleado(empleado)}
+                    title="Crear acceso al sistema"
+                  >
+                    <i className="bi bi-person-lock"></i>
+                  </Button>
+                )}
+                
                 <Button
                   variant="outline-warning"
                   size="sm"

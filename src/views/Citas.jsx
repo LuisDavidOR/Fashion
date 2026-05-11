@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
+import { Container, Row, Col, Button, Spinner, Alert, Modal } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 import ModalRegistroCita from "../components/citas/ModalRegistroCita";
 import NotificacionOperacion from "../components/NotificacionOperacion";
@@ -10,10 +11,12 @@ import TablaCitas from "../components/citas/TablaCitas";
 
 const Citas = () => {
 
-  const { rol, perfil } = useAuth();
+  const { usuario, rol, perfil } = useAuth();
+  const navigate = useNavigate();
   const esAdmin = rol === "admin";
   const esCliente = rol === "cliente";
   const esEmpleado = rol === "empleado";
+  const esInvitado = !usuario;
   const [toast, setToast] = useState({mostrar: false, mensaje: "", tipo: ""});
   const [mostrarModal, setMostrarModal] = useState(false);
   const [nuevaCita, setNuevaCita] = useState({
@@ -30,6 +33,7 @@ const Citas = () => {
   const [citas, setCitas] = useState([]);
   const [cargandoCitas, setCargandoCitas] = useState(true);
   const [citaExpandida, setCitaExpandida] = useState(null);
+  const [mostrarModalAcceso, setMostrarModalAcceso] = useState(false);
 
   const limpiarCita = () => {
     setNuevaCita({
@@ -176,10 +180,16 @@ const Citas = () => {
   cargarEmpleados();
   cargarServicios();
 
+  if (esInvitado) {
+    setCitas([]);
+    setCargandoCitas(false);
+    return;
+  }
+
   if (rol && perfil !== undefined) {
     cargarCitas();
   }
-}, [rol, perfil]);
+}, [rol, perfil, usuario]);
 
   const manejoCambioInput = (e) => {
     const { name, value } = e.target;
@@ -247,8 +257,41 @@ const Citas = () => {
     );
   };
 
+  const abrirModalRegistroCita = () => {
+    if (esInvitado) {
+      setMostrarModalAcceso(true);
+      return;
+    }
+
+    if (esEmpleado) {
+      setToast({
+        mostrar: true,
+        mensaje: "Los empleados no pueden agendar citas desde esta vista.",
+        tipo: "advertencia",
+      });
+      return;
+    }
+
+    setMostrarModal(true);
+  };
+
   const agregarCita = async () => {
     try {
+
+      if (esInvitado) {
+        setMostrarModalAcceso(true);
+        return;
+      }
+
+      if (!esAdmin && !esCliente) {
+        setToast({
+          mostrar: true,
+          mensaje: "No tienes permisos para agendar citas.",
+          tipo: "advertencia",
+        });
+        return;
+      }
+
       if (
       !nuevaCita.fecha.trim() ||
       !nuevaCita.hora.trim()
@@ -373,15 +416,19 @@ const Citas = () => {
     ? "Gestión de citas"
     : esCliente
       ? "Mis citas"
-      : "Citas disponibles";
+      : esEmpleado
+        ? "Citas disponibles"
+        : "Agenda tu cita";
 
   const descripcionSinCitas = esAdmin
-    ? "No hay citas registradas."
-    : esCliente
-      ? "Aún no tienes citas registradas."
-      : "No hay citas pendientes o asignadas.";
+  ? "No hay citas registradas."
+  : esCliente
+    ? "Aún no tienes citas registradas."
+    : esEmpleado
+      ? "No hay citas pendientes o asignadas."
+      : "Inicia sesión para agendar y dar seguimiento a tus citas.";
 
-  const puedeCrearCita = esAdmin || esCliente;
+  const puedeCrearCita = esAdmin || esCliente || esInvitado;
 
   return (
     
@@ -396,11 +443,13 @@ const Citas = () => {
         <Col xs={3} sm={5} md={5} lg={5} className="text-end">
           {puedeCrearCita && (
             <Button
-              onClick={() => setMostrarModal(true)}
+              onClick={abrirModalRegistroCita}
               size="md"
             >
               <i className="bi-plus-lg"></i>
-              <span className="d-none d-sm-inline ms-2">Nueva Cita</span>
+              <span className="d-none d-sm-inline ms-2">
+                {esInvitado || esCliente ? "Agendar cita" : "Nueva Cita"}
+              </span>
             </Button>
           )}
         </Col>
@@ -445,6 +494,44 @@ const Citas = () => {
         agregarServicioDetalle={agregarServicioDetalle}
         eliminarServicioDetalle={eliminarServicioDetalle}
       />
+
+      <Modal
+        show={mostrarModalAcceso}
+        onHide={() => setMostrarModalAcceso(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Inicia sesión para continuar</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <p className="mb-0">
+            Para agendar una cita necesita iniciar sesión o registrarse en el sistema.
+          </p>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setMostrarModalAcceso(false)}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            style={{
+              backgroundColor: "#7A564A",
+              borderColor: "#7A564A",
+            }}
+            onClick={() => {
+              setMostrarModalAcceso(false);
+              navigate("/login");
+            }}
+          >
+            Iniciar sesión
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <NotificacionOperacion 
         mostrar={toast.mostrar}

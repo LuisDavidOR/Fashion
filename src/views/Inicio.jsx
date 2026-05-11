@@ -5,7 +5,8 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { useAuth } from "../context/AuthContext";
 
 const Inicio = () => {
-  const { rol } = useAuth();
+  const { usuario, rol } = useAuth();
+  const esInvitado = !usuario;
 
   const contenidoHeroPorRol = {
     admin: {
@@ -92,6 +93,17 @@ const Inicio = () => {
           >
             {contenidoHero.botonPrincipal}
           </Button>
+
+          {/* SOLO INVITADO */}
+          {esInvitado && (
+            <Button
+              as={Link}
+              to="/citas"
+              className="btn-hero btn-hero-secondary"
+            >
+              Agendar cita
+            </Button>
+          )}
 
             <Button
             as={Link}
