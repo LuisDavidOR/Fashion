@@ -2547,3 +2547,107 @@ body,
 .modal-cita-resumen-cliente strong {
   text-transform: none !important;
 }
+
+/* ==========================
+   CITAS RESPONSIVE MOVIL
+========================== */
+
+.tarjetas-citas-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tarjeta-cita-responsive {
+  background: #fff;
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: 0 8px 25px rgba(122, 86, 74, 0.12);
+  border: 1px solid rgba(122, 86, 74, 0.12);
+}
+
+.tarjeta-cita-responsive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.tarjeta-cita-responsive-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #8a5a44;
+  font-weight: 700;
+}
+
+.tarjeta-cita-responsive-header h6 {
+  margin: 4px 0;
+  font-weight: 700;
+}
+
+.tarjeta-cita-responsive-header p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.tarjeta-cita-responsive-info {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.tarjeta-cita-responsive-info div {
+  background: #faf5f3;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.tarjeta-cita-responsive-info span {
+  display: block;
+  font-size: 0.75rem;
+  color: #8a5a44;
+  font-weight: 700;
+}
+
+.tarjeta-cita-responsive-info strong {
+  font-size: 0.95rem;
+}
+
+.tarjeta-cita-responsive-servicios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.tarjeta-cita-responsive-servicios span {
+  background: #fff4ef;
+  color: #7a564a;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.tarjeta-cita-responsive-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.tarjeta-cita-responsive-footer button {
+  border-radius: 12px;
+}
+
+@media (max-width: 480px) {
+  .tarjeta-cita-responsive-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tarjeta-cita-responsive-footer button {
+    width: 100%;
+  }
+}

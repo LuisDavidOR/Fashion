@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Table, Button, Badge, Modal, Form, Row, Col } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import TarjetaCitasResponsive from "./TarjetaCitasResponsive";
 
 const TablaCitas = ({
   citas,
@@ -128,7 +129,27 @@ const TablaCitas = ({
         </Row>
       </div>
 
-      <div className="tabla-citas-contenedor">
+      {/* Vista móvil/tablet */}
+      <div className="d-lg-none">
+        {citasFiltradas.length > 0 ? (
+          <TarjetaCitasResponsive
+            citas={citasFiltradas}
+            esEmpleado={esEmpleado}
+            aceptarCita={aceptarCita}
+            aceptandoCita={aceptandoCita}
+            completarCita={completarCita}
+            completandoCita={completandoCita}
+            vistaEmpleado={vistaEmpleado}
+            abrirDetalle={setCitaSeleccionada}
+          />
+        ) : (
+          <div className="text-center py-4 text-muted">
+            No se encontraron citas con los filtros seleccionados.
+          </div>
+        )}
+      </div>
+
+      <div className="tabla-citas-contenedor d-none d-lg-block">
         <Table responsive borderless className="tabla-citas align-middle">
           <thead>
             <tr>
