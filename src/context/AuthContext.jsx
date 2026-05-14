@@ -165,9 +165,11 @@ export const AuthProvider = ({ children }) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      await obtenerPerfil(session?.user ?? null);
-    });
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+          setTimeout(() => {
+            obtenerPerfil(session?.user ?? null);
+          }, 0);
+        });
 
     return () => {
       subscription.unsubscribe();
@@ -180,6 +182,9 @@ export const AuthProvider = ({ children }) => {
     setUsuario(null);
     setPerfil(null);
     setRol("invitado");
+    setCargando(false);
+
+    sessionStorage.removeItem("mensaje-login");
   };
 
   return (

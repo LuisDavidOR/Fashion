@@ -1,13 +1,18 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-
+import "bootstrap/dist/css/bootstrap.min.css";
 import { useAuth } from "../../context/AuthContext";
 
 const RutaProtegida = ({ children, rolesPermitidos = [] }) => {
   const { usuario, perfil, rol, cargando } = useAuth();
 
   if (cargando) {
-    return <h3>Cargando...</h3>;
+    return (
+      <div className="text-center mt-5">
+        <div className="spinner-border text-primary" role="status"></div>
+        <p className="mt-3">Verificando sesión...</p>
+      </div>
+    );
   }
 
   // Si no hay sesión
