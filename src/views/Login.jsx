@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import FormularioLogin from "../components/login/FormularioLogin";
 import { supabase } from "../database/supabaseconfig";
 import logo from "../assets/logo.png";
@@ -10,17 +10,29 @@ const Login = () => {
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState(null);
+  const [exito, setExito] = useState(null);
   const [cargandoLogin, setCargandoLogin] = useState(false);
   const navegar = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    setError(null);
+    setExito(null);
+
     const mensaje = sessionStorage.getItem("mensaje-login");
+
+    if (location.state?.mensajeExito) {
+      setExito(location.state.mensajeExito);
+      sessionStorage.removeItem("mensaje-login");
+      window.history.replaceState({}, document.title);
+      return;
+    }
 
     if (mensaje) {
       setError(mensaje);
       sessionStorage.removeItem("mensaje-login");
     }
-  }, []);
+  }, [location.state]);
 
   const iniciarSesion = async () => {
     if (cargandoLogin) return;
@@ -192,6 +204,7 @@ const Login = () => {
             usuario={usuario}
             contrasena={contrasena}
             error={error}
+            exito={exito}
             setUsuario={setUsuario}
             setContrasena={setContrasena}
             iniciarSesion={iniciarSesion}

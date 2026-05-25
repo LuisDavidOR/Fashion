@@ -5,6 +5,7 @@ const FormularioLogin = ({
   usuario,
   contrasena,
   error,
+  exito,
   setUsuario,
   setContrasena,
   iniciarSesion,
@@ -107,6 +108,16 @@ const FormularioLogin = ({
         {error && (
           <Alert variant="danger" className="py-2 px-3 mb-3" style={{ fontSize: "0.9rem" }}>
             {error}
+          </Alert>
+        )}
+
+        {exito && (
+          <Alert
+            variant="success"
+            className="py-2 px-3 mb-3"
+            style={{ fontSize: "0.9rem" }}
+          >
+            {exito}
           </Alert>
         )}
 

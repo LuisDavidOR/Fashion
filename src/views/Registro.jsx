@@ -200,6 +200,7 @@ const Registro = () => {
         {
           correo,
           rol: "cliente",
+          estado: "activo",
           id_cliente: idCliente,
           id_empleado: null,
           auth_id: authId,
@@ -218,17 +219,30 @@ const Registro = () => {
         return;
       }
 
+      const { error: errorLoginAutomatico } = await supabase.auth.signInWithPassword({
+        email: correo,
+        password: contrasena,
+      });
+
+      if (errorLoginAutomatico) {
+        console.error("Error en login automático:", errorLoginAutomatico.message);
+        setError("La cuenta fue creada, pero no se pudo iniciar sesión automáticamente.");
+        return;
+      }
+
       if (!authData.session) {
         setExito(
           "Cuenta creada correctamente. Revisa tu correo y confirma tu cuenta antes de iniciar sesión."
         );
-      } else {
-        setExito(
-          "Cuenta creada correctamente. Ahora puedes iniciar sesión."
-        );
 
-        await supabase.auth.signOut();
+        setTimeout(() => {
+          navegar("/login");
+        }, 2500);
+
+        return;
       }
+
+      setExito("Cuenta creada correctamente. Bienvenido a Fashion.");
 
       setDatosRegistro({
         nombre: "",
@@ -240,8 +254,10 @@ const Registro = () => {
       });
 
       setTimeout(() => {
-        navegar("/login");
-      }, 2500);
+        sessionStorage.removeItem("mensaje-login");
+        navegar("/");
+      }, 1800);
+      
     } catch (err) {
       console.error("Error inesperado al registrar cliente:", err.message);
       setError("Ocurrió un error inesperado al registrar la cuenta.");
