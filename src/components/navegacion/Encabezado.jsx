@@ -193,6 +193,17 @@ const Encabezado = () => {
         </Nav.Link>
       )}
       </Nav>
+      {mostrarMenu && usuario && (
+        <div className="mt-3 px-3">
+          <button
+            className="btn btn-outline-danger w-100"
+            onClick={manejarCerrarSesion}
+          >
+            <i className="bi-box-arrow-right me-2"></i>
+            Cerrar sesión
+          </button>
+        </div>
+      )}
       </>
     );
   }
