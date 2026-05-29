@@ -15,6 +15,7 @@ import Login from "./views/Login";
 import Servicios from "./views/Servicios";
 import Insumos from './views/Insumos';
 import Registro from './views/Registro';
+import Perfil from './views/Perfil';
 
 import RutaProtegida from "./components/rutas/RutaProtegida";
 import ScrollToTop from './components/ScrollToTop';
@@ -41,7 +42,8 @@ const App = () => {
             <Route path='/empleados' element={<RutaProtegida rolesPermitidos={["admin"]}><Empleados /></RutaProtegida>} />
             <Route path='/clientes' element={<RutaProtegida rolesPermitidos={["admin"]}><Clientes /></RutaProtegida>} />
             <Route path='/insumos' element={<RutaProtegida rolesPermitidos={["admin"]}><Insumos /></RutaProtegida>} />
-
+            <Route path='/perfil' element={<RutaProtegida rolesPermitidos={["cliente", "empleado"]}><Perfil /></RutaProtegida>}/>
+            
             <Route path='*' element={<Pagina404/>} />
           </Routes>
         </main>

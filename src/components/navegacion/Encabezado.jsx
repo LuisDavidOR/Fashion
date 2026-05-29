@@ -154,6 +154,16 @@ const Encabezado = () => {
             <strong>Catálogo</strong>
           </Nav.Link>
 
+          {(esCliente || esEmpleado) && (
+            <Nav.Link
+              onClick={() => manejarNavegacion("/perfil")}
+              className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
+            >
+              {mostrarMenu ? <i className="bi-person-circle me-2"></i> : null}
+              <strong>Perfil</strong>
+            </Nav.Link>
+          )}
+
           {!mostrarMenu && (
             <Nav.Link
               onClick={manejarCerrarSesion}
@@ -170,7 +180,6 @@ const Encabezado = () => {
               <i className="bi-envelope-fill me-2"></i>
               {usuario?.email?.toLowerCase() || "Usuario"}
             </p>
-
             <button
               className="btn btn-outline-danger mt-3 w-100"
               onClick={manejarCerrarSesion}
