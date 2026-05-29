@@ -169,7 +169,7 @@ const Encabezado = () => {
               onClick={manejarCerrarSesion}
               className="navbar-fashion-link"
             >
-              <i className="bi-box-arrow-right me-2"></i>
+              <i className="bi-box-arrow-right"></i>
             </Nav.Link>
           )}
         </Nav>

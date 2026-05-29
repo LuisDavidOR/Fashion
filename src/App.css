@@ -14,6 +14,15 @@
   background: #EBCFC4; /* fondo principal */
 }
 
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+
 /* HOVER para ambos botones */
 .btn-activas:hover,
 .btn-inactivas:hover {
@@ -1645,6 +1654,8 @@ button {
   font-size: 62px;
 }
 
+
+
 /* NAVBAR DISEÑO FASHION */
 .navbar-fashion {
   background: rgba(122, 86, 74, 0.94);
@@ -1673,7 +1684,7 @@ button {
 }
 
 .navbar-fashion-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: 1.75rem;
   font-weight: 700;
   color: #fff;
@@ -2650,4 +2661,82 @@ body,
   .tarjeta-cita-responsive-footer button {
     width: 100%;
   }
+}
+
+.navbar-fashion-salir {
+  width: 36px;
+  height: 36px;
+  margin-left: 10px !important;
+  margin-right: 0 !important;
+  padding: 0 !important;
+  border-radius: 10px;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  letter-spacing: 0 !important;
+}
+
+.navbar-fashion-salir::after {
+  display: none !important;
+}
+
+.navbar-fashion-salir:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.navbar-fashion-salir i {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.btn-fashion-primary {
+  background: linear-gradient(135deg, #8b6b61, #a57f71) !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 14px !important;
+  padding: 10px 18px !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+
+  box-shadow: 0 8px 18px rgba(139, 107, 97, 0.20);
+
+  transition: all 0.25s ease !important;
+}
+
+.btn-fashion-primary:hover {
+  background: linear-gradient(135deg, #7b5e55, #957164) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(139, 107, 97, 0.28);
+}
+
+.btn-fashion-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-fashion-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(139, 107, 97, 0.25) !important;
+}
+
+.btn-fashion-primary i {
+  font-size: 1rem;
+}
+
+.inicio-hero .inicio-etiqueta {
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.inicio-hero h2 {
+  margin-top: 0;
+  margin-bottom: 14px;
+  line-height: 1.15;
+}
+
+.inicio-hero p {
+  margin-bottom: 0;
+  line-height: 1.6;
 }

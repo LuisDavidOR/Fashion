@@ -933,14 +933,17 @@ const Citas = () => {
         <Col xs={3} sm={5} md={5} lg={5} className="text-end">
           {puedeCrearCita && (
             <Button
-              onClick={abrirModalRegistroCita}
-              size="md"
-            >
-              <i className="bi-plus-lg"></i>
-              <span className="d-none d-sm-inline ms-2">
-                {esInvitado || esCliente ? "Agendar cita" : "Nueva Cita"}
-              </span>
-            </Button>
+            onClick={abrirModalRegistroCita}
+            className="btn-fashion-primary"
+          >
+            <i className="bi-plus-lg"></i>
+
+            <span className="d-none d-sm-inline ms-2">
+              {esInvitado || esCliente
+                ? "Agendar cita"
+                : "Nueva Cita"}
+            </span>
+          </Button>
           )}
         </Col>
       </Row>

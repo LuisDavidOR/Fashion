@@ -467,10 +467,16 @@ const Clientes = () => {
         </Col>
 
         <Col xs={3} sm={5} md={5} lg={5} className="text-end">
-          <Button onClick={() => setMostrarModal(true)} size="md">
-            <i className="bi-plus-lg"></i>
-            <span className="d-none d-sm-inline ms-2">Nuevo Cliente</span>
-          </Button>
+          <Button
+                    onClick={() => setMostrarModal(true)}
+                    className="btn-fashion-primary"
+                  >
+                    <i className="bi-plus-lg"></i>
+          
+                    <span className="d-none d-sm-inline ms-2">
+                      Nuevo cliente
+                    </span>
+                  </Button>
         </Col>
       </Row>
 

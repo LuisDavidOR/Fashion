@@ -233,6 +233,7 @@ const Inicio = () => {
       <section className="inicio-hero my-5">
         <div>
           <span className="inicio-etiqueta">Salón Fashion</span>
+          
           <h2>Una forma más moderna de vivir la belleza</h2>
           <p>
             Explora nuestro catálogo, conoce los servicios disponibles y disfruta
