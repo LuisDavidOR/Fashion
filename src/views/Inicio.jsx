@@ -5,13 +5,21 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { useAuth } from "../context/AuthContext";
 
 const Inicio = () => {
-  const { usuario, rol } = useAuth();
+  const { usuario, rol, perfil } = useAuth();
   const esInvitado = !usuario;
+
+  const nombreUsuario =
+  perfil?.Clientes?.nombre ||
+  perfil?.Empleados?.nombre ||
+  "";
 
   const contenidoHeroPorRol = {
     admin: {
       etiqueta: "Sistema de Gestión",
-      titulo: "Bienvenido a Salón Fashion",
+      titulo:
+      nombreUsuario
+    ? `Bienvenido ${nombreUsuario}`
+    : "Bienvenido a Salón Fashion",
       descripcion:
         "Administra la operación del salón con una experiencia moderna, organizada y elegante.",
       botonPrincipal: "Ver Catálogo",
@@ -20,25 +28,29 @@ const Inicio = () => {
       rutaSecundaria: "/citas",
     },
     cliente: {
-      etiqueta: "Área de Cliente",
-      titulo: "Bienvenido a tu espacio Fashion",
-      descripcion:
-        "Explora servicios, agenda tus citas y disfruta una experiencia pensada para ti.",
-      botonPrincipal: "Ver Catálogo",
-      rutaPrincipal: "/catalogo",
-      botonSecundario: "Mis Citas",
-      rutaSecundaria: "/citas",
-    },
+    etiqueta: "Área de Cliente",
+    titulo: nombreUsuario
+      ? `Bienvenido ${nombreUsuario}`
+      : "Bienvenido a tu espacio fashion",
+    descripcion:
+      "Explora servicios, agenda tus citas y disfruta una experiencia pensada para ti.",
+    botonPrincipal: "Ver Catálogo",
+    rutaPrincipal: "/catalogo",
+    botonSecundario: "Mis Citas",
+    rutaSecundaria: "/citas",
+  },
     empleado: {
-      etiqueta: "Área de Empleado",
-      titulo: "Panel de trabajo Fashion",
-      descripcion:
-        "Consulta tus citas, revisa servicios y acompaña a cada cliente con atención profesional.",
-      botonPrincipal: "Ver Citas",
-      rutaPrincipal: "/citas",
-      botonSecundario: "Ver Catálogo",
-      rutaSecundaria: "/catalogo",
-    },
+    etiqueta: "Área de Empleado",
+    titulo: nombreUsuario
+      ? `Bienvenido ${nombreUsuario}`
+      : "Bienvenido a tu panel de trabajo fashion",
+    descripcion:
+      "Consulta tus citas, revisa servicios y acompaña a cada cliente con atención profesional.",
+    botonPrincipal: "Ver Citas",
+    rutaPrincipal: "/citas",
+    botonSecundario: "Ver Catálogo",
+    rutaSecundaria: "/catalogo",
+  },
     invitado: {
       etiqueta: "Bienvenido",
       titulo: "Descubre Salón Fashion",
