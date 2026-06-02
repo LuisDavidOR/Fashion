@@ -69,13 +69,21 @@ const Login = () => {
         .maybeSingle();
 
       if (errorPerfil || !perfilUsuario) {
-        await supabase.auth.signOut();
+        try {
+          await supabase.auth.signOut();
+        } catch (error) {
+          console.error("No se pudo cerrar sesión:", error);
+        }
         setError("Tu cuenta aún no tiene acceso al sistema. Contacta al administrador.");
         return;
       }
 
       if (perfilUsuario.estado?.toLowerCase().trim() !== "activo") {
-        await supabase.auth.signOut();
+        try {
+          await supabase.auth.signOut();
+        } catch (error) {
+          console.error("No se pudo cerrar sesión:", error);
+        }   
         setError("Tu usuario está inactivo. Contacta al administrador.");
         return;
       }
@@ -83,7 +91,11 @@ const Login = () => {
       const rolesPermitidos = ["admin", "cliente", "empleado"];
 
       if (!rolesPermitidos.includes(perfilUsuario.rol)) {
-        await supabase.auth.signOut();
+        try {
+          await supabase.auth.signOut();
+        } catch (error) {
+          console.error("No se pudo cerrar sesión:", error);
+        }
         setError("Tu rol no es válido. Contacta al administrador.");
         return;
       }
