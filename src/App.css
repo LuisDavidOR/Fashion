@@ -2740,3 +2740,33 @@ body,
 .menu-abierto .boton-ia-flotante {
   display: none !important;
 }
+
+/* DROPDOWN DE NOTIFICACIONES EN ENCABEZADO */
+.dropdown-notificaciones {
+  border: 1px solid #ead8ce;
+  box-shadow: 0 12px 28px rgba(122, 86, 74, 0.18) !important;
+  border-radius: 16px;
+  background-color: #ffffff;
+}
+
+.notificacion-item {
+  transition: background-color 0.2s ease;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.notificacion-item:hover {
+  background-color: #fcf9f7;
+}
+
+.notificacion-item:last-child {
+  border-bottom: none !important;
+}
+
+.bg-fashion {
+  background-color: #7a564a !important;
+}
+
+.text-fashion {
+  color: #7a564a !important;
+}
