@@ -4,6 +4,7 @@ import { Container, Nav, Navbar, Offcanvas } from "react-bootstrap";
 import logo from "../../assets/logo.png";
 import { useAuth } from "../../context/AuthContext";
 
+
 const Encabezado = () => {
 
   const [mostrarMenu, setMostrarMenu] = useState(false);
@@ -95,6 +96,7 @@ const Encabezado = () => {
 
           <strong>Inicio</strong>
         </Nav.Link>
+
 
           {esAdmin && (
             <>
@@ -260,6 +262,7 @@ const Encabezado = () => {
         </Navbar.Offcanvas>
       </Container>
     </Navbar>
+    
   );
 }
 
