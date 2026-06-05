@@ -1,8 +1,39 @@
-import React from "react";
-import { Modal, Badge } from "react-bootstrap";
+import React, { useState } from "react";
+import { Modal, Badge, Form, Button } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import { useAuth } from "../../context/AuthContext";
 
-const ModalDetalleServicio = ({ mostrarModal, setMostrarModal, servicio }) => {
+const ModalDetalleServicio = ({ mostrarModal, setMostrarModal, servicio, onEliminarCalificacion, onResponderCalificacion }) => {
+  const { usuario, rol } = useAuth();
+  
+  const [calificacionRespondiendo, setCalificacionRespondiendo] = useState(null);
+  const [textoRespuesta, setTextoRespuesta] = useState("");
+  const [guardandoRespuesta, setGuardandoRespuesta] = useState(false);
+
+  const esAdminOEmpleado = usuario && (rol === "admin" || rol === "empleado");
+
+  const manejarGuardarRespuesta = async (idCalificacion) => {
+    if (guardandoRespuesta) return;
+    setGuardandoRespuesta(true);
+    try {
+      if (onResponderCalificacion) {
+        await onResponderCalificacion(idCalificacion, servicio.id_servicio, textoRespuesta.trim());
+      }
+      setCalificacionRespondiendo(null);
+      setTextoRespuesta("");
+    } catch (error) {
+      console.error("Error al guardar respuesta:", error);
+    } finally {
+      setGuardandoRespuesta(false);
+    }
+  };
+
+  const manejarEliminarRespuesta = async (idCalificacion) => {
+    const confirmar = window.confirm("¿Estás seguro de que deseas eliminar la respuesta a este comentario?");
+    if (confirmar && onResponderCalificacion) {
+      await onResponderCalificacion(idCalificacion, servicio.id_servicio, null);
+    }
+  };
   if (!servicio) return null;
 
   const renderEstrellas = (puntuacion) => {
@@ -76,27 +107,138 @@ const ModalDetalleServicio = ({ mostrarModal, setMostrarModal, servicio }) => {
 
         {servicio.calificaciones && servicio.calificaciones.length > 0 ? (
           <div className="modal-calificaciones-lista">
-            {servicio.calificaciones.map((calificacion) => (
-              <div
-                key={calificacion.id_calificacion}
-                className="modal-calificacion-item"
-              >
-                <div className="mb-2">
-                  {renderEstrellas(calificacion.puntuacion)}
+            {servicio.calificaciones.map((calificacion) => {
+              const puedeEliminar = usuario && (rol === "admin" || rol === "empleado" || rol === "cliente");
+
+              const manejarEliminar = async () => {
+                const confirmar = window.confirm("¿Estás seguro de que deseas eliminar este comentario?");
+                if (confirmar && onEliminarCalificacion) {
+                  await onEliminarCalificacion(calificacion.id_calificacion, servicio.id_servicio);
+                }
+              };
+
+              return (
+                <div
+                  key={calificacion.id_calificacion}
+                  className="modal-calificacion-item d-flex justify-content-between align-items-start"
+                >
+                  <div className="flex-grow-1">
+                    <div className="mb-2">
+                      {renderEstrellas(calificacion.puntuacion)}
+                    </div>
+
+                    <p className="mb-1">
+                      {calificacion.comentario || "Sin comentario."}
+                    </p>
+
+                    <small className="text-muted">
+                      —{" "}
+                      {calificacion.Clientes
+                        ? `${calificacion.Clientes.nombre} ${calificacion.Clientes.apellido}`
+                        : `Cliente #${calificacion.id_cliente}`}
+                    </small>
+
+                    {/* LÓGICA DE RESPUESTA */}
+                    {calificacionRespondiendo === calificacion.id_calificacion ? (
+                      <div className="mt-3 p-2 bg-white rounded border border-light-subtle shadow-sm">
+                        <Form.Group className="mb-2">
+                          <Form.Control
+                            as="textarea"
+                            rows={2}
+                            placeholder="Escribe una respuesta de agradecimiento o aclaración..."
+                            value={textoRespuesta}
+                            onChange={(e) => setTextoRespuesta(e.target.value)}
+                            disabled={guardandoRespuesta}
+                            style={{ fontSize: "0.85rem" }}
+                          />
+                        </Form.Group>
+                        <div className="d-flex gap-2 justify-content-end">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => {
+                              setCalificacionRespondiendo(null);
+                              setTextoRespuesta("");
+                            }}
+                            disabled={guardandoRespuesta}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            style={{ backgroundColor: "#7A564A", borderColor: "#7A564A" }}
+                            onClick={() => manejarGuardarRespuesta(calificacion.id_calificacion)}
+                            disabled={guardandoRespuesta || !textoRespuesta.trim()}
+                          >
+                            {guardandoRespuesta ? "Guardando..." : "Responder"}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {calificacion.respuesta ? (
+                          <div className="modal-calificacion-respuesta mt-2 ms-3 p-2 bg-white rounded border-start border-3 border-secondary d-flex justify-content-between align-items-start shadow-sm">
+                            <div className="flex-grow-1">
+                              <small className="fw-bold text-muted d-block mb-1">
+                                <i className="bi bi-reply-fill me-1"></i>Respuesta del salón:
+                              </small>
+                              <p className="mb-0 text-muted small">{calificacion.respuesta}</p>
+                            </div>
+                            {esAdminOEmpleado && (
+                              <div className="d-flex gap-1 ms-2">
+                                <button
+                                  className="btn btn-link text-primary p-0"
+                                  onClick={() => {
+                                    setCalificacionRespondiendo(calificacion.id_calificacion);
+                                    setTextoRespuesta(calificacion.respuesta);
+                                  }}
+                                  title="Editar respuesta"
+                                  style={{ fontSize: "1rem" }}
+                                >
+                                  <i className="bi bi-pencil-square"></i>
+                                </button>
+                                <button
+                                  className="btn btn-link text-danger p-0"
+                                  onClick={() => manejarEliminarRespuesta(calificacion.id_calificacion)}
+                                  title="Eliminar respuesta"
+                                  style={{ fontSize: "1rem" }}
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          esAdminOEmpleado && (
+                            <button
+                              className="btn btn-link text-primary p-0 mt-2 d-block text-decoration-none"
+                              onClick={() => {
+                                setCalificacionRespondiendo(calificacion.id_calificacion);
+                                setTextoRespuesta("");
+                              }}
+                              style={{ fontSize: "0.82rem" }}
+                            >
+                              <i className="bi bi-reply me-1"></i>Responder
+                            </button>
+                          )
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {puedeEliminar && (
+                    <button
+                      className="btn btn-link text-danger p-0 ms-3 mt-1"
+                      onClick={manejarEliminar}
+                      title="Eliminar comentario"
+                      style={{ fontSize: "1.2rem", border: "none", background: "none" }}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </button>
+                  )}
                 </div>
-
-                <p className="mb-1">
-                  {calificacion.comentario || "Sin comentario."}
-                </p>
-
-                <small className="text-muted">
-                  —{" "}
-                  {calificacion.Clientes
-                    ? `${calificacion.Clientes.nombre} ${calificacion.Clientes.apellido}`
-                    : `Cliente #${calificacion.id_cliente}`}
-                </small>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p className="text-muted">

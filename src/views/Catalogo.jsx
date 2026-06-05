@@ -6,6 +6,7 @@ import TarjetaCatalogo from "../components/catalogo/TarjetaCatalogo";
 import ModalDetalleServicio from "../components/catalogo/ModalDetalleServicio";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import NotificacionOperacion from "../components/NotificacionOperacion";
 
 const Catalogo = () => {
   const navigate = useNavigate();
@@ -31,6 +32,8 @@ const Catalogo = () => {
 
   const [mostrarModalAcceso, setMostrarModalAcceso] = useState(false);
   const [mensajeAcceso, setMensajeAcceso] = useState("");
+
+  const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
 
   useEffect(() => {
     cargarCategorias();
@@ -76,6 +79,7 @@ const Catalogo = () => {
           id_servicio,
           puntuacion,
           comentario,
+          respuesta,
           Clientes (
             id_cliente,
             nombre,
@@ -171,12 +175,111 @@ const Catalogo = () => {
         if (error) throw error;
       }
 
+      setToast({
+        mostrar: true,
+        mensaje: calificacionExistente
+          ? "Calificación actualizada correctamente."
+          : "Calificación guardada correctamente.",
+        tipo: "exito",
+      });
+
       setMostrarModalCalificacion(false);
       setCalificacionExistente(null);
 
       await cargarCatalogo();
     } catch (err) {
       console.error("Error al guardar calificación:", err.message);
+      setToast({
+        mostrar: true,
+        mensaje: "Error al guardar la calificación.",
+        tipo: "error",
+      });
+    }
+  };
+
+  const eliminarCalificacion = async (idCalificacion, idServicio) => {
+    try {
+      const { error } = await supabase
+        .from("Calificaciones")
+        .delete()
+        .eq("id_calificacion", idCalificacion);
+
+      if (error) throw error;
+
+      await cargarCatalogo();
+
+      if (servicioDetalle && servicioDetalle.id_servicio === idServicio) {
+        setServicioDetalle((prev) => {
+          const nuevasCalificaciones = prev.calificaciones.filter(
+            (c) => c.id_calificacion !== idCalificacion
+          );
+          const totalReviews = nuevasCalificaciones.length;
+          const rating = totalReviews > 0
+            ? nuevasCalificaciones.reduce((total, cal) => total + Number(cal.puntuacion), 0) / totalReviews
+            : 0;
+
+          return {
+            ...prev,
+            calificaciones: nuevasCalificaciones,
+            rating,
+            totalReviews,
+          };
+        });
+      }
+
+      setToast({
+        mostrar: true,
+        mensaje: "Comentario eliminado correctamente.",
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Error al eliminar calificación:", err.message);
+      setToast({
+        mostrar: true,
+        mensaje: "Error al eliminar el comentario.",
+        tipo: "error",
+      });
+    }
+  };
+
+  const responderCalificacion = async (idCalificacion, idServicio, respuestaTexto) => {
+    try {
+      const { error } = await supabase
+        .from("Calificaciones")
+        .update({ respuesta: respuestaTexto })
+        .eq("id_calificacion", idCalificacion);
+
+      if (error) throw error;
+
+      await cargarCatalogo();
+
+      if (servicioDetalle && servicioDetalle.id_servicio === idServicio) {
+        setServicioDetalle((prev) => {
+          const nuevasCalificaciones = prev.calificaciones.map((c) => {
+            if (c.id_calificacion === idCalificacion) {
+              return { ...c, respuesta: respuestaTexto };
+            }
+            return c;
+          });
+          return {
+            ...prev,
+            calificaciones: nuevasCalificaciones,
+          };
+        });
+      }
+
+      setToast({
+        mostrar: true,
+        mensaje: respuestaTexto ? "Respuesta guardada correctamente." : "Respuesta eliminada correctamente.",
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Error al responder calificación:", err.message);
+      setToast({
+        mostrar: true,
+        mensaje: "Error al registrar la respuesta.",
+        tipo: "error",
+      });
     }
   };
 
@@ -403,6 +506,15 @@ const Catalogo = () => {
         mostrarModal={mostrarModalDetalle}
         setMostrarModal={setMostrarModalDetalle}
         servicio={servicioDetalle}
+        onEliminarCalificacion={eliminarCalificacion}
+        onResponderCalificacion={responderCalificacion}
+      />
+
+      <NotificacionOperacion
+        mostrar={toast.mostrar}
+        mensaje={toast.mensaje}
+        tipo={toast.tipo}
+        onCerrar={() => setToast({ ...toast, mostrar: false })}
       />
 
       <Modal

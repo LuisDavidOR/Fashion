@@ -590,32 +590,36 @@ hr {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: auto;
+  align-items: stretch;
 }
 
 .catalogo-detalle-item {
   background: #f8f5f3;
   border-radius: 14px;
-  padding: 10px;
+  padding: 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #4b3a34;
+  height: 100%;
 }
 
 .catalogo-detalle-item i {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #7a564a;
 }
 
 .catalogo-detalle-item span {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: #8a7770;
 }
 
 .catalogo-detalle-item strong {
-  font-size: 0.9rem;
+  display: block;
+  font-size: 0.85rem;
   color: #2b211e;
+  white-space: nowrap;
 }
 
 .btn-calificar-servicio {
