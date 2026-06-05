@@ -18,6 +18,8 @@ import Registro from './views/Registro';
 import Perfil from './views/Perfil';
 
 import RutaProtegida from "./components/rutas/RutaProtegida";
+import RecuperarCredenciales from './components/login/RecuperarCredenciales';
+import RestablecerPassword from './components/login/RestablecerPassword';
 import ScrollToTop from './components/ScrollToTop';
 const App = () => {
   return(
@@ -30,6 +32,14 @@ const App = () => {
           <Routes>
             <Route path='/login' element={<Login />} />
             <Route path="/registro" element={<Registro />} />
+            <Route
+              path="/recuperar-credenciales"
+              element={<RecuperarCredenciales />}
+            />
+            <Route
+              path="/restablecer-password"
+              element={<RestablecerPassword />}
+            />
 
             <Route path='/' element={<Inicio />} />
 

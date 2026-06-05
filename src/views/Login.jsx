@@ -101,6 +101,10 @@ const Login = () => {
     navegar("/registro");
   };
 
+  const irRecuperarCredenciales = () => {
+    navegar("/recuperar-credenciales");
+  };
+
   const ingresarComoInvitado = () => {
     navegar("/");
   };
@@ -209,6 +213,7 @@ const Login = () => {
             setContrasena={setContrasena}
             iniciarSesion={iniciarSesion}
             irRegistro={irRegistro}
+            irRecuperarCredenciales={irRecuperarCredenciales}
             ingresarComoInvitado={ingresarComoInvitado}
             cargandoLogin={cargandoLogin}
           />

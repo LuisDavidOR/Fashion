@@ -10,6 +10,7 @@ const FormularioLogin = ({
   setContrasena,
   iniciarSesion,
   irRegistro,
+  irRecuperarCredenciales,
   ingresarComoInvitado,
   cargandoLogin
 }) => {
@@ -175,6 +176,20 @@ const FormularioLogin = ({
               </button>
             </div>
           </Form.Group>
+
+          <div className="text-end mb-2">
+            <span
+              onClick={irRecuperarCredenciales}
+              style={{
+                color: "#3b82f6",
+                cursor: "pointer",
+                fontWeight: "500",
+                fontSize: "0.9rem",
+              }}
+            >
+              ¿Olvidaste tu contraseña?
+            </span>
+          </div>
 
           <Button
             style={estilos.boton}

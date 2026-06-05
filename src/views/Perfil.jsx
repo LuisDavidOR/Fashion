@@ -21,6 +21,11 @@ const Perfil = () => {
   const [mensaje, setMensaje] = useState("");
   const [tipoMensaje, setTipoMensaje] = useState("success");
   const [previewImagen, setPreviewImagen] = useState("");
+  const [errores, setErrores] = useState({
+    nombre: "",
+    apellido: "",
+    telefono: "",
+  });
   const navigate = useNavigate();
 
   const cargarPerfil = async () => {
@@ -87,23 +92,49 @@ const Perfil = () => {
     obtenerPerfil();
   }, [usuario, rol]);
 
+  const validarCampo = (name, value) => {
+    if (name === "nombre") {
+      if (!value.trim()) return "El nombre es obligatorio.";
+
+      if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value)) {
+        return "El nombre solo debe contener letras.";
+      }
+    }
+
+    if (name === "apellido") {
+      if (!value.trim()) return "El apellido es obligatorio.";
+
+      if (!/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(value)) {
+        return "El apellido solo debe contener letras.";
+      }
+    }
+
+    if (name === "telefono") {
+      if (!/^\d{8}$/.test(value)) {
+        return "El teléfono debe tener exactamente 8 dígitos.";
+      }
+    }
+
+    return "";
+  };
+
   const manejarCambio = (e) => {
     const { name, value } = e.target;
 
+    let nuevoValor = value;
+
     if (name === "telefono") {
-      const soloNumeros = value.replace(/\D/g, "").slice(0, 8);
-
-      setPerfil({
-        ...perfil,
-        telefono: soloNumeros,
-      });
-
-      return;
+      nuevoValor = value.replace(/\D/g, "").slice(0, 8);
     }
 
     setPerfil({
       ...perfil,
-      [name]: value,
+      [name]: nuevoValor,
+    });
+
+    setErrores({
+      ...errores,
+      [name]: validarCampo(name, nuevoValor),
     });
   };
 
@@ -117,20 +148,20 @@ const Perfil = () => {
   };
 
   const validarFormulario = () => {
-    if (!perfil.nombre.trim()) {
-      setMensaje("El nombre es obligatorio.");
-      setTipoMensaje("danger");
-      return false;
-    }
+    const nuevosErrores = {
+      nombre: validarCampo("nombre", perfil.nombre),
+      apellido: validarCampo("apellido", perfil.apellido),
+      telefono: validarCampo("telefono", perfil.telefono),
+    };
 
-    if (!perfil.apellido.trim()) {
-      setMensaje("El apellido es obligatorio.");
-      setTipoMensaje("danger");
-      return false;
-    }
+    setErrores(nuevosErrores);
 
-    if (!/^\d{8}$/.test(perfil.telefono)) {
-      setMensaje("El teléfono debe tener exactamente 8 dígitos.");
+    if (
+      nuevosErrores.nombre ||
+      nuevosErrores.apellido ||
+      nuevosErrores.telefono
+    ) {
+      setMensaje("Corrige los campos marcados antes de guardar.");
       setTipoMensaje("danger");
       return false;
     }
@@ -354,12 +385,20 @@ const Perfil = () => {
                   {perfil.nombre || "Sin nombre registrado"}
                 </div>
               ) : (
-                <Form.Control
-                  type="text"
-                  name="nombre"
-                  value={perfil.nombre}
-                  onChange={manejarCambio}
-                />
+                <>
+                  <Form.Control
+                    type="text"
+                    name="nombre"
+                    value={perfil.nombre}
+                    onChange={manejarCambio}
+                    isInvalid={!!errores.nombre}
+                    placeholder="Ingrese su nombre"
+                  />
+
+                  <Form.Control.Feedback type="invalid">
+                    {errores.nombre}
+                  </Form.Control.Feedback>
+                </>
               )}
             </Form.Group>
 
@@ -381,12 +420,20 @@ const Perfil = () => {
                   {perfil.apellido || "Sin apellido registrado"}
                 </div>
               ) : (
-                <Form.Control
-                  type="text"
-                  name="apellido"
-                  value={perfil.apellido}
-                  onChange={manejarCambio}
-                />
+                <>
+                  <Form.Control
+                    type="text"
+                    name="apellido"
+                    value={perfil.apellido}
+                    onChange={manejarCambio}
+                    isInvalid={!!errores.apellido}
+                    placeholder="Ingrese su apellido"
+                  />
+
+                  <Form.Control.Feedback type="invalid">
+                    {errores.apellido}
+                  </Form.Control.Feedback>
+                </>
               )}
             </Form.Group>
 
@@ -408,13 +455,20 @@ const Perfil = () => {
                   {perfil.telefono || "Sin teléfono registrado"}
                 </div>
               ) : (
+              <>
                 <Form.Control
                   type="text"
                   name="telefono"
                   value={perfil.telefono}
                   onChange={manejarCambio}
                   maxLength={8}
+                  isInvalid={!!errores.telefono}
+                  placeholder="Ingrese 8 dígitos"
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errores.telefono}
+                </Form.Control.Feedback>
+              </>
               )}
             </Form.Group>
 
@@ -477,6 +531,11 @@ const Perfil = () => {
                     setEditando(false);
                     setImagen(null);
                     setPreviewImagen("");
+                    setErrores({
+                      nombre: "",
+                      apellido: "",
+                      telefono: "",
+                    });
                     cargarPerfil();
                   }}
                 >
