@@ -32,7 +32,11 @@ export const AuthProvider = ({ children }) => {
 
       if (error) {
         console.error("Error obteniendo perfil:", error);
-        await supabase.auth.signOut();
+
+        sessionStorage.setItem(
+          "mensaje-login",
+          "No se pudo conectar con el servidor. Revisa tu conexión e intenta nuevamente."
+        );
 
         setUsuario(null);
         setPerfil(null);
@@ -176,16 +180,19 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const cerrarSesion = async () => {
-    await supabase.auth.signOut();
-
-    setUsuario(null);
-    setPerfil(null);
-    setRol("invitado");
-    setCargando(false);
-
-    sessionStorage.removeItem("mensaje-login");
-  };
+    const cerrarSesion = async () => {
+      try {
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+      } finally {
+        setUsuario(null);
+        setPerfil(null);
+        setRol("invitado");
+        setCargando(false);
+        sessionStorage.removeItem("mensaje-login");
+      }
+    };
 
   return (
     <AuthContext.Provider
