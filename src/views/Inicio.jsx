@@ -260,22 +260,22 @@ const Inicio = () => {
       />
 
       {/* Botón flotante */}
-      <button
-       className="rounded-circle shadow-lg border-0"
-        onClick={() => setMostrarChatIA(true)}
-        style={{
-           position: "fixed",
-    bottom: "20px",
-    right: "20px",
-    width: "65px",
-    height: "65px",
-    zIndex: 9999,
-    backgroundColor: "#B38B6D", // café suave
-    color: "#fff",
-        }}
-      >
-        <i className="bi bi-robot fs-3"></i>
-      </button>
+          <button
+      className="boton-ia-flotante rounded-circle shadow-lg border-0"
+      onClick={() => setMostrarChatIA(true)}
+      style={{
+        position: "fixed",
+        bottom: "20px",
+        right: "20px",
+        width: "65px",
+        height: "65px",
+        zIndex: 9999,
+        backgroundColor: "#B38B6D",
+        color: "#fff",
+      }}
+    >
+      <i className="bi bi-robot fs-3"></i>
+    </button>
     </Container>
   );
 };

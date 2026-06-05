@@ -2733,3 +2733,6 @@ body,
   line-height: 1.6;
 }
 
+.menu-abierto .boton-ia-flotante {
+  display: none !important;
+}

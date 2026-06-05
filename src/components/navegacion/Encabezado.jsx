@@ -18,7 +18,16 @@ const Encabezado = () => {
   const esEmpleado = usuario && rol === "empleado";
   const esInvitado = !usuario;
 
-  const manejarToggle = () => setMostrarMenu(!mostrarMenu);
+  const manejarToggle = () => {
+  const nuevoEstado = !mostrarMenu;
+  setMostrarMenu(nuevoEstado);
+
+  if (nuevoEstado) {
+    document.body.classList.add("menu-abierto");
+  } else {
+    document.body.classList.remove("menu-abierto");
+  }
+};
 
   const manejarNavegacion = (ruta) => {
     navigate(ruta);
@@ -250,7 +259,10 @@ const Encabezado = () => {
           id="menu-offcanvas"
           placement="end"
           show={mostrarMenu}
-          onHide={() => setMostrarMenu(false)}
+         onHide={() => {
+          setMostrarMenu(false);
+          document.body.classList.remove("menu-abierto");
+        }}
         >
           <Offcanvas.Header closeButton>
             <Offcanvas.Title>Menú Fashion</Offcanvas.Title>
