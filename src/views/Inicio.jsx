@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useAuth } from "../context/AuthContext";
 import ChatIA from "../components/ia/ChatIA";
+import { useNavigate } from "react-router-dom";
 
 const Inicio = () => {
   const { usuario, rol, perfil } = useAuth();
   const [mostrarChatIA, setMostrarChatIA] = useState(false);
   const esInvitado = !usuario;
+  const navigate = useNavigate();
 
   const nombreUsuario =
   perfil?.Clientes?.nombre ||
@@ -133,6 +135,22 @@ const Inicio = () => {
           <i className="bi bi-stars"></i>
         </div>
       </section>
+
+      {rol === "admin" && (
+        <section className="my-5 text-center">
+          <h2>📊 Centro de Inteligencia del Negocio</h2>
+          <p>
+            Visualiza métricas clave de rentabilidad, productividad y satisfacción del salón.
+          </p>
+
+          <Button
+            className="btn-hero btn-hero-primary"
+            onClick={() => navigate("/inteligencia-negocio")}
+          >
+            Ver Dashboard Ejecutivo
+          </Button>
+        </section>
+      )}
 
       <section className="my-5">
         <Row className="align-items-center g-4">

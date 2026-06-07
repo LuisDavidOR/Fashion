@@ -892,6 +892,46 @@ const Citas = () => {
     }
   };
 
+  const cancelarCita = async (cita) => {
+  try {
+
+    const { error } = await supabase
+      .from("Citas")
+      .update({
+        estado_cita: "cancelada"
+      })
+      .eq("id_cita", cita.id_cita);
+
+    if (error) {
+      setToast({
+        mostrar: true,
+        mensaje: "Error al cancelar la cita.",
+        tipo: "error",
+      });
+      return;
+    }
+
+    setToast({
+      mostrar: true,
+      mensaje: "Cita cancelada correctamente.",
+      tipo: "exito",
+    });
+
+    await cargarCitas();
+
+  } catch (err) {
+
+    setToast({
+      mostrar: true,
+      mensaje: "Error inesperado al cancelar la cita.",
+      tipo: "error",
+    });
+
+    console.error(err);
+
+  }
+};
+
   const tituloVista = esAdmin
     ? "Gestión de citas"
     : esCliente
@@ -963,7 +1003,10 @@ const Citas = () => {
           {descripcionSinCitas}
         </Alert>
       ) : esCliente ? (
-        <TarjetaCitas citas={citas} />
+        <TarjetaCitas
+        citas={citas}
+        cancelarCita={cancelarCita}
+      />
       ) : esEmpleado ? (
         <>
           <div className="d-flex justify-content-center gap-3 mb-4 flex-wrap">

@@ -16,6 +16,7 @@ import Servicios from "./views/Servicios";
 import Insumos from './views/Insumos';
 import Registro from './views/Registro';
 import Perfil from './views/Perfil';
+import InteligenciaNegocio from "./pages/InteligenciaNegocio";
 
 import RutaProtegida from "./components/rutas/RutaProtegida";
 import RecuperarCredenciales from './components/login/RecuperarCredenciales';
@@ -52,6 +53,7 @@ const App = () => {
             <Route path='/empleados' element={<RutaProtegida rolesPermitidos={["admin"]}><Empleados /></RutaProtegida>} />
             <Route path='/clientes' element={<RutaProtegida rolesPermitidos={["admin"]}><Clientes /></RutaProtegida>} />
             <Route path='/insumos' element={<RutaProtegida rolesPermitidos={["admin"]}><Insumos /></RutaProtegida>} />
+            <Route path="/inteligencia-negocio" element={<RutaProtegida rolesPermitidos={["admin"]}><InteligenciaNegocio /></RutaProtegida>} />
             <Route path='/perfil' element={<RutaProtegida rolesPermitidos={["cliente", "empleado"]}><Perfil /></RutaProtegida>}/>
             
             <Route path='*' element={<Pagina404/>} />

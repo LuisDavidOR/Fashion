@@ -23,65 +23,153 @@ const Encabezado = () => {
   const [mostrarNotificaciones, setMostrarNotificaciones] = useState(false);
   const [citasPendientes, setCitasPendientes] = useState([]);
   const [toastNotification, setToastNotification] = useState({ mostrar: false, mensaje: "", tipo: "" });
+  const [citasAceptadasCliente, setCitasAceptadasCliente] = useState([]);
+  const [hayNotificacionNueva, setHayNotificacionNueva] = useState(false);
+
+  const cargarCitasAceptadasCliente = async () => {
+      try {
+        if (!usuario || rol !== "cliente") return;
+
+        const { data: usuarioActual, error: errorUsuario } = await supabase
+          .from("Usuarios")
+          .select("id_cliente")
+          .eq("auth_id", usuario.id)
+          .single();
+
+        if (errorUsuario || !usuarioActual?.id_cliente) return;
+
+        const { data, error } = await supabase
+          .from("Citas")
+          .select(`
+            id_cita,
+            fecha,
+            hora,
+            Empleados (nombre, apellido),
+            Detalle_cita (
+              Servicios (nombre)
+            )
+          `)
+          .eq("id_cliente", usuarioActual.id_cliente)
+          .eq("estado_cita", "aceptado")
+          .order("id_cita", { ascending: false });
+
+        if (error) throw error;
+
+        setCitasAceptadasCliente(data || []);
+      } catch (err) {
+        console.error("Error al cargar citas aceptadas del cliente:", err);
+      }
+    };
 
   const cargarCitasPendientes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("Citas")
-        .select(`
-          id_cita,
-          fecha,
-          hora,
-          Clientes (nombre, apellido),
-          Detalle_cita (
-            Servicios (nombre)
-          )
-        `)
-        .eq("estado_cita", "pendiente")
-        .is("id_empleado", null);
+      try {
+        const { data, error } = await supabase
+          .from("Citas")
+          .select(`
+            id_cita,
+            fecha,
+            hora,
+            Clientes (nombre, apellido),
+            Detalle_cita (
+              Servicios (nombre)
+            )
+          `)
+          .eq("estado_cita", "pendiente")
+          .is("id_empleado", null)
+          .order("id_cita", { ascending: false });
 
-      if (error) throw error;
-      setCitasPendientes(data || []);
-    } catch (err) {
-      console.error("Error al cargar citas pendientes:", err);
-    }
-  };
+        if (error) throw error;
+
+        setCitasPendientes(data || []);
+      } catch (err) {
+        console.error("Error al cargar citas pendientes:", err);
+      }
+    };
 
   useEffect(() => {
-    if (!usuario || (rol !== "admin" && rol !== "empleado")) {
-      setCitasPendientes([]);
-      setMostrarNotificaciones(false);
-      return;
-    }
+  if (!usuario) {
+    setCitasPendientes([]);
+    setCitasAceptadasCliente([]);
+    setMostrarNotificaciones(false);
+    return;
+  }
 
+  if (rol === "admin" || rol === "empleado") {
     cargarCitasPendientes();
+  }
 
-    const canal = supabase
-      .channel("citas-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "Citas" },
-        () => {
+  if (rol === "cliente") {
+    cargarCitasAceptadasCliente();
+  }
+
+  const canal = supabase
+    .channel("citas-realtime")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "Citas" },
+      () => {
+        if (rol === "admin" || rol === "empleado") {
           cargarCitasPendientes();
         }
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          console.log("Sistema de notificaciones de citas conectado.");
-        } else if (status === "CHANNEL_ERROR") {
-          console.error("Error al conectar el canal de notificaciones.");
-          setToastNotification({
-            mostrar: true,
-            mensaje: "Error al conectar el sistema de notificaciones en tiempo real.",
-            tipo: "error",
-          });
-        }
-      });
 
-    return () => {
-      supabase.removeChannel(canal);
-    };
-  }, [usuario, rol]);
+        if (rol === "cliente") {
+          cargarCitasAceptadasCliente();
+        }
+      }
+    )
+    .subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        console.log("Sistema de notificaciones de citas conectado.");
+      } else if (status === "CHANNEL_ERROR") {
+        console.error("Error al conectar el canal de notificaciones.");
+        setToastNotification({
+          mostrar: true,
+          mensaje: "Error al conectar el sistema de notificaciones en tiempo real.",
+          tipo: "error",
+        });
+      }
+    });
+
+  return () => {
+    supabase.removeChannel(canal);
+  };
+}, [usuario, rol]);
+
+  const notificacionesActuales = esCliente
+  ? citasAceptadasCliente
+  : citasPendientes;
+
+  const tituloNotificaciones = "Notificaciones";
+
+  const mensajeSinNotificaciones = "Sin actividad reciente.";
+
+  const obtenerUltimoIdNotificacion = () => {
+  if (!notificacionesActuales || notificacionesActuales.length === 0) {
+    return null;
+  }
+
+  return notificacionesActuales[0].id_cita;
+};
+
+useEffect(() => {
+  if (!usuario || !rol) return;
+
+  const ultimoId = obtenerUltimoIdNotificacion();
+
+  if (!ultimoId) {
+    setHayNotificacionNueva(false);
+    return;
+  }
+
+  const claveStorage = `ultimaNotificacionVista_${usuario.id}_${rol}`;
+  const ultimoIdVisto = localStorage.getItem(claveStorage);
+
+  if (String(ultimoId) !== String(ultimoIdVisto)) {
+    setHayNotificacionNueva(true);
+  } else {
+    setHayNotificacionNueva(false);
+  }
+}, [notificacionesActuales, usuario, rol]);
 
   const manejarToggle = () => {
   const nuevoEstado = !mostrarMenu;
@@ -284,6 +372,10 @@ const Encabezado = () => {
     );
   }
 
+
+
+  console.log(notificacionesActuales);
+
   return (
     <>
       <Navbar expand="md" fixed="top" className="navbar-fashion shadow-sm" variant="dark">
@@ -313,44 +405,69 @@ const Encabezado = () => {
           </Navbar.Brand>
 
           {/* Campana de Notificaciones (para admin y empleado) */}
-          {(esAdmin || esEmpleado) && (
+          {(esAdmin || esEmpleado || esCliente) && (
             <div className="nav-item-notificaciones position-relative align-self-center ms-auto me-3">
               <button
                 className="btn btn-link text-white p-0 position-relative d-flex align-items-center"
-                onClick={() => setMostrarNotificaciones(!mostrarNotificaciones)}
+                onClick={() => {
+                  const nuevoEstado = !mostrarNotificaciones;
+                  setMostrarNotificaciones(nuevoEstado);
+
+                  if (nuevoEstado) {
+                    const ultimoId = obtenerUltimoIdNotificacion();
+
+                    if (ultimoId) {
+                      const claveStorage = `ultimaNotificacionVista_${usuario.id}_${rol}`;
+                      localStorage.setItem(claveStorage, String(ultimoId));
+                    }
+
+                    setHayNotificacionNueva(false);
+                  }
+                }}
                 style={{ textDecoration: "none", border: "none", background: "none" }}
               >
-                <i className="bi bi-bell-fill" style={{ fontSize: "1.25rem" }}></i>
-                {citasPendientes.length > 0 && (
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: "0.6rem" }}>
-                    {citasPendientes.length}
+                <i className={`bi bi-bell-fill icono-campana-notificacion ${
+                    notificacionesActuales.length > 0 ? "campana-activa" : ""}`}></i>
+                {hayNotificacionNueva && (
+                  <span className="badge-notificacion position-absolute top-0 start-100 translate-middle">
+                    1
                   </span>
                 )}
               </button>
 
               {mostrarNotificaciones && (
-                <div className="dropdown-notificaciones shadow-lg border rounded-3 bg-white p-3 text-dark position-absolute end-0 mt-2" style={{ width: "300px", zIndex: 1000 }}>
+                <div className="dropdown-notificaciones text-dark position-absolute end-0 mt-2">
                   <h6 className="fw-bold border-bottom pb-2 mb-2 d-flex justify-content-between align-items-center text-dark">
-                    Citas Pendientes
-                    <span className="badge bg-danger text-white">{citasPendientes.length}</span>
+                    {tituloNotificaciones}
+                    {hayNotificacionNueva && (
+                        <span className="badge bg-danger text-white">1</span>
+                      )}
                   </h6>
                   <div style={{ maxHeight: "250px", overflowY: "auto" }}>
-                    {citasPendientes.length === 0 ? (
+                    {notificacionesActuales.length === 0 ? (
                       <div className="text-center py-3 text-muted small">
-                        No hay citas pendientes.
+                        {mensajeSinNotificaciones}
                       </div>
                     ) : (
-                      citasPendientes.map((cita) => {
+                      notificacionesActuales.map((cita) => {
                         const serviciosNombres = cita.Detalle_cita?.map(
                           (d) => d.Servicios?.nombre
                         ).filter(Boolean).join(", ") || "Sin servicios";
 
                         return (
-                          <div key={cita.id_cita} className="notificacion-item border-bottom py-2" style={{ cursor: "pointer" }} onClick={() => {
+                          <div key={cita.id_cita}className="notificacion-item"onClick={() => {
                             setMostrarNotificaciones(false);
                             navigate("/citas");
                           }}>
-                            <div className="small fw-bold text-dark">{cita.Clientes ? `${cita.Clientes.nombre} ${cita.Clientes.apellido}` : "Cliente"}</div>
+                            <div className="small fw-bold text-dark">
+                              {esCliente
+                                ? cita.Empleados
+                                ? `Tu cita fue aceptada por ${cita.Empleados.nombre}`
+                                : "Actualización de cita"
+                                : cita.Clientes
+                                  ? `${cita.Clientes.nombre} ${cita.Clientes.apellido}`
+                                  : "Cliente"}
+                            </div>
                             <div className="text-muted" style={{ fontSize: "0.75rem" }}>{serviciosNombres}</div>
                             <div className="text-muted d-flex justify-content-between mt-1" style={{ fontSize: "0.7rem" }}>
                               <span><i className="bi bi-calendar-event me-1"></i>{cita.fecha}</span>
@@ -362,9 +479,7 @@ const Encabezado = () => {
                     )}
                   </div>
                   <div className="text-center border-top pt-2 mt-2">
-                    <button
-                      className="btn btn-sm text-white w-100"
-                      style={{ backgroundColor: "#7A564A" }}
+                    <button className="btn btn-notificaciones w-100"
                       onClick={() => {
                         setMostrarNotificaciones(false);
                         navigate("/citas");
@@ -381,10 +496,10 @@ const Encabezado = () => {
           {/* Botón del menú */}
           {!esRutaAuth && (
             <Navbar.Toggle
-              aria-controls="menu-offcanvas"
-              onClick={manejarToggle}
-              className={(esAdmin || esEmpleado) ? "ms-0" : "ms-auto"}
-            />
+            aria-controls="menu-offcanvas"
+            onClick={manejarToggle}
+            className="toggle-fashion-menu"
+          />
           )}
 
           {/*Menú lateral */}

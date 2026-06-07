@@ -14,8 +14,10 @@
     "@supabase/supabase-js": "^2.103.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "chart.js": "^4.5.1",
     "react": "^19.2.4",
     "react-bootstrap": "^2.10.10",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.14.0",
     "tslib": "^2.8.1"

@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-const TarjetaCitas = ({ citas }) => {
+const TarjetaCitas = ({
+  citas,
+  cancelarCita,
+}) => {
   const [citaSeleccionada, setCitaSeleccionada] = useState(null);
 
   const obtenerClaseEstado = (estado) => {
@@ -146,6 +149,17 @@ const TarjetaCitas = ({ citas }) => {
                     <i className="bi bi-eye me-1"></i>
                     Ver detalles
                   </Button>
+                  {(cita.estado_cita === "pendiente" ||
+                    cita.estado_cita === "aceptado") && (
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => cancelarCita(cita)}
+                    >
+                      <i className="bi bi-x-circle me-1"></i>
+                      Cancelar
+                    </Button>
+                  )}
                 </div>
               </div>
             );
