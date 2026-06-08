@@ -1,153 +1,205 @@
-import React from "react";
 import { Container, Row, Col, Card } from "react-bootstrap";
-
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-import { Bar } from "react-chartjs-2";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend
-);
+import React, { useEffect, useState } from "react";
+import { supabase } from "../database/supabaseconfig";
 
 const InteligenciaNegocio = () => {
-  const productividadData = {
-    labels: ["Snaijder", "David", "Iris", "Luffy"],
-    datasets: [
-      {
-        label: "Citas atendidas",
-        data: [7, 6, 5, 5],
-        backgroundColor: "#4CAF50",
-      },
-    ],
-  };
+  const [gananciaTotal, setGananciaTotal] = useState(0);
+  const [calificacionPromedio, setCalificacionPromedio] = useState(0);
+  const [satisfaccion, setSatisfaccion] = useState(0);
+  const [mejorEmpleado, setMejorEmpleado] = useState("Sin datos");
 
-  const ingresosData = {
-    labels: ["Snaijder", "Iris", "Luffy", "David"],
-    datasets: [
-      {
-        label: "Ingresos C$",
-        data: [9640, 6580, 6350, 6160],
-        backgroundColor: "#D4A373",
-      },
-    ],
-  };
+  useEffect(() => {
+    cargarDatosDashboard();
+  }, []);
 
-  const rentabilidadData = {
-    labels: [
-      "Maquillaje",
-      "Uñas",
-      "Pintar cabello",
-      "Combo uñas",
-      "Manicura rusa",
-    ],
-    datasets: [
-      {
-        label: "Ganancia",
-        data: [2902, 2681, 2557, 2482, 1909],
-        backgroundColor: "#5CB85C",
-      },
-    ],
-  };
+  const cargarDatosDashboard = async () => {
+    try {
+      const { data: detalles, error: errorDetalles } = await supabase
+        .from("Detalle_cita")
+        .select(`
+          id_detalle_cita,
+          subtotal,
+          costo_empleado,
+          costo_insumo,
+          Servicios(nombre),
+          Citas(
+            id_cita,
+            estado_cita,
+            id_empleado,
+            Empleados(nombre, apellido)
+          )
+        `);
 
-  const demandaData = {
-    labels: [
-      "Manicura rusa",
-      "Corte cabello",
-      "Uñas acrílicas",
-      "Retiro acrílico",
-      "Peinado",
-    ],
-    datasets: [
-      {
-        label: "% Demanda",
-        data: [24.4, 22, 22, 17.1, 14.6],
-        backgroundColor: "#6C8EBF",
-      },
-    ],
+      if (errorDetalles) throw errorDetalles;
+
+      const detallesValidos = (detalles || []).filter(
+        (detalle) => detalle.Citas?.estado_cita === "completada"
+      );
+
+      const ganancia = detallesValidos.reduce((total, detalle) => {
+        const subtotal = Number(detalle.subtotal || 0);
+        const costoEmpleado = Number(detalle.costo_empleado || 0);
+        const costoInsumo = Number(detalle.costo_insumo || 0);
+
+        return total + (subtotal - costoEmpleado - costoInsumo);
+      }, 0);
+
+      setGananciaTotal(ganancia);
+
+      const empleadosMap = {};
+
+      detallesValidos.forEach((detalle) => {
+        const cita = detalle.Citas;
+        const empleado = cita?.Empleados;
+
+        if (!empleado) return;
+
+        const nombreEmpleado = `${empleado.nombre} ${
+          empleado.apellido || ""
+        }`.trim();
+
+        if (!empleadosMap[nombreEmpleado]) {
+          empleadosMap[nombreEmpleado] = {
+            empleado: nombreEmpleado,
+            ingresos: 0,
+          };
+        }
+
+        empleadosMap[nombreEmpleado].ingresos += Number(detalle.subtotal || 0);
+      });
+
+      const empleados = Object.values(empleadosMap);
+
+      if (empleados.length > 0) {
+        const mejor = [...empleados].sort((a, b) => b.ingresos - a.ingresos)[0];
+        setMejorEmpleado(mejor.empleado);
+      }
+
+      const { data: calificaciones, error: errorCalificaciones } =
+        await supabase.from("Calificaciones").select("puntuacion");
+
+      if (errorCalificaciones) throw errorCalificaciones;
+
+      if ((calificaciones || []).length > 0) {
+        const promedio =
+          calificaciones.reduce(
+            (total, item) => total + Number(item.puntuacion || 0),
+            0
+          ) / calificaciones.length;
+
+        setCalificacionPromedio(promedio);
+
+        const satisfechos = calificaciones.filter(
+          (item) => Number(item.puntuacion) >= 4
+        ).length;
+
+        setSatisfaccion((satisfechos / calificaciones.length) * 100);
+      }
+    } catch (error) {
+      console.error("Error cargando datos del dashboard:", error.message);
+    }
   };
 
   return (
-    <Container fluid className="py-5 px-4">
+    <Container fluid className="inteligencia-container py-5 px-4">
       <h1 className="text-center fw-bold mb-5">
+        <Card className="dashboard-hero border-0 shadow-lg mb-5"></Card>
         📊 Centro de Inteligencia del Negocio
       </h1>
 
       <Row className="g-4 mb-5">
         <Col md={3}>
-          <Card className="shadow text-center p-4 h-100">
-            <h4>Ganancia Total</h4>
-            <h1 className="text-success fw-bold">C$25,850</h1>
+          <Card className="kpi-card shadow text-center h-100">
+            <h4>💰 Ganancia Total</h4>
+            <h1 className="text-success fw-bold">
+              C${gananciaTotal.toLocaleString("es-NI")}
+            </h1>
           </Card>
         </Col>
 
         <Col md={3}>
-          <Card className="shadow text-center p-4 h-100">
-            <h4>Satisfacción</h4>
-            <h1 className="text-success fw-bold">93%</h1>
+          <Card className="kpi-card shadow text-center h-100">
+            <h4>⭐ Satisfacción</h4>
+            <h1 className="text-success fw-bold">
+              {satisfaccion.toFixed(0)}%
+            </h1>
           </Card>
         </Col>
 
         <Col md={3}>
-          <Card className="shadow text-center p-4 h-100">
-            <h4>Mejor Empleado</h4>
-            <h1 className="fw-bold">Snaijder</h1>
+          <Card className="kpi-card shadow text-center h-100">
+            <h5 className="mb-2">🤴🏼 Mejor empleado </h5>
+            <h1 className="fw-bold">{mejorEmpleado}</h1>
           </Card>
         </Col>
 
         <Col md={3}>
-          <Card className="shadow text-center p-4 h-100">
-            <h4>Calificación Promedio</h4>
+          <Card className="kpi-card shadow text-center h-100">
+        <h5 className="mb-3">
+        💬 Calificación Promedio
+        </h5>
             <h1 className="fw-bold">
-              4.40 <span>⭐</span>
+              {calificacionPromedio.toFixed(1)} ⭐
             </h1>
           </Card>
         </Col>
       </Row>
 
-      <Row className="g-4">
-        <Col lg={6}>
-          <Card className="shadow p-4">
-            <h4 className="mb-3">👨‍💼 Productividad del Personal</h4>
-            <Bar data={productividadData} />
-          </Card>
-        </Col>
+      <hr className="my-5" />
 
-        <Col lg={6}>
-          <Card className="shadow p-4">
-            <h4 className="mb-3">💰 Ingresos por Empleado</h4>
-            <Bar data={ingresosData} />
-          </Card>
-        </Col>
+      <Card className="shadow mb-5">
+        <Card.Header className="fw-bold fs-5">
+          📈 Rentabilidad del Negocio
+Indicadores financieros y servicios más rentables.
+        </Card.Header>
 
-        <Col lg={6}>
-          <Card className="shadow p-4">
-            <h4 className="mb-3">📈 Servicios Más Rentables</h4>
-            <Bar data={rentabilidadData} />
-          </Card>
-        </Col>
+        <Card.Body>
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ height: "300px" }}
+          >
+            <div className="text-center">
+              <h4>Dashboard pendiente</h4>
+              <p className="text-muted mb-0">
+                Esperando enlace de Tableau Public.
+              </p>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
 
-        <Col lg={6}>
-          <Card className="shadow p-4">
-            <h4 className="mb-3">🔥 Servicios con Mayor Demanda</h4>
-            <Bar data={demandaData} />
-          </Card>
-        </Col>
-      </Row>
+      <Card className="shadow mb-5">
+        <Card.Header className="fw-bold fs-5">
+          👥 Productividad del Personal 
+          Análisis del desempeño y generación de ingresos.
+        </Card.Header>
+
+        <div className="tableau-wrapper">
+            <iframe
+                title="Dashboard Productividad"
+                src="https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1?:showVizHome=no"
+                className="tableau-iframe"
+            />
+            </div>
+      </Card>
+
+      <Card className="shadow mb-5">
+        <Card.Header className="fw-bold fs-5">
+          ⭐ Satisfacción de Clientes
+Percepción y experiencia de nuestros servicios.
+        </Card.Header>
+        
+    
+        <Card.Body style={{ padding: 0 }}>
+          <iframe
+            title="Dashboard Satisfacción"
+            src="https://public.tableau.com/views/DashboardF2/Dashboard1?:showVizHome=no"
+            width="100%"
+            height="850"
+            frameBorder="0"
+          />
+        </Card.Body>
+      </Card>
     </Container>
   );
 };
