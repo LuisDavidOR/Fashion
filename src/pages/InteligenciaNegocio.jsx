@@ -241,10 +241,16 @@ const crearUrlTableau = (url) => {
 
   return (
     <Container fluid className="inteligencia-container py-5 px-4">
-      <h1 className="text-center fw-bold mb-5">
-        <Card className="dashboard-hero border-0 shadow-lg mb-5"></Card>
-        📊 Centro de Inteligencia del Negocio
-      </h1>
+      <section className="bi-hero">
+          <span className="bi-etiqueta">Panel Ejecutivo</span>
+
+          <h1>📊 Centro de Inteligencia del Negocio</h1>
+
+          <p>
+            Analiza la rentabilidad, productividad y satisfacción de Salón Fashion
+            mediante indicadores visuales y reportes ejecutivos.
+          </p>
+        </section>
 
       <Row className="g-4 mb-5">
         <Col md={3}>
@@ -283,111 +289,170 @@ const crearUrlTableau = (url) => {
           </Card>
         </Col>
       </Row>
-      <div className="text-center mb-5">
-        <Button variant="dark" onClick={generarReporteGeneral}>
-          📄 Generar Reporte Ejecutivo PDF
-        </Button>
-      </div>
-      <div className="text-center mb-5 d-flex justify-content-center gap-3 flex-wrap">
-      <Button variant="success" onClick={generarReporteRentabilidad}>
-        📈 PDF Rentabilidad
-      </Button>
+     <section className="reportes-panel mb-5">
+        <h3>Reportes ejecutivos</h3>
 
-      <Button variant="warning" onClick={generarReporteProductividad}>
-        👥 PDF Productividad
-      </Button>
+        <p>
+          Descarga informes en PDF con los principales resultados del salón para
+          presentar la rentabilidad, productividad y satisfacción de forma clara.
+        </p>
 
-      <Button variant="info" onClick={generarReporteSatisfaccion}>
-        ⭐ PDF Satisfacción
-      </Button>
-    </div>
+        <div className="reportes-botones">
+          <Button className="btn-fashion-primary" onClick={generarReporteGeneral}>
+            📄 Reporte Ejecutivo
+          </Button>
+
+          <Button className="btn-fashion-outline" onClick={generarReporteRentabilidad}>
+            📈 Rentabilidad
+          </Button>
+
+          <Button className="btn-fashion-outline" onClick={generarReporteProductividad}>
+            👥 Productividad
+          </Button>
+
+          <Button className="btn-fashion-outline" onClick={generarReporteSatisfaccion}>
+            ⭐ Satisfacción
+          </Button>
+        </div>
+      </section>
 
       <hr className="my-5" />
 
-      <Card className="dashboard-card shadow mb-5">
-        <Card.Header className="fw-bold fs-5">
-            📈 Rentabilidad del Negocio
-            <p className="mb-0 text-muted fs-6">
-            Indicadores financieros y servicios más rentables.
-            </p>
-        </Card.Header>
+      <section className="dashboard-section">
+        <div className="dashboard-info">
+          <span className="dashboard-tag">Análisis financiero</span>
+          <h2>📈 Rentabilidad del Negocio</h2>
 
-       <Card.Body style={{ padding: 0 }}>
-          <div className="tableau-wrapper">
-            <iframe
-              title="Dashboard Rentabilidad"
-              src={crearUrlTableau("https://public.tableau.com/views/RentabilidadFS/Dashboard1")}
-              className="tableau-iframe"
-            />
-          </div>
+          <p>
+            Este dashboard permite identificar los servicios que generan mayor ganancia
+            para el salón, considerando ingresos, costos de empleados e insumos.
+          </p>
 
-          <div className="text-center p-3">
-            <a
-              href="https://public.tableau.com/views/RentabilidadFS/Dashboard1?:showVizHome=no"
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-dark"
-            >
-              Abrir en pantalla completa
-            </a>
-          </div>
-        </Card.Body>
+          <p>
+            Ayuda a tomar decisiones sobre precios, promociones y servicios que deben
+            impulsarse dentro del catálogo.
+          </p>
+        </div>
+
+        <Card className="dashboard-card-fashion">
+          <Card.Body>
+            <div className="tableau-wrapper">
+              <iframe
+                title="Dashboard Rentabilidad"
+                src={crearUrlTableau("https://public.tableau.com/views/RentabilidadFS/Dashboard1")}
+                className="tableau-iframe"
+              />
+            </div>
+
+            <div className="dashboard-actions">
+              <a
+                href="https://public.tableau.com/views/RentabilidadFS/Dashboard1?:showVizHome=no"
+                target="_blank"
+                rel="noreferrer"
+                className="btn-fashion-primary"
+              >
+                Ver en pantalla completa
+              </a>
+            </div>
+          </Card.Body>
         </Card>
+      </section>
 
-      <Card className="shadow mb-5">
-        <Card.Header className="fw-bold fs-5">
-          👥 Productividad del Personal 
-          Análisis del desempeño y generación de ingresos.
-        </Card.Header>
+      <section className="dashboard-section">
+        <div className="dashboard-info">
+          <span className="dashboard-tag">Desempeño del equipo</span>
+          <h2>👥 Productividad del Personal</h2>
 
-        <Card.Body style={{ padding: 0 }}>
-          <div className="tableau-wrapper">
-            <iframe
-              title="Dashboard Productividad"
-              src={crearUrlTableau("https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1")}
-              className="tableau-iframe"
-            />
-          </div>
+          <p>
+            Esta vista muestra el rendimiento del personal según las citas atendidas,
+            ingresos generados y participación en los servicios completados.
+          </p>
 
-          <div className="text-center p-3">
-            <a
-              href="https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1?:showVizHome=no"
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-dark"
-            >
-              Abrir en pantalla completa
-            </a>
-          </div>
-        </Card.Body>
-      </Card>
+          <p>
+            Permite reconocer fortalezas del equipo y mejorar la organización interna
+            del salón.
+          </p>
+        </div>
 
-      <Card className="shadow mb-5">
-        <Card.Header className="fw-bold fs-5">
-          ⭐ Satisfacción de Clientes
-Percepción y experiencia de nuestros servicios.
-        </Card.Header>
-        
-    
-        <Card.Body style={{ padding: 0 }}>
-          <div className="tableau-wrapper">
-            <iframe
-              title="Dashboard Satisfacción"
-              src={crearUrlTableau("https://public.tableau.com/views/DashboardF2/Dashboard1")}
-              className="tableau-iframe"
-            />
-          </div>
+        <Card className="dashboard-card-fashion">
+          <Card.Body>
+            <div className="tableau-wrapper">
+              <iframe
+                title="Dashboard Productividad"
+                src={crearUrlTableau("https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1")}
+                className="tableau-iframe"
+              />
+            </div>
 
-          <div className="text-center p-3">
-            <a
-              href="https://public.tableau.com/views/DashboardF2/Dashboard1?:showVizHome=no"
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-dark"
-            >
-              Abrir en pantalla completa
-            </a>
-          </div>
+            <div className="dashboard-actions">
+              <a
+                href="https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1?:showVizHome=no"
+                target="_blank"
+                rel="noreferrer"
+                className="btn-fashion-primary"
+              >
+                Ver en pantalla completa
+              </a>
+            </div>
+          </Card.Body>
+        </Card>
+      </section>
+
+      <section className="dashboard-section">
+        <div className="dashboard-info">
+          <span className="dashboard-tag">Experiencia del cliente</span>
+          <h2>⭐ Satisfacción de Clientes</h2>
+
+          <p>
+            Este dashboard resume la percepción de los clientes mediante sus
+            calificaciones y el nivel general de satisfacción con los servicios.
+          </p>
+
+          <p>
+            Sirve para detectar oportunidades de mejora y mantener una experiencia
+            alineada con la calidad de Salón Fashion.
+          </p>
+        </div>
+
+        <Card className="dashboard-card-fashion">
+          <Card.Body>
+            <div className="tableau-wrapper">
+              <iframe
+                title="Dashboard Satisfacción"
+                src={crearUrlTableau("https://public.tableau.com/views/DashboardF2/Dashboard1")}
+                className="tableau-iframe"
+              />
+            </div>
+
+            <div className="dashboard-actions">
+              <a
+                href="https://public.tableau.com/views/DashboardF2/Dashboard1?:showVizHome=no"
+                target="_blank"
+                rel="noreferrer"
+                className="btn-fashion-primary"
+              >
+                Ver en pantalla completa
+              </a>
+            </div>
+          </Card.Body>
+        </Card>
+      </section>
+
+      <Card className="dashboard-conclusion">
+        <Card.Body>
+          <h3>📌 Conclusión ejecutiva</h3>
+
+          <p>
+            El Centro de Inteligencia del Negocio permite analizar el desempeño del
+            salón desde tres perspectivas clave: rentabilidad, productividad y
+            satisfacción del cliente.
+          </p>
+
+          <p>
+            Esta información facilita la toma de decisiones para mejorar servicios,
+            reconocer el rendimiento del personal y fortalecer la experiencia de los
+            clientes.
+          </p>
         </Card.Body>
       </Card>
     </Container>

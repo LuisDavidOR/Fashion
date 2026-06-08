@@ -145,8 +145,8 @@ const Inicio = () => {
               className="btn-dashboard-ejecutivo"
               onClick={() => navigate("/inteligencia-negocio")}
             >
-              
-            Ver Dashboard Ejecutivo
+
+            Ver Dashboards Ejecutivos
           </Button>
         </section>
       )}
