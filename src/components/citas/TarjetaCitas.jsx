@@ -5,6 +5,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 const TarjetaCitas = ({
   citas,
   cancelarCita,
+  onReagendar,
 }) => {
   const [citaSeleccionada, setCitaSeleccionada] = useState(null);
 
@@ -149,11 +150,22 @@ const TarjetaCitas = ({
                     <i className="bi bi-eye me-1"></i>
                     Ver detalles
                   </Button>
+                  {cita.estado_cita === "pendiente" && (
+                    <Button
+                      size="sm"
+                      className="btn-reagendar-cita ms-2"
+                      onClick={() => onReagendar(cita)}
+                    >
+                      <i className="bi bi-calendar-range me-1"></i>
+                      Reagendar
+                    </Button>
+                  )}
                   {(cita.estado_cita === "pendiente" ||
                     cita.estado_cita === "aceptado") && (
                     <Button
                       size="sm"
                       variant="outline-danger"
+                      className="ms-2"
                       onClick={() => cancelarCita(cita)}
                     >
                       <i className="bi bi-x-circle me-1"></i>
@@ -253,6 +265,24 @@ const TarjetaCitas = ({
             </>
           )}
         </Modal.Body>
+        <Modal.Footer>
+          {citaSeleccionada && citaSeleccionada.estado_cita === "pendiente" && (
+            <Button
+              className="btn-reagendar-cita"
+              onClick={() => {
+                const cita = citaSeleccionada;
+                setCitaSeleccionada(null);
+                onReagendar(cita);
+              }}
+            >
+              <i className="bi bi-calendar-range me-1"></i>
+              Reagendar cita
+            </Button>
+          )}
+          <Button variant="secondary" onClick={() => setCitaSeleccionada(null)}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );

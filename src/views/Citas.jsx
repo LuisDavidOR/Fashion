@@ -8,6 +8,7 @@ import ModalRegistroCita from "../components/citas/ModalRegistroCita";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import TablaCitas from "../components/citas/TablaCitas";
 import TarjetaCitas from "../components/citas/TarjetaCitas";
+import ModalReagendarCita from "../components/citas/ModalReagendarCita";
 
 const Citas = () => {
 
@@ -39,6 +40,8 @@ const Citas = () => {
   const [aceptandoCita, setAceptandoCita] = useState(null);
   const [completandoCita, setCompletandoCita] = useState(null);
   const [vistaEmpleado, setVistaEmpleado] = useState("disponibles");
+  const [mostrarModalReagendar, setMostrarModalReagendar] = useState(false);
+  const [citaParaReagendar, setCitaParaReagendar] = useState(null);
 
   const limpiarCita = () => {
     setNuevaCita({
@@ -892,6 +895,302 @@ const Citas = () => {
     }
   };
 
+  const abrirModalReagendar = (cita) => {
+    setCitaParaReagendar(cita);
+    setMostrarModalReagendar(true);
+  };
+
+  const calcularDuracionDeCita = (detalleCitaArray) => {
+    return (
+      detalleCitaArray?.reduce(
+        (total, item) => total + Number(item.Servicios?.duracion || 0),
+        0
+      ) || 0
+    );
+  };
+
+  const calcularHorariosNoDisponiblesReagendar = async (fecha, idCliente, idCitaExcluir) => {
+    if (!fecha) return [];
+
+    try {
+      const horasBase = generarHorasBase();
+      const fechaActual = obtenerFechaLocal();
+      const ahora = new Date();
+      const minutosActuales = ahora.getHours() * 60 + ahora.getMinutes();
+
+      const { count: totalEmpleadosActivos, error: errorEmpleados } =
+        await supabase
+          .from("Empleados")
+          .select("*", { count: "exact", head: true })
+          .eq("estado", "activo");
+
+      if (errorEmpleados) {
+        console.error("Error contando empleados activos:", errorEmpleados.message);
+        return [];
+      }
+
+      let query = supabase
+        .from("Citas")
+        .select(`
+          id_cita,
+          id_cliente,
+          id_empleado,
+          hora,
+          estado_cita,
+          Detalle_cita (
+            Servicios (
+              duracion
+            )
+          )
+        `)
+        .eq("fecha", fecha)
+        .in("estado_cita", ["pendiente", "aceptado"]);
+
+      if (idCitaExcluir) {
+        query = query.neq("id_cita", idCitaExcluir);
+      }
+
+      const { data: citasDelDia, error: errorCitas } = await query;
+
+      if (errorCitas) {
+        console.error("Error cargando citas del día para reagendar:", errorCitas.message);
+        return [];
+      }
+
+      const bloqueadas = horasBase.filter((hora) => {
+        const inicioHora = convertirHoraAMinutos(hora);
+
+        if (
+          fecha === fechaActual &&
+          inicioHora < minutosActuales + 60
+        ) {
+          return true;
+        }
+
+        const clienteTieneCruce = citasDelDia.some((cita) => {
+          if (String(cita.id_cliente) !== String(idCliente)) return false;
+
+          const inicioExistente = convertirHoraAMinutos(cita.hora);
+
+          const duracionExistente =
+            cita.Detalle_cita?.reduce(
+              (total, detalle) =>
+                total + Number(detalle.Servicios?.duracion || 0),
+              0
+            ) || 30;
+
+          const finExistente = inicioExistente + duracionExistente;
+
+          return inicioHora >= inicioExistente && inicioHora < finExistente;
+        });
+
+        if (clienteTieneCruce) return true;
+
+        const empleadosOcupados = new Set();
+
+        citasDelDia.forEach((cita) => {
+          if (cita.estado_cita !== "aceptado" || !cita.id_empleado) return;
+
+          const inicioExistente = convertirHoraAMinutos(cita.hora);
+
+          const duracionExistente =
+            cita.Detalle_cita?.reduce(
+              (total, detalle) =>
+                total + Number(detalle.Servicios?.duracion || 0),
+              0
+            ) || 30;
+
+          const finExistente = inicioExistente + duracionExistente;
+
+          if (inicioHora >= inicioExistente && inicioHora < finExistente) {
+            empleadosOcupados.add(cita.id_empleado);
+          }
+        });
+
+        return empleadosOcupados.size >= Number(totalEmpleadosActivos || 0);
+      });
+
+      return bloqueadas;
+    } catch (err) {
+      console.error("Error calculando horarios para reagendar:", err.message);
+      return [];
+    }
+  };
+
+  const validarFechaHoraReagendar = (fecha, hora) => {
+    if (!fecha || !hora) {
+      setToast({
+        mostrar: true,
+        mensaje: "Debe seleccionar fecha y hora.",
+        tipo: "advertencia",
+      });
+      return false;
+    }
+
+    const fechaActual = obtenerFechaLocal();
+
+    if (fecha < fechaActual) {
+      setToast({
+        mostrar: true,
+        mensaje: "No puedes agendar una cita en una fecha pasada.",
+        tipo: "advertencia",
+      });
+      return false;
+    }
+
+    const ahora = new Date();
+    const minutosActuales = ahora.getHours() * 60 + ahora.getMinutes();
+    const minutosSeleccionados = convertirHoraAMinutos(hora);
+
+    if (fecha === fechaActual && minutosSeleccionados < minutosActuales + 60) {
+      setToast({
+        mostrar: true,
+        mensaje: "Debes agendar con al menos 1 hora de anticipación.",
+        tipo: "advertencia",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const validarCruceClienteReagendar = async (idCliente, fecha, hora, idCitaExcluir) => {
+    const { data, error } = await supabase
+      .from("Citas")
+      .select(`
+        id_cita,
+        hora,
+        Detalle_cita (
+          Servicios (
+            duracion
+          )
+        )
+      `)
+      .eq("id_cliente", idCliente)
+      .eq("fecha", fecha)
+      .neq("id_cita", idCitaExcluir)
+      .in("estado_cita", ["pendiente", "aceptado"]);
+
+    if (error) {
+      console.error("Error validando citas del cliente para reagendar:", error.message);
+      setToast({
+        mostrar: true,
+        mensaje: "Error al validar tus citas existentes.",
+        tipo: "error",
+      });
+      return false;
+    }
+
+    const cita = citas.find(c => c.id_cita === idCitaExcluir);
+    if (!cita) return false;
+
+    const duracionNueva = calcularDuracionDeCita(cita.Detalle_cita);
+    const inicioNueva = convertirHoraAMinutos(hora);
+    const finNueva = inicioNueva + duracionNueva;
+
+    const existeCruce = data.some((c) => {
+      const inicioExistente = convertirHoraAMinutos(c.hora);
+      const duracionExistente =
+        c.Detalle_cita?.reduce(
+          (total, detalle) =>
+            total + Number(detalle.Servicios?.duracion || 0),
+          0
+        ) || 30;
+      const finExistente = inicioExistente + duracionExistente;
+
+      return seCruzanHorarios(
+        inicioNueva,
+        finNueva,
+        inicioExistente,
+        finExistente
+      );
+    });
+
+    if (existeCruce) {
+      setToast({
+        mostrar: true,
+        mensaje: "Ya tienes una cita registrada en ese rango de horario.",
+        tipo: "advertencia",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const reagendarCita = async (cita, nuevaFecha, nuevaHora) => {
+    try {
+      if (!validarFechaHoraReagendar(nuevaFecha, nuevaHora)) {
+        return;
+      }
+
+      const cruceValido = await validarCruceClienteReagendar(
+        cita.id_cliente,
+        nuevaFecha,
+        nuevaHora,
+        cita.id_cita
+      );
+
+      if (!cruceValido) {
+        return;
+      }
+
+      const bloqueados = await calcularHorariosNoDisponiblesReagendar(
+        nuevaFecha,
+        cita.id_cliente,
+        cita.id_cita
+      );
+
+      if (bloqueados.includes(nuevaHora)) {
+        setToast({
+          mostrar: true,
+          mensaje: "Ese horario ya no está disponible. Selecciona otra hora.",
+          tipo: "advertencia",
+        });
+        return;
+      }
+
+      const updateData = {
+        fecha: nuevaFecha,
+        hora: nuevaHora,
+        estado_cita: "pendiente",
+        id_empleado: null,
+      };
+
+      const { error } = await supabase
+        .from("Citas")
+        .update(updateData)
+        .eq("id_cita", cita.id_cita);
+
+      if (error) {
+        console.error("Error al reagendar cita:", error.message);
+        setToast({
+          mostrar: true,
+          mensaje: "Error al reagendar la cita.",
+          tipo: "error",
+        });
+        return;
+      }
+
+      setToast({
+        mostrar: true,
+        mensaje: "Cita reagendada exitosamente.",
+        tipo: "exito",
+      });
+
+      setMostrarModalReagendar(false);
+      setCitaParaReagendar(null);
+      await cargarCitas();
+    } catch (err) {
+      console.error("Excepción al reagendar cita:", err.message);
+      setToast({
+        mostrar: true,
+        mensaje: "Error inesperado al reagendar la cita.",
+        tipo: "error",
+      });
+    }
+  };
+
   const cancelarCita = async (cita) => {
   try {
 
@@ -1006,6 +1305,7 @@ const Citas = () => {
         <TarjetaCitas
         citas={citas}
         cancelarCita={cancelarCita}
+        onReagendar={abrirModalReagendar}
       />
       ) : esEmpleado ? (
         <>
@@ -1099,6 +1399,17 @@ const Citas = () => {
         eliminarServicioDetalle={eliminarServicioDetalle}
         horariosNoDisponibles={horariosNoDisponibles}
         cargandoHorarios={cargandoHorarios}
+      />
+
+      <ModalReagendarCita
+        mostrar={mostrarModalReagendar}
+        onHide={() => {
+          setMostrarModalReagendar(false);
+          setCitaParaReagendar(null);
+        }}
+        cita={citaParaReagendar}
+        calcularHorariosNoDisponibles={calcularHorariosNoDisponiblesReagendar}
+        onGuardar={reagendarCita}
       />
 
       <Modal
