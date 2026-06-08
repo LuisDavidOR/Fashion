@@ -3635,3 +3635,38 @@ body,
   }
 }
 
+@media (max-width: 576px) {
+
+  .dropdown-notificaciones {
+    position: fixed !important;
+
+    top: 72px !important;
+    left: 12px !important;
+    right: 12px !important;
+
+    width: auto !important;
+    max-width: none !important;
+
+    margin-top: 0 !important;
+
+    z-index: 9999;
+    border-radius: 20px;
+  }
+
+  .dropdown-notificaciones h6 {
+    font-size: 0.9rem;
+  }
+
+  .notificacion-item {
+    padding: 10px;
+  }
+
+  .notificacion-item .small {
+    font-size: 0.8rem;
+  }
+
+  .notificacion-item .text-muted {
+    font-size: 0.72rem !important;
+  }
+}
+
