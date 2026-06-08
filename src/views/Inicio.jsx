@@ -3,12 +3,10 @@ import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useAuth } from "../context/AuthContext";
-import ChatIA from "../components/ia/ChatIA";
 import { useNavigate } from "react-router-dom";
 
 const Inicio = () => {
   const { usuario, rol, perfil } = useAuth();
-  const [mostrarChatIA, setMostrarChatIA] = useState(false);
   const esInvitado = !usuario;
   const navigate = useNavigate();
 
@@ -271,29 +269,6 @@ const Inicio = () => {
           <i className="bi bi-flower1"></i>
         </div>
       </section>
-       {/* Chat IA */}
-      <ChatIA
-        mostrar={mostrarChatIA}
-        onCerrar={() => setMostrarChatIA(false)}
-      />
-
-      {/* Botón flotante */}
-          <button
-      className="boton-ia-flotante rounded-circle shadow-lg border-0"
-      onClick={() => setMostrarChatIA(true)}
-      style={{
-        position: "fixed",
-        bottom: "20px",
-        right: "20px",
-        width: "65px",
-        height: "65px",
-        zIndex: 9999,
-        backgroundColor: "#B38B6D",
-        color: "#fff",
-      }}
-    >
-      <i className="bi bi-robot fs-3"></i>
-    </button>
     </Container>
   );
 };
