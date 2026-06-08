@@ -5,11 +5,13 @@ import logo from "../../assets/logo.png";
 import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../database/supabaseconfig";
 import NotificacionOperacion from "../NotificacionOperacion";
+import ChatIA from "../ia/ChatIA";
 
 
 const Encabezado = () => {
 
   const [mostrarMenu, setMostrarMenu] = useState(false);
+  const [mostrarChatIA, setMostrarChatIA] = useState(false);
   const navigate = useNavigate();
   const location = useLocation(); //Para detectar la ruta actual
 
@@ -270,6 +272,7 @@ useEffect(() => {
                 <strong>Categorías</strong>
               </Nav.Link>
 
+
               <Nav.Link
                 onClick={() => manejarNavegacion("/servicios")}
                 className={mostrarMenu ? "navbar-fashion-link-offcanvas" : "navbar-fashion-link"}
@@ -523,7 +526,21 @@ useEffect(() => {
         </Container>
       </Navbar>
 
+      {esAdmin && !esRutaAuth && (
+        <button
+          className="btn-chat-ia-flotante"
+          onClick={() => setMostrarChatIA(true)}
+        >
+          <i className="bi bi-robot"></i>
+        </button>
+      )}
 
+      {esAdmin && (
+        <ChatIA
+          mostrar={mostrarChatIA}
+          onCerrar={() => setMostrarChatIA(false)}
+        />
+      )}
 
       <NotificacionOperacion
         mostrar={toastNotification.mostrar}
