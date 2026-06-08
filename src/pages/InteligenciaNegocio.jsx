@@ -147,26 +147,24 @@ const InteligenciaNegocio = () => {
 
       <hr className="my-5" />
 
-      <Card className="shadow mb-5">
+      <Card className="dashboard-card shadow mb-5">
         <Card.Header className="fw-bold fs-5">
-          📈 Rentabilidad del Negocio
-Indicadores financieros y servicios más rentables.
+            📈 Rentabilidad del Negocio
+            <p className="mb-0 text-muted fs-6">
+            Indicadores financieros y servicios más rentables.
+            </p>
         </Card.Header>
 
-        <Card.Body>
-          <div
-            className="d-flex justify-content-center align-items-center"
-            style={{ height: "300px" }}
-          >
-            <div className="text-center">
-              <h4>Dashboard pendiente</h4>
-              <p className="text-muted mb-0">
-                Esperando enlace de Tableau Public.
-              </p>
+        <Card.Body style={{ padding: 0 }}>
+            <div className="tableau-wrapper">
+            <iframe
+                title="Dashboard Rentabilidad"
+                src="https://public.tableau.com/views/RentabilidadFS/Dashboard1?:showVizHome=no"
+                className="tableau-iframe"
+            />
             </div>
-          </div>
         </Card.Body>
-      </Card>
+        </Card>
 
       <Card className="shadow mb-5">
         <Card.Header className="fw-bold fs-5">

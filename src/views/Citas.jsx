@@ -3,6 +3,8 @@ import { Container, Row, Col, Button, Spinner, Alert, Modal, Badge } from "react
 import { supabase } from "../database/supabaseconfig";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import ModalRegistroCita from "../components/citas/ModalRegistroCita";
 import NotificacionOperacion from "../components/NotificacionOperacion";
@@ -1259,6 +1261,54 @@ const Citas = () => {
     (cita) => String(cita.id_empleado) === String(perfil?.id_empleado)
   );
 
+  const generarPDFCita = (cita) => {
+    const doc = new jsPDF();
+
+    const total =
+      cita.Detalle_cita?.reduce(
+        (sum, detalle) => sum + Number(detalle.subtotal || 0),
+        0
+      ) || 0;
+
+    doc.setFontSize(18);
+    doc.text("Reporte de Cita", 14, 20);
+    doc.line(14, 25, 195, 25);
+
+    autoTable(doc, {
+      startY: 35,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["ID Cita", cita.id_cita],
+        ["Fecha", cita.fecha],
+        ["Hora", cita.hora],
+        ["Estado", cita.estado_cita],
+        ["Cliente", `${cita.Clientes?.nombre || ""} ${cita.Clientes?.apellido || ""}`],
+        [
+          "Empleado",
+          cita.Empleados?.nombre
+            ? `${cita.Empleados.nombre} ${cita.Empleados.apellido}`
+            : "Pendiente de asignación",
+        ],
+        ["Total", `C$ ${total.toFixed(2)}`],
+      ],
+    });
+
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 10,
+      head: [["Servicio", "Precio", "Costo insumo", "Costo empleado", "Subtotal"]],
+      body:
+        cita.Detalle_cita?.map((detalle) => [
+          detalle.Servicios?.nombre || "Servicio",
+          `C$ ${Number(detalle.Servicios?.precio || 0).toFixed(2)}`,
+          `C$ ${Number(detalle.costo_insumo || 0).toFixed(2)}`,
+          `C$ ${Number(detalle.costo_empleado || 0).toFixed(2)}`,
+          `C$ ${Number(detalle.subtotal || 0).toFixed(2)}`,
+        ]) || [],
+    });
+
+    doc.save(`cita_${cita.id_cita}.pdf`);
+  };
+
   return (
     
     <Container className="mt-3">
@@ -1370,6 +1420,7 @@ const Citas = () => {
               completarCita={completarCita}
               completandoCita={completandoCita}
               vistaEmpleado="asignadas"
+
             />
           )}
         </>
@@ -1378,6 +1429,7 @@ const Citas = () => {
           citas={citas}
           citaExpandida={citaExpandida}
           setCitaExpandida={setCitaExpandida}
+          generarPDFCita={esAdmin ? generarPDFCita : null}
         />
       )}
 

@@ -13,6 +13,7 @@ const TablaCitas = ({
   completarCita,
   completandoCita,
   vistaEmpleado = "disponibles",
+   generarPDFCita,
 }) => {
 
   const [citaSeleccionada, setCitaSeleccionada] = useState(null);
@@ -206,14 +207,28 @@ const TablaCitas = ({
                     </td>
 
                     <td className="text-center">
-                      <Button
-                        size="sm"
-                        className="btn-ver-detalle-cita"
-                        onClick={() => setCitaSeleccionada(cita)}
-                      >
-                        <i className="bi bi-eye me-1"></i>
-                        Ver
-                      </Button>
+                      <div className="d-flex justify-content-center gap-2">
+
+                        <Button
+                          size="sm"
+                          className="btn-ver-detalle-cita"
+                          onClick={() => setCitaSeleccionada(cita)}
+                        >
+                          <i className="bi bi-eye me-1"></i>
+                          Ver
+                        </Button>
+
+                        {generarPDFCita && (
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            onClick={() => generarPDFCita(cita)}
+                          >
+                            <i className="bi bi-file-earmark-pdf"></i>
+                          </Button>
+                        )}
+
+                      </div>
                     </td>
 
                     {esEmpleado && (

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import TarjetaServicio from "../components/servicios/TarjetaServicio";
 import ModalRegistroServicio from "../components/servicios/ModalRegistroServicio";
@@ -525,6 +527,86 @@ const Servicios = () => {
     }
   };
 
+  const generarPDFServicio = async (servicio) => {
+    const doc = new jsPDF();
+
+    const costoTotalInsumos =
+      servicio.Servicio_Insumo?.reduce((total, relacion) => {
+        const insumo = relacion.Insumos;
+
+        if (!insumo || !insumo.contenido_total) return total;
+
+        const costoPorUnidad =
+          Number(insumo.costo_producto) / Number(insumo.contenido_total);
+
+        return total + costoPorUnidad * Number(relacion.cantidad_usada || 0);
+      }, 0) || 0;
+
+    doc.setFontSize(18);
+    doc.text("Reporte de Servicio", 14, 20);
+    doc.line(14, 25, 195, 25);
+
+    let posicionY = 35;
+
+    if (servicio.url_imagen) {
+      const imagenBase64 = await convertirImagenABase64(servicio.url_imagen);
+
+      if (imagenBase64) {
+          const tipoImagen =
+          imagenBase64.includes("image/png")
+            ? "PNG"
+            : "JPEG";
+        doc.addImage(
+          imagenBase64,
+          tipoImagen,
+          14,
+          posicionY,
+          55,
+          40
+        );
+        posicionY += 50;
+      }
+    }
+
+    autoTable(doc, {
+      startY: posicionY,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["ID", servicio.id_servicio],
+        ["Nombre", servicio.nombre],
+        ["Descripción", servicio.descripcion || "Sin descripción"],
+        ["Categoría", servicio.Categorias?.nombre || "Sin categoría"],
+        ["Precio", `C$ ${Number(servicio.precio || 0).toFixed(2)}`],
+        ["Duración", `${servicio.duracion} minutos`],
+        ["Costo insumos", `C$ ${costoTotalInsumos.toFixed(2)}`],
+        ["Estado", servicio.estado],
+      ],
+    });
+
+    doc.save(`servicio_${servicio.id_servicio}.pdf`);
+  };
+
+const convertirImagenABase64 = async (url) => {
+  if (!url) return null;
+
+  try {
+    const respuesta = await fetch(url);
+    const blob = await respuesta.blob();
+
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error("Error convirtiendo imagen:", error);
+    return null;
+  }
+};
+
   return (
     <Container className="mt-3">
       <Row className="align-items-center mb-3">
@@ -621,6 +703,7 @@ const Servicios = () => {
           abrirModalEliminacion={abrirModalEliminacion}
           abrirModalInsumos={abrirModalInsumos}
           cambiarEstadoServicio={abrirModalEstado}
+            generarPDFServicio={generarPDFServicio}
         />
       )}
 

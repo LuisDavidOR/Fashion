@@ -7,6 +7,7 @@ const TarjetaCategoria = ({
   abrirModalEdicion,
   abrirModalEliminacion,
   cambiarEstadoCategoria,
+  generarPDFCategoria,
 }) => {
   return (
     <Row className="g-4">
@@ -88,6 +89,14 @@ const TarjetaCategoria = ({
                     }
                   ></i>
                 </Button>
+                <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => generarPDFCategoria(categoria)}
+                title="Generar PDF"
+              >
+                <i className="bi bi-file-earmark-pdf"></i>
+              </Button>
               </div>
             </Card.Body>
           </Card>

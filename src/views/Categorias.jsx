@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";
 import NotificacionOperacion from "../components/NotificacionOperacion";
@@ -143,6 +145,49 @@ const Categorias = () => {
   const abrirModalEstado = (categoria) => {
     setCategoriaEstado(categoria);
     setMostrarModalEstado(true);
+  };
+
+  //Generar PDF
+    const generarPDFCategoria = async (categoria) => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("Reporte de Categoría", 14, 20);
+    doc.line(14, 25, 195, 25);
+
+    let posicionY = 35;
+
+    if (categoria.url_imagen) {
+      const imagenBase64 = await convertirImagenABase64(categoria.url_imagen);
+      const tipoImagen =
+        imagenBase64.includes("image/png")
+          ? "PNG"
+          : "JPEG";
+      if (imagenBase64) {
+        doc.addImage(
+          imagenBase64,
+          tipoImagen,
+          14,
+          posicionY,
+          55,
+          40
+        );
+        posicionY += 50;
+      }
+    }
+
+    autoTable(doc, {
+      startY: posicionY,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["ID", categoria.id_categoria],
+        ["Nombre", categoria.nombre],
+        ["Descripción", categoria.descripcion || "Sin descripción"],
+        ["Estado", categoria.estado],
+      ],
+    });
+
+    doc.save(`categoria_${categoria.id_categoria}.pdf`);
   };
 
   //Cargar categorias ya sea en tabla o tarjeta
@@ -452,6 +497,27 @@ const Categorias = () => {
         }
       };
 
+      const convertirImagenABase64 = async (url) => {
+        if (!url) return null;
+
+        try {
+          const respuesta = await fetch(url);
+          const blob = await respuesta.blob();
+
+          return await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+
+            reader.readAsDataURL(blob);
+          });
+        } catch (error) {
+          console.error("Error convirtiendo imagen:", error);
+          return null;
+        }
+      };
+
 
   return (
     
@@ -556,6 +622,7 @@ const Categorias = () => {
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
               cambiarEstadoCategoria={abrirModalEstado}
+                generarPDFCategoria={generarPDFCategoria}
             />
           </Col>
           </Row>

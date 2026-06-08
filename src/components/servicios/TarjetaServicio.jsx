@@ -8,6 +8,7 @@ const TarjetaServicio = ({
   abrirModalEliminacion,
   abrirModalInsumos,
   cambiarEstadoServicio,
+  generarPDFServicio,
 }) => {
   return (
     <Row className="g-4">
@@ -144,6 +145,14 @@ const TarjetaServicio = ({
                   >
                     <i className="bi bi-box-seam"></i>
                   </Button>
+                  <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => generarPDFServicio(servicio)}
+                  title="Generar PDF"
+                >
+                  <i className="bi bi-file-earmark-pdf"></i>
+                </Button>
                 </div>
               </Card.Body>
             </Card>

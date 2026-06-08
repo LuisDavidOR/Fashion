@@ -6,6 +6,7 @@ const TarjetaCitas = ({
   citas,
   cancelarCita,
   onReagendar,
+  generarPDFCita,
 }) => {
   const [citaSeleccionada, setCitaSeleccionada] = useState(null);
 
