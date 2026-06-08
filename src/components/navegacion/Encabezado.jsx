@@ -187,11 +187,13 @@ useEffect(() => {
   const manejarNavegacion = (ruta) => {
     navigate(ruta);
     setMostrarMenu(false);
+    document.body.classList.remove("menu-abierto");
   };
 
   const manejarCerrarSesion = async () => {
     await cerrarSesion();
     setMostrarMenu(false);
+    document.body.classList.remove("menu-abierto");
     navigate("/login");
   };
 
@@ -528,7 +530,7 @@ useEffect(() => {
 
       {esAdmin && !esRutaAuth && (
         <button
-          className="btn-chat-ia-flotante"
+          className="boton-ia-flotante"
           onClick={() => setMostrarChatIA(true)}
         >
           <i className="bi bi-robot"></i>
