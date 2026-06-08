@@ -138,43 +138,47 @@ const TarjetaCitas = ({
                 </div>
 
                 <div className="tarjeta-cita-footer">
-                  <div>
+                  <div className="tarjeta-cita-total">
                     <span>Total</span>
                     <strong>C$ {total.toFixed(2)}</strong>
                   </div>
 
-                  <Button
-                    size="sm"
-                    className="btn-ver-detalle-cita"
-                    onClick={() => setCitaSeleccionada(cita)}
-                  >
-                    <i className="bi bi-eye me-1"></i>
-                    Ver detalles
-                  </Button>
-                  {cita.estado_cita === "pendiente" && (
+                  <div className="acciones-cita-cliente">
                     <Button
                       size="sm"
-                      className="btn-reagendar-cita ms-2"
-                      onClick={() => onReagendar(cita)}
+                      className="btn-ver-detalle-cita"
+                      onClick={() => setCitaSeleccionada(cita)}
                     >
-                      <i className="bi bi-calendar-range me-1"></i>
-                      Reagendar
+                      <i className="bi bi-eye me-1"></i>
+                      Ver detalles
                     </Button>
-                  )}
-                  {(cita.estado_cita === "pendiente" ||
-                    cita.estado_cita === "aceptado") && (
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      className="ms-2"
-                      onClick={() => cancelarCita(cita)}
-                    >
-                      <i className="bi bi-x-circle me-1"></i>
-                      Cancelar
-                    </Button>
-                  )}
+
+                    {cita.estado_cita === "pendiente" && (
+                      <Button
+                        size="sm"
+                        className="btn-reagendar-cita"
+                        onClick={() => onReagendar(cita)}
+                      >
+                        <i className="bi bi-calendar-range me-1"></i>
+                        Reagendar
+                      </Button>
+                    )}
+
+                    {(cita.estado_cita === "pendiente" ||
+                      cita.estado_cita === "aceptado") && (
+                      <Button
+                        size="sm"
+                        variant="outline-danger"
+                        className="btn-cancelar-cita"
+                        onClick={() => cancelarCita(cita)}
+                      >
+                        <i className="bi bi-x-circle me-1"></i>
+                        Cancelar
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
+                  </div>
             );
           })
         ) : (

@@ -3593,3 +3593,45 @@ body,
   }
 }
 
+.tarjeta-cita-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tarjeta-cita-total {
+  display: flex;
+  flex-direction: column;
+}
+
+.acciones-cita-cliente {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.acciones-cita-cliente .btn {
+  min-width: 130px;
+  white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+  .tarjeta-cita-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .acciones-cita-cliente {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .acciones-cita-cliente .btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
