@@ -235,6 +235,10 @@ const generarReporteSatisfaccion = () => {
   doc.save("reporte_satisfaccion_fashion.pdf");
 };
 
+const crearUrlTableau = (url) => {
+  return `${url}?:showVizHome=no&:embed=true&:toolbar=yes&:showAppBanner=false&:display_count=n&:device=desktop`;
+};
+
   return (
     <Container fluid className="inteligencia-container py-5 px-4">
       <h1 className="text-center fw-bold mb-5">
@@ -308,14 +312,25 @@ const generarReporteSatisfaccion = () => {
             </p>
         </Card.Header>
 
-        <Card.Body style={{ padding: 0 }}>
-            <div className="tableau-wrapper">
+       <Card.Body style={{ padding: 0 }}>
+          <div className="tableau-wrapper">
             <iframe
-                title="Dashboard Rentabilidad"
-                src="https://public.tableau.com/views/RentabilidadFS/Dashboard1?:showVizHome=no"
-                className="tableau-iframe"
+              title="Dashboard Rentabilidad"
+              src={crearUrlTableau("https://public.tableau.com/views/RentabilidadFS/Dashboard1")}
+              className="tableau-iframe"
             />
-            </div>
+          </div>
+
+          <div className="text-center p-3">
+            <a
+              href="https://public.tableau.com/views/RentabilidadFS/Dashboard1?:showVizHome=no"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-dark"
+            >
+              Abrir en pantalla completa
+            </a>
+          </div>
         </Card.Body>
         </Card>
 
@@ -325,13 +340,26 @@ const generarReporteSatisfaccion = () => {
           Análisis del desempeño y generación de ingresos.
         </Card.Header>
 
-        <div className="tableau-wrapper">
+        <Card.Body style={{ padding: 0 }}>
+          <div className="tableau-wrapper">
             <iframe
-                title="Dashboard Productividad"
-                src="https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1?:showVizHome=no"
-                className="tableau-iframe"
+              title="Dashboard Productividad"
+              src={crearUrlTableau("https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1")}
+              className="tableau-iframe"
             />
-            </div>
+          </div>
+
+          <div className="text-center p-3">
+            <a
+              href="https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1?:showVizHome=no"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-dark"
+            >
+              Abrir en pantalla completa
+            </a>
+          </div>
+        </Card.Body>
       </Card>
 
       <Card className="shadow mb-5">
@@ -342,13 +370,24 @@ Percepción y experiencia de nuestros servicios.
         
     
         <Card.Body style={{ padding: 0 }}>
-          <iframe
-            title="Dashboard Satisfacción"
-            src="https://public.tableau.com/views/DashboardF2/Dashboard1?:showVizHome=no"
-            width="100%"
-            height="850"
-            frameBorder="0"
-          />
+          <div className="tableau-wrapper">
+            <iframe
+              title="Dashboard Satisfacción"
+              src={crearUrlTableau("https://public.tableau.com/views/DashboardF2/Dashboard1")}
+              className="tableau-iframe"
+            />
+          </div>
+
+          <div className="text-center p-3">
+            <a
+              href="https://public.tableau.com/views/DashboardF2/Dashboard1?:showVizHome=no"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-dark"
+            >
+              Abrir en pantalla completa
+            </a>
+          </div>
         </Card.Body>
       </Card>
     </Container>

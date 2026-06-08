@@ -3070,3 +3070,58 @@ body,
 .kpi-card:hover {
   transform: translateY(-5px);
 }
+
+.tableau-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 0 0 20px 20px;
+}
+
+.tableau-iframe {
+  width: 1200px;
+  min-width: 1200px;
+  height: 850px;
+  border: none;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .tableau-wrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tableau-iframe {
+    width: 1200px;
+    min-width: 1200px;
+    height: 850px;
+  }
+}
+
+.tableau-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  background: #fff;
+}
+
+.tableau-iframe {
+  width: 1366px;
+  min-width: 1366px;
+  height: 900px;
+  border: none;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .tableau-wrapper {
+    max-width: 100%;
+  }
+
+  .tableau-iframe {
+    width: 1366px;
+    min-width: 1366px;
+    height: 900px;
+  }
+}
