@@ -142,9 +142,10 @@ const Inicio = () => {
           </p>
 
           <Button
-            className="btn-hero btn-hero-primary"
-            onClick={() => navigate("/inteligencia-negocio")}
-          >
+              className="btn-dashboard-ejecutivo"
+              onClick={() => navigate("/inteligencia-negocio")}
+            >
+              
             Ver Dashboard Ejecutivo
           </Button>
         </section>

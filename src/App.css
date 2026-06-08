@@ -3211,3 +3211,93 @@ body,
     font-size: 1.35rem;
   }
 }
+
+
+.btn-dashboard-ejecutivo {
+  background: linear-gradient(
+    135deg,
+    #c6a495 0%,
+    #b8937f 50%,
+    #a9826d 100%
+  );
+  color: #fff !important;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow:
+    0 8px 20px rgba(184, 147, 127, 0.25),
+    0 0 0 rgba(184, 147, 127, 0.4);
+
+  transition: all 0.35s ease;
+  position: relative;
+  overflow: hidden;
+
+  animation: pulseFashion 3s infinite;
+}
+
+.btn-dashboard-ejecutivo:hover {
+  background: linear-gradient(
+    135deg,
+    #d2b3a5 0%,
+    #c19a85 50%,
+    #ae876f 100%
+  );
+
+  color: white !important;
+
+  transform: translateY(-4px) scale(1.03);
+
+  box-shadow:
+    0 15px 30px rgba(184, 147, 127, 0.35),
+    0 0 25px rgba(184, 147, 127, 0.25);
+}
+
+.btn-dashboard-ejecutivo:active {
+  transform: scale(0.98);
+}
+
+.btn-dashboard-ejecutivo::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.35),
+    transparent
+  );
+
+  transition: 0.8s;
+}
+
+.btn-dashboard-ejecutivo:hover::before {
+  left: 130%;
+}
+
+@keyframes pulseFashion {
+  0% {
+    box-shadow:
+      0 8px 20px rgba(184, 147, 127, 0.25),
+      0 0 0 0 rgba(184, 147, 127, 0.35);
+  }
+
+  70% {
+    box-shadow:
+      0 8px 20px rgba(184, 147, 127, 0.25),
+      0 0 0 12px rgba(184, 147, 127, 0);
+  }
+
+  100% {
+    box-shadow:
+      0 8px 20px rgba(184, 147, 127, 0.25),
+      0 0 0 0 rgba(184, 147, 127, 0);
+  }
+}
+
