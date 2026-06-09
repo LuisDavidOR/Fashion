@@ -78,12 +78,18 @@ const Encabezado = () => {
       }
     };
 
-    const cargarNotificacionServicioNuevo = () => {
+    const cargarNotificacionServicioNuevo = async () => {
       if (!esCliente || !usuario) return;
 
-      const guardada = JSON.parse(localStorage.getItem("ultimoServicioNuevo"));
+      const { data, error } = await supabase
+        .from("Servicios")
+        .select("id_servicio, nombre")
+        .eq("estado", "activo")
+        .order("id_servicio", { ascending: false })
+        .limit(1)
+        .single();
 
-      if (!guardada) {
+      if (error || !data) {
         setNotificacionServicioNuevo(null);
         return;
       }
@@ -91,8 +97,15 @@ const Encabezado = () => {
       const claveVista = `ultimoServicioVisto_${usuario.id}`;
       const ultimoVisto = localStorage.getItem(claveVista);
 
-      if (String(guardada.id_servicio) !== String(ultimoVisto)) {
-        setNotificacionServicioNuevo(guardada);
+      if (String(data.id_servicio) !== String(ultimoVisto)) {
+        setNotificacionServicioNuevo({
+          id: `servicio-${data.id_servicio}`,
+          tipo: "servicio_nuevo",
+          id_servicio: data.id_servicio,
+          titulo: "Nuevo servicio disponible",
+          mensaje: `Ya está disponible el servicio ${data.nombre}.`,
+          fecha: new Date().toISOString(),
+        });
       } else {
         setNotificacionServicioNuevo(null);
       }
