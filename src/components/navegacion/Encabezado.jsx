@@ -15,7 +15,7 @@ const Encabezado = () => {
   const navigate = useNavigate();
   const location = useLocation(); //Para detectar la ruta actual
 
-  const { usuario, rol, cerrarSesion } = useAuth();
+  const { usuario, rol, perfil, cerrarSesion } = useAuth();
 
   const esAdmin = usuario && rol === "admin";
   const esCliente = usuario && rol === "cliente";
@@ -27,6 +27,21 @@ const Encabezado = () => {
   const [toastNotification, setToastNotification] = useState({ mostrar: false, mensaje: "", tipo: "" });
   const [citasAceptadasCliente, setCitasAceptadasCliente] = useState([]);
   const [hayNotificacionNueva, setHayNotificacionNueva] = useState(false);
+  const [notificacionesEmpleadoLocal, setNotificacionesEmpleadoLocal] = useState([]);
+  const [notificacionServicioNuevo, setNotificacionServicioNuevo] = useState(null);
+
+  const cargarNotificacionesEmpleadoLocal = () => {
+  if (!esEmpleado || !perfil?.id_empleado) return;
+
+  const guardadas =
+    JSON.parse(localStorage.getItem("notificacionesEmpleado")) || [];
+
+  const propias = guardadas.filter(
+    (noti) => String(noti.id_empleado) === String(perfil.id_empleado)
+  );
+
+  setNotificacionesEmpleadoLocal(propias);
+};
 
   const cargarCitasAceptadasCliente = async () => {
       try {
@@ -60,6 +75,26 @@ const Encabezado = () => {
         setCitasAceptadasCliente(data || []);
       } catch (err) {
         console.error("Error al cargar citas aceptadas del cliente:", err);
+      }
+    };
+
+    const cargarNotificacionServicioNuevo = () => {
+      if (!esCliente || !usuario) return;
+
+      const guardada = JSON.parse(localStorage.getItem("ultimoServicioNuevo"));
+
+      if (!guardada) {
+        setNotificacionServicioNuevo(null);
+        return;
+      }
+
+      const claveVista = `ultimoServicioVisto_${usuario.id}`;
+      const ultimoVisto = localStorage.getItem(claveVista);
+
+      if (String(guardada.id_servicio) !== String(ultimoVisto)) {
+        setNotificacionServicioNuevo(guardada);
+      } else {
+        setNotificacionServicioNuevo(null);
       }
     };
 
@@ -100,8 +135,13 @@ const Encabezado = () => {
     cargarCitasPendientes();
   }
 
+  if (rol === "empleado") {
+    cargarNotificacionesEmpleadoLocal();
+  }
+
   if (rol === "cliente") {
     cargarCitasAceptadasCliente();
+    cargarNotificacionServicioNuevo();
   }
 
   const canal = supabase
@@ -111,8 +151,12 @@ const Encabezado = () => {
       { event: "*", schema: "public", table: "Citas" },
       () => {
         if (rol === "admin" || rol === "empleado") {
-          cargarCitasPendientes();
-        }
+            cargarCitasPendientes();
+          }
+
+          if (rol === "empleado") {
+            cargarNotificacionesEmpleadoLocal();
+          }
 
         if (rol === "cliente") {
           cargarCitasAceptadasCliente();
@@ -135,11 +179,16 @@ const Encabezado = () => {
   return () => {
     supabase.removeChannel(canal);
   };
-}, [usuario, rol]);
+}, [usuario, rol, perfil]);
 
-  const notificacionesActuales = esCliente
-  ? citasAceptadasCliente
-  : citasPendientes;
+ const notificacionesActuales = esCliente
+  ? [
+      ...(notificacionServicioNuevo ? [notificacionServicioNuevo] : []),
+      ...citasAceptadasCliente,
+    ]
+  : esEmpleado
+    ? [...notificacionesEmpleadoLocal, ...citasPendientes]
+    : citasPendientes;
 
   const tituloNotificaciones = "Notificaciones";
 
@@ -150,7 +199,13 @@ const Encabezado = () => {
     return null;
   }
 
-  return notificacionesActuales[0].id_cita;
+  const ultima = notificacionesActuales[0];
+
+  if (esCliente) {
+    return `${ultima.id_cita}-${ultima.fecha}-${ultima.hora}-${ultima.Empleados?.nombre || "sin-empleado"}`;
+  }
+
+  return ultima.id || ultima.id_cita;
 };
 
 useEffect(() => {
@@ -448,32 +503,65 @@ useEffect(() => {
                         <span className="badge bg-danger text-white">1</span>
                       )}
                   </h6>
-                  <div style={{ maxHeight: "250px", overflowY: "auto" }}>
+                  <div
+                      className="notificaciones-lista"
+                      style={{
+                        maxHeight: "250px",
+                        overflowY: "auto",
+                        overflowX: "hidden",
+                        overscrollBehavior: "contain",
+                      }}
+                    >
                     {notificacionesActuales.length === 0 ? (
                       <div className="text-center py-3 text-muted small">
                         {mensajeSinNotificaciones}
                       </div>
                     ) : (
                       notificacionesActuales.map((cita) => {
-                        const serviciosNombres = cita.Detalle_cita?.map(
-                          (d) => d.Servicios?.nombre
-                        ).filter(Boolean).join(", ") || "Sin servicios";
+                        const esNotificacionLocal =
+                        cita.tipo === "cita_cancelada" ||
+                        cita.tipo === "cita_reagendada" ||
+                        cita.tipo === "servicio_nuevo";
+
+                      const serviciosNombres = cita.Detalle_cita?.map(
+                        (d) => d.Servicios?.nombre
+                      ).filter(Boolean).join(", ") || "Sin servicios";
 
                         return (
-                          <div key={cita.id_cita}className="notificacion-item"onClick={() => {
-                            setMostrarNotificaciones(false);
-                            navigate("/citas");
-                          }}>
+                          <div
+                              key={cita.id || cita.id_cita}
+                              className="notificacion-item"
+                              onClick={() => {
+                                setMostrarNotificaciones(false);
+
+                                if (cita.tipo === "servicio_nuevo") {
+                                  localStorage.setItem(
+                                    `ultimoServicioVisto_${usuario.id}`,
+                                    String(cita.id_servicio)
+                                  );
+
+                                  setNotificacionServicioNuevo(null);
+                                  navigate("/catalogo");
+                                  return;
+                                }
+
+                                navigate(`/citas?id_cita=${cita.id_cita}`);
+                              }}
+                            >
                             <div className="small fw-bold text-dark">
-                              {esCliente
+                              {esNotificacionLocal
+                              ? cita.titulo
+                              : esCliente
                                 ? cita.Empleados
-                                ? `Tu cita fue aceptada por ${cita.Empleados.nombre}`
-                                : "Actualización de cita"
+                                  ? `Tu cita fue aceptada por ${cita.Empleados.nombre}`
+                                  : "Actualización de cita"
                                 : cita.Clientes
                                   ? `${cita.Clientes.nombre} ${cita.Clientes.apellido}`
                                   : "Cliente"}
                             </div>
-                            <div className="text-muted" style={{ fontSize: "0.75rem" }}>{serviciosNombres}</div>
+                           <div className="text-muted" style={{ fontSize: "0.75rem" }}>
+                              {esNotificacionLocal ? cita.mensaje : serviciosNombres}
+                            </div>
                             <div className="text-muted d-flex justify-content-between mt-1" style={{ fontSize: "0.7rem" }}>
                               <span><i className="bi bi-calendar-event me-1"></i>{cita.fecha}</span>
                               <span><i className="bi bi-clock me-1"></i>{cita.hora}</span>
@@ -482,16 +570,6 @@ useEffect(() => {
                         );
                       })
                     )}
-                  </div>
-                  <div className="text-center border-top pt-2 mt-2">
-                    <button className="btn btn-notificaciones w-100"
-                      onClick={() => {
-                        setMostrarNotificaciones(false);
-                        navigate("/citas");
-                      }}
-                    >
-                      Ver todas las citas
-                    </button>
                   </div>
                 </div>
               )}

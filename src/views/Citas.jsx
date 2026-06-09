@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Spinner, Alert, Modal, Badge } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -16,6 +16,7 @@ const Citas = () => {
 
   const { usuario, rol, perfil } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const esAdmin = rol === "admin";
   const esCliente = rol === "cliente";
   const esEmpleado = rol === "empleado";
@@ -44,6 +45,9 @@ const Citas = () => {
   const [vistaEmpleado, setVistaEmpleado] = useState("disponibles");
   const [mostrarModalReagendar, setMostrarModalReagendar] = useState(false);
   const [citaParaReagendar, setCitaParaReagendar] = useState(null);
+  const [mostrarModalCancelar, setMostrarModalCancelar] = useState(false);
+  const [citaParaCancelar, setCitaParaCancelar] = useState(null);
+  const [citaResaltada, setCitaResaltada] = useState(null);
 
   const limpiarCita = () => {
     setNuevaCita({
@@ -122,6 +126,57 @@ const Citas = () => {
       setCargandoCitas(false);
     }
   };
+
+  useEffect(() => {
+    if (cargandoCitas || citas.length === 0) return;
+
+    const params = new URLSearchParams(location.search);
+    const idCitaUrl = params.get("id_cita");
+    const vistaUrl = params.get("vista");
+
+    if (esEmpleado && vistaUrl === "asignadas") {
+      setVistaEmpleado("asignadas");
+    }
+
+    if (!idCitaUrl) return;
+
+    const citaEncontrada = citas.find(
+      (cita) => String(cita.id_cita) === String(idCitaUrl)
+    );
+
+    if (!citaEncontrada) return;
+
+    setCitaExpandida(citaEncontrada.id_cita);
+    setCitaResaltada(citaEncontrada.id_cita);
+
+    if (esEmpleado) {
+      if (
+        citaEncontrada.estado_cita === "pendiente" &&
+        !citaEncontrada.id_empleado
+      ) {
+        setVistaEmpleado("disponibles");
+      } else if (
+        String(citaEncontrada.id_empleado) === String(perfil?.id_empleado)
+      ) {
+        setVistaEmpleado("asignadas");
+      }
+    }
+
+    setTimeout(() => {
+      const elemento = document.getElementById(`cita-${idCitaUrl}`);
+
+      if (elemento) {
+        elemento.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 300);
+
+    setTimeout(() => {
+      setCitaResaltada(null);
+    }, 3500);
+  }, [cargandoCitas, citas, location.search, esEmpleado]);
 
   const cargarClientes = async () => {
     const { data, error } = await supabase
@@ -1152,6 +1207,28 @@ const Citas = () => {
         return;
       }
 
+      if (cita.estado_cita === "aceptado" && cita.id_empleado) {
+      const notificacionesEmpleado =
+        JSON.parse(localStorage.getItem("notificacionesEmpleado")) || [];
+
+      notificacionesEmpleado.unshift({
+        id: `reagendada-${cita.id_cita}-${Date.now()}`,
+        tipo: "cita_reagendada",
+        id_cita: cita.id_cita,
+        id_empleado: cita.id_empleado,
+        titulo: "Cita reagendada",
+        mensaje: "Una cita que tenías asignada fue reagendada por el cliente.",
+        fecha: cita.fecha,
+        hora: cita.hora,
+        leida: false,
+      });
+
+      localStorage.setItem(
+        "notificacionesEmpleado",
+        JSON.stringify(notificacionesEmpleado)
+      );
+    }
+
       const updateData = {
         fecha: nuevaFecha,
         hora: nuevaHora,
@@ -1193,8 +1270,35 @@ const Citas = () => {
     }
   };
 
+  const solicitarCancelarCita = (cita) => {
+    setCitaParaCancelar(cita);
+    setMostrarModalCancelar(true);
+  };
+
   const cancelarCita = async (cita) => {
   try {
+
+    if (cita.estado_cita === "aceptado" && cita.id_empleado) {
+      const notificacionesEmpleado =
+        JSON.parse(localStorage.getItem("notificacionesEmpleado")) || [];
+
+      notificacionesEmpleado.unshift({
+        id: `cancelada-${cita.id_cita}-${Date.now()}`,
+        tipo: "cita_cancelada",
+        id_cita: cita.id_cita,
+        id_empleado: cita.id_empleado,
+        titulo: "Cita cancelada",
+        mensaje: "Una cita que tenías asignada fue cancelada por el cliente.",
+        fecha: cita.fecha,
+        hora: cita.hora,
+        leida: false,
+      });
+
+      localStorage.setItem(
+        "notificacionesEmpleado",
+        JSON.stringify(notificacionesEmpleado)
+      );
+    }
 
     const { error } = await supabase
       .from("Citas")
@@ -1354,8 +1458,9 @@ const Citas = () => {
       ) : esCliente ? (
         <TarjetaCitas
         citas={citas}
-        cancelarCita={cancelarCita}
+        cancelarCita={solicitarCancelarCita}
         onReagendar={abrirModalReagendar}
+        citaResaltada={citaResaltada}
       />
       ) : esEmpleado ? (
         <>
@@ -1405,6 +1510,7 @@ const Citas = () => {
                 aceptarCita={aceptarCita}
                 aceptandoCita={aceptandoCita}
                 vistaEmpleado="disponibles"
+                citaResaltada={citaResaltada}
               />
             )
           ) : citasAsignadasEmpleado.length === 0 ? (
@@ -1420,6 +1526,7 @@ const Citas = () => {
               completarCita={completarCita}
               completandoCita={completandoCita}
               vistaEmpleado="asignadas"
+              citaResaltada={citaResaltada}
 
             />
           )}
@@ -1430,6 +1537,7 @@ const Citas = () => {
           citaExpandida={citaExpandida}
           setCitaExpandida={setCitaExpandida}
           generarPDFCita={esAdmin ? generarPDFCita : null}
+          citaResaltada={citaResaltada}
         />
       )}
 
@@ -1498,6 +1606,89 @@ const Citas = () => {
             }}
           >
             Iniciar sesión
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+          show={mostrarModalCancelar}
+          onHide={() => {
+            setMostrarModalCancelar(false);
+            setCitaParaCancelar(null);
+          }}
+          centered
+          className="modal-cancelar-fashion"
+        >
+
+       <Modal.Header closeButton className="modal-cancelar-header">
+          <div className="modal-cancelar-icono">
+            <i className="bi bi-exclamation-triangle"></i>
+          </div>
+
+          <Modal.Title>Cancelar cita</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className="modal-cancelar-body">
+          <p>
+            ¿Seguro que deseas cancelar esta cita? Esta acción cambiará su estado y ya no seguirá activa.
+          </p>
+
+          {citaParaCancelar && (
+            <div className="modal-cancelar-resumen">
+              <div>
+                <span>Fecha</span>
+                <strong>
+                  {new Date(
+                    citaParaCancelar.fecha + "T00:00:00"
+                  ).toLocaleDateString("es-NI", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </strong>
+              </div>
+
+              <div>
+                <span>Hora</span>
+                <strong>
+                {new Date(`2000-01-01T${citaParaCancelar.hora}`)
+                  .toLocaleTimeString("es-NI", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+              </strong>
+              </div>
+
+              <div>
+                <span>Estado actual</span>
+                <strong>{citaParaCancelar.estado_cita}</strong>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer className="modal-cancelar-footer">
+          <Button
+            className="btn-cancelar-volver"
+            onClick={() => {
+              setMostrarModalCancelar(false);
+              setCitaParaCancelar(null);
+            }}
+          >
+            No, volver
+          </Button>
+
+          <Button
+            className="btn-confirmar-cancelacion"
+            onClick={async () => {
+              await cancelarCita(citaParaCancelar);
+              setMostrarModalCancelar(false);
+              setCitaParaCancelar(null);
+            }}
+          >
+            Sí, cancelar cita
           </Button>
         </Modal.Footer>
       </Modal>

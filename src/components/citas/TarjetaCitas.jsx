@@ -7,6 +7,7 @@ const TarjetaCitas = ({
   cancelarCita,
   onReagendar,
   generarPDFCita,
+   citaResaltada,
 }) => {
   const [citaSeleccionada, setCitaSeleccionada] = useState(null);
 
@@ -81,7 +82,15 @@ const TarjetaCitas = ({
             const duracion = calcularDuracion(cita.Detalle_cita);
 
             return (
-              <div className="tarjeta-cita-cliente" key={cita.id_cita}>
+              <div
+                  id={`cita-${cita.id_cita}`}
+                  key={cita.id_cita}
+                  className={`tarjeta-cita-cliente ${
+                    citaResaltada === cita.id_cita
+                      ? "cita-resaltada"
+                      : ""
+                  }`}
+                >
                 <div className="tarjeta-cita-header">
                   <div>
                     <p className="tarjeta-cita-label">Tu cita</p>
@@ -153,7 +162,7 @@ const TarjetaCitas = ({
                       Ver detalles
                     </Button>
 
-                    {cita.estado_cita === "pendiente" && (
+                    {(cita.estado_cita === "pendiente" || cita.estado_cita === "aceptado") && (
                       <Button
                         size="sm"
                         className="btn-reagendar-cita"

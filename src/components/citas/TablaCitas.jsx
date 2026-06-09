@@ -14,6 +14,7 @@ const TablaCitas = ({
   completandoCita,
   vistaEmpleado = "disponibles",
    generarPDFCita,
+   citaResaltada,
 }) => {
 
   const [citaSeleccionada, setCitaSeleccionada] = useState(null);
@@ -171,7 +172,15 @@ const TablaCitas = ({
                 const total = calcularTotal(cita.Detalle_cita);
 
                 return (
-                  <tr className="fila-cita" key={cita.id_cita}>
+                  <tr
+                      id={`cita-${cita.id_cita}`}
+                      key={cita.id_cita}
+                      className={`fila-cita ${
+                        citaResaltada === cita.id_cita
+                          ? "cita-resaltada"
+                          : ""
+                      }`}
+                    >
                     <td>
                       <strong>{formatearFecha(cita.fecha)}</strong>
                     </td>

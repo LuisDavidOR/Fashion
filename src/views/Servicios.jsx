@@ -327,16 +327,20 @@ const Servicios = () => {
         urlImagen = await subirImagenServicio(nuevoServicio.archivo);
       }
 
-      const { error } = await supabase.from("Servicios").insert([
-        {
-          nombre: nuevoServicio.nombre.trim(),
-          descripcion: nuevoServicio.descripcion.trim() || null,
-          precio: parseFloat(nuevoServicio.precio),
-          duracion: parseInt(nuevoServicio.duracion),
-          id_categoria: nuevoServicio.id_categoria,
-          url_imagen: urlImagen || null,
-        },
-      ]);
+      const { data: servicioInsertado, error } = await supabase
+        .from("Servicios")
+        .insert([
+          {
+            nombre: nuevoServicio.nombre.trim(),
+            descripcion: nuevoServicio.descripcion.trim() || null,
+            precio: parseFloat(nuevoServicio.precio),
+            duracion: parseInt(nuevoServicio.duracion),
+            id_categoria: nuevoServicio.id_categoria,
+            url_imagen: urlImagen || null,
+          },
+        ])
+        .select("id_servicio, nombre")
+        .single();
 
       if (error) {
         console.error("Error al registrar servicio:", error.message);
@@ -346,6 +350,20 @@ const Servicios = () => {
           tipo: "error",
         });
         return;
+      }
+
+      if (servicioInsertado) {
+        localStorage.setItem(
+          "ultimoServicioNuevo",
+          JSON.stringify({
+            id: `servicio-${servicioInsertado.id_servicio}`,
+            tipo: "servicio_nuevo",
+            id_servicio: servicioInsertado.id_servicio,
+            titulo: "Nuevo servicio disponible",
+            mensaje: `Ya está disponible el servicio ${servicioInsertado.nombre}.`,
+            fecha: new Date().toISOString(),
+          })
+        );
       }
 
       setToast({
