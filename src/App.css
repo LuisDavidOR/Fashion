@@ -3878,3 +3878,28 @@ body,
     height: 380px;
   }
 }
+
+.dashboard-mobile-link {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .dashboard-reducido-wrapper {
+    display: none;
+  }
+
+  .dashboard-mobile-link {
+    display: block;
+    text-align: center;
+    padding: 2rem 1rem;
+    border-radius: 18px;
+    background: #fff7f4;
+    border: 1px solid rgba(139, 107, 97, 0.25);
+  }
+
+  .dashboard-mobile-link p {
+    margin-bottom: 1rem;
+    color: #6f4f46;
+    font-weight: 500;
+  }
+}

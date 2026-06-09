@@ -292,6 +292,21 @@ const InteligenciaNegocio = () => {
               />
             </div>
 
+            <div className="dashboard-mobile-link">
+              <p>
+                Para una mejor visualización en celular, abre este dashboard en pantalla completa.
+              </p>
+
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-fashion-primary"
+              >
+                {textoBoton}
+              </a>
+            </div>
+
             <div className="dashboard-actions mt-3">
               <a
                 href={url}
