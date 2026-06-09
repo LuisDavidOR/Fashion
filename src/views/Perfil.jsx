@@ -90,7 +90,7 @@ const Perfil = () => {
       await cargarPerfil();
     };
     obtenerPerfil();
-  }, [usuario, rol, perfil]);
+  }, [usuario, rol]);
 
   const validarCampo = (name, value) => {
     if (name === "nombre") {
