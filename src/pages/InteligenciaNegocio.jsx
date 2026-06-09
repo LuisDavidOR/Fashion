@@ -11,50 +11,26 @@ const InteligenciaNegocio = () => {
   const [mejorEmpleado, setMejorEmpleado] = useState("Sin datos");
   const [detallesReporte, setDetallesReporte] = useState([]);
 
+  const urlsTableau = {
+    rentabilidad:
+      "https://public.tableau.com/views/Dashboardrentabilidad/Dashboard1?:language=es-ES&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
+
+    productividad:
+      "https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
+
+    satisfaccion:
+      "https://public.tableau.com/views/DashboardF2/Dashboard1?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
+  };
+
   useEffect(() => {
     cargarDatosDashboard();
   }, []);
 
-  const urlsTableau = {
-    rentabilidad: {
-      serviciosMenosRentables:
-        "https://public.tableau.com/views/Dashboardrentabilidad/ServiciosConMenorRentabilidad?:language=es-ES&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      serviciosMasRentables:
-        "https://public.tableau.com/views/Dashboardrentabilidad/ServiciosConMayorRentabilidad?:language=es-ES&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      gananciaPorDia:
-        "https://public.tableau.com/views/Dashboardrentabilidad/GananciaPorDadelaSemana?:language=es-ES&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      dashboardCompleto:
-        "https://public.tableau.com/views/Dashboardrentabilidad/Dashboard1?:language=es-ES&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-    },
-
-    productividad: {
-      citasPorEmpleado:
-        "https://public.tableau.com/views/DashboardF1_17808758226050/Hoja1_1?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      ingresosPorEmpleado:
-        "https://public.tableau.com/views/DashboardF1_17808758226050/Hoja2_1?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      productividadVsRentabilidad:
-        "https://public.tableau.com/views/DashboardF1_17808758226050/Hoja6_1?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      dashboardCompleto:
-        "https://public.tableau.com/views/DashboardF1_17808758226050/Dashboard1?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-    },
-
-    satisfaccion: {
-      serviciosMenorSatisfaccion:
-        "https://public.tableau.com/views/DashboardF2/Hoja4?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      distribucionCalificaciones:
-        "https://public.tableau.com/views/DashboardF2/Hoja7?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      serviciosMayorDemanda:
-        "https://public.tableau.com/views/DashboardF2/Hoja6?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-      dashboardCompleto:
-        "https://public.tableau.com/views/DashboardF2/Dashboard1?:language=es-ES&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link",
-    },
-  };
-
   const crearUrlTableau = (url) => {
-  const base = url.split("?")[0];
+    const base = url.split("?")[0];
 
-  return `${base}?:showVizHome=no&:embed=true&:toolbar=no&:tabs=no&:showAppBanner=false&:display_count=n`;
-};
+    return `${base}?:showVizHome=no&:embed=true&:toolbar=no&:tabs=no&:showAppBanner=false&:display_count=n&:device=desktop`;
+  };
 
   const cargarDatosDashboard = async () => {
     try {
@@ -291,33 +267,11 @@ const InteligenciaNegocio = () => {
     doc.save("reporte_satisfaccion_fashion.pdf");
   };
 
-  const GraficoTableau = ({ titulo, descripcion, url }) => {
-    return (
-      <Card className="dashboard-card-fashion mb-4">
-        <Card.Body>
-          <div className="grafico-encabezado">
-            <h4>{titulo}</h4>
-            <p>{descripcion}</p>
-          </div>
-
-          <div className="tableau-wrapper grafico-individual-wrapper">
-            <iframe
-              title={titulo}
-              src={crearUrlTableau(url)}
-              className="tableau-iframe grafico-individual-iframe"
-            />
-          </div>
-        </Card.Body>
-      </Card>
-    );
-  };
-
-  const SeccionAnalisis = ({
+  const DashboardTableau = ({
     etiqueta,
     titulo,
     descripcion,
-    graficos,
-    dashboardCompleto,
+    url,
     textoBoton,
   }) => {
     return (
@@ -328,25 +282,28 @@ const InteligenciaNegocio = () => {
           <p>{descripcion}</p>
         </div>
 
-        {graficos.map((grafico, index) => (
-          <GraficoTableau
-            key={index}
-            titulo={grafico.titulo}
-            descripcion={grafico.descripcion}
-            url={grafico.url}
-          />
-        ))}
+        <Card className="dashboard-card-fashion mb-4">
+          <Card.Body>
+            <div className="dashboard-reducido-wrapper">
+              <iframe
+                title={titulo}
+                src={crearUrlTableau(url)}
+                className="dashboard-reducido-iframe"
+              />
+            </div>
 
-        <div className="dashboard-actions mt-3 mb-5">
-          <a
-            href={dashboardCompleto}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-fashion-primary"
-          >
-            {textoBoton}
-          </a>
-        </div>
+            <div className="dashboard-actions mt-3">
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-fashion-primary"
+              >
+                {textoBoton}
+              </a>
+            </div>
+          </Card.Body>
+        </Card>
       </section>
     );
   };
@@ -360,8 +317,8 @@ const InteligenciaNegocio = () => {
 
         <p>
           Analiza la rentabilidad, productividad y satisfacción de Salón Fashion
-          mediante indicadores visuales, reportes ejecutivos y gráficos
-          interactivos de Tableau.
+          mediante dashboards ejecutivos, indicadores principales y reportes en
+          PDF.
         </p>
       </section>
 
@@ -430,88 +387,28 @@ const InteligenciaNegocio = () => {
 
       <hr className="my-5" />
 
-      <SeccionAnalisis
+      <DashboardTableau
         etiqueta="Análisis financiero"
         titulo="📈 Rentabilidad del Negocio"
-        descripcion="Esta sección permite identificar qué servicios generan mayores ganancias, cuáles requieren revisión y en qué días se concentra mejor el rendimiento económico del salón."
-        dashboardCompleto={urlsTableau.rentabilidad.dashboardCompleto}
+        descripcion="Este dashboard permite visualizar la ganancia del salón, los servicios más rentables, los servicios con menor rentabilidad y el comportamiento económico según los días de la semana."
+        url={urlsTableau.rentabilidad}
         textoBoton="Ver Dashboard Completo de Rentabilidad"
-        graficos={[
-          {
-            titulo: "Servicios menos rentables",
-            descripcion:
-              "Muestra los servicios que generan menor margen de ganancia y que podrían necesitar ajustes en precio, costos o estrategia.",
-            url: urlsTableau.rentabilidad.serviciosMenosRentables,
-          },
-          {
-            titulo: "Servicios más rentables",
-            descripcion:
-              "Identifica los servicios que aportan mayor utilidad al salón y que pueden impulsarse dentro del catálogo.",
-            url: urlsTableau.rentabilidad.serviciosMasRentables,
-          },
-          {
-            titulo: "Ganancia por día de la semana",
-            descripcion:
-              "Permite reconocer los días con mejor rendimiento económico para apoyar decisiones de agenda, promociones y disponibilidad.",
-            url: urlsTableau.rentabilidad.gananciaPorDia,
-          },
-        ]}
       />
 
-      <SeccionAnalisis
+      <DashboardTableau
         etiqueta="Desempeño del equipo"
         titulo="👥 Productividad del Personal"
-        descripcion="Esta sección analiza el rendimiento de los empleados según citas atendidas, ingresos generados y relación entre productividad y rentabilidad."
-        dashboardCompleto={urlsTableau.productividad.dashboardCompleto}
+        descripcion="Este dashboard muestra el rendimiento de los empleados según citas atendidas, ingresos generados y relación entre productividad y rentabilidad."
+        url={urlsTableau.productividad}
         textoBoton="Ver Dashboard Completo de Productividad"
-        graficos={[
-          {
-            titulo: "Citas atendidas por empleado",
-            descripcion:
-              "Compara la cantidad de citas realizadas por cada empleado para conocer la distribución del trabajo.",
-            url: urlsTableau.productividad.citasPorEmpleado,
-          },
-          {
-            titulo: "Ingresos por empleado",
-            descripcion:
-              "Muestra cuánto ingreso genera cada empleado mediante los servicios atendidos.",
-            url: urlsTableau.productividad.ingresosPorEmpleado,
-          },
-          {
-            titulo: "Productividad vs rentabilidad",
-            descripcion:
-              "Relaciona la cantidad de citas atendidas con los ingresos generados para identificar el mejor desempeño general.",
-            url: urlsTableau.productividad.productividadVsRentabilidad,
-          },
-        ]}
       />
 
-      <SeccionAnalisis
+      <DashboardTableau
         etiqueta="Experiencia del cliente"
         titulo="⭐ Satisfacción de Clientes"
-        descripcion="Esta sección resume la percepción de los clientes mediante sus calificaciones, permitiendo detectar fortalezas y oportunidades de mejora en los servicios."
-        dashboardCompleto={urlsTableau.satisfaccion.dashboardCompleto}
+        descripcion="Este dashboard resume la percepción de los clientes mediante calificaciones, servicios mejor valorados y servicios con oportunidades de mejora."
+        url={urlsTableau.satisfaccion}
         textoBoton="Ver Dashboard Completo de Satisfacción"
-        graficos={[
-          {
-            titulo: "Servicios con menor satisfacción",
-            descripcion:
-              "Ayuda a identificar los servicios que requieren atención para mejorar la experiencia del cliente.",
-            url: urlsTableau.satisfaccion.serviciosMenorSatisfaccion,
-          },
-          {
-            titulo: "Distribución de calificaciones",
-            descripcion:
-              "Muestra cómo se distribuyen las puntuaciones dadas por los clientes en el sistema.",
-            url: urlsTableau.satisfaccion.distribucionCalificaciones,
-          },
-          {
-            titulo: "Servicios con mayor demanda",
-            descripcion:
-              "Permite reconocer los servicios más solicitados por los clientes dentro del salón.",
-            url: urlsTableau.satisfaccion.serviciosMayorDemanda,
-          },
-        ]}
       />
 
       <Card className="dashboard-conclusion">

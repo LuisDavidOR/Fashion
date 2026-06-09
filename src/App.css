@@ -3844,3 +3844,37 @@ body,
     height: 430px;
   }
 }
+
+.dashboard-reducido-wrapper {
+  width: 100%;
+  height: 560px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(139, 107, 97, 0.18);
+}
+
+.dashboard-reducido-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+@media (max-width: 992px) {
+  .dashboard-reducido-wrapper {
+    height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-reducido-wrapper {
+    height: 440px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-reducido-wrapper {
+    height: 380px;
+  }
+}
