@@ -94,21 +94,14 @@ const Encabezado = () => {
         return;
       }
 
-      const claveVista = `ultimoServicioVisto_${usuario.id}`;
-      const ultimoVisto = localStorage.getItem(claveVista);
-
-      if (String(data.id_servicio) !== String(ultimoVisto)) {
-        setNotificacionServicioNuevo({
-          id: `servicio-${data.id_servicio}`,
-          tipo: "servicio_nuevo",
-          id_servicio: data.id_servicio,
-          titulo: "Nuevo servicio disponible",
-          mensaje: `Ya está disponible el servicio ${data.nombre}.`,
-          fecha: new Date().toISOString(),
-        });
-      } else {
-        setNotificacionServicioNuevo(null);
-      }
+      setNotificacionServicioNuevo({
+        id: `servicio-${data.id_servicio}`,
+        tipo: "servicio_nuevo",
+        id_servicio: data.id_servicio,
+        titulo: "Nuevo servicio disponible",
+        mensaje: `Ya está disponible el servicio ${data.nombre}.`,
+        fecha: new Date().toISOString(),
+      });
     };
 
   const cargarCitasPendientes = async () => {
@@ -445,6 +438,26 @@ useEffect(() => {
     );
   }
 
+  const formatearFechaNotificacion = (fecha) => {
+    if (!fecha) return "";
+
+    return new Date(fecha).toLocaleDateString("es-NI", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  const formatearHoraNotificacion = (fecha) => {
+    if (!fecha) return "";
+
+    return new Date(fecha).toLocaleTimeString("es-NI", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
 
 
   console.log(notificacionesActuales);
@@ -548,15 +561,15 @@ useEffect(() => {
                                 setMostrarNotificaciones(false);
 
                                 if (cita.tipo === "servicio_nuevo") {
-                                  localStorage.setItem(
-                                    `ultimoServicioVisto_${usuario.id}`,
-                                    String(cita.id_servicio)
-                                  );
+                                localStorage.setItem(
+                                  `ultimoServicioVisto_${usuario.id}`,
+                                  String(cita.id_servicio)
+                                );
 
-                                  setNotificacionServicioNuevo(null);
-                                  navigate("/catalogo");
-                                  return;
-                                }
+                                setHayNotificacionNueva(false);
+                                navigate("/catalogo");
+                                return;
+                              }
 
                                 navigate(`/citas?id_cita=${cita.id_cita}`);
                               }}
@@ -576,8 +589,24 @@ useEffect(() => {
                               {esNotificacionLocal ? cita.mensaje : serviciosNombres}
                             </div>
                             <div className="text-muted d-flex justify-content-between mt-1" style={{ fontSize: "0.7rem" }}>
-                              <span><i className="bi bi-calendar-event me-1"></i>{cita.fecha}</span>
-                              <span><i className="bi bi-clock me-1"></i>{cita.hora}</span>
+                              <span>
+                              <i className="bi bi-calendar-event me-1"></i>
+                              {formatearFechaNotificacion(cita.fecha)}
+                            </span>
+
+                            <span>
+                              <i className="bi bi-clock me-1"></i>
+                              {cita.tipo === "servicio_nuevo"
+                                ? formatearHoraNotificacion(cita.fecha)
+                                : new Date(`2000-01-01T${cita.hora}`).toLocaleTimeString(
+                                    "es-NI",
+                                    {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    }
+                                  )}
+                            </span>
                             </div>
                           </div>
                         );
