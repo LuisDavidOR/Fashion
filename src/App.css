@@ -3952,3 +3952,18 @@ body,
     font-size: 1.2rem;
   }
 }
+
+@media (max-width: 768px) {
+  .dashboard-actions {
+    display: none !important;
+  }
+
+  .dashboard-mobile-link {
+    display: block !important;
+  }
+
+  .dashboard-mobile-link a,
+  .dashboard-mobile-link button {
+    display: none !important;
+  }
+}

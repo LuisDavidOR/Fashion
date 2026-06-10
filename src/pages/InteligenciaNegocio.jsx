@@ -140,6 +140,7 @@ const InteligenciaNegocio = () => {
         ["Satisfacción", `${satisfaccion.toFixed(0)}%`],
         ["Mejor empleado", mejorEmpleado],
         ["Calificación promedio", calificacionPromedio.toFixed(2)],
+        ["Citas completadas analizadas", detallesReporte.length],
       ],
     });
 
@@ -252,6 +253,16 @@ const InteligenciaNegocio = () => {
     doc.text("Proyecto Fashion - Salón de Belleza", 14, 28);
     doc.text(`Fecha: ${new Date().toLocaleDateString("es-NI")}`, 14, 35);
 
+    autoTable(doc, {
+      startY: 45,
+      head: [["Resumen", "Valor"]],
+      body: [
+        ["Calificación promedio", calificacionPromedio.toFixed(2)],
+        ["Clientes satisfechos", `${satisfaccion.toFixed(0)}%`],
+        ["Total de calificaciones", calificaciones.length],
+      ],
+    });
+
     const filas = calificaciones.map((item) => {
       const puntuacion = Number(item.puntuacion || 0);
 
@@ -259,7 +270,7 @@ const InteligenciaNegocio = () => {
     });
 
     autoTable(doc, {
-      startY: 45,
+      startY: 90,
       head: [["Puntuación", "Clasificación"]],
       body: filas,
     });
@@ -294,17 +305,10 @@ const InteligenciaNegocio = () => {
 
             <div className="dashboard-mobile-link">
               <p>
-                Para una mejor visualización en celular, abre este dashboard en pantalla completa.
+                Este dashboard se visualiza mejor desde una computadora de escritorio.
+                Para revisar correctamente los gráficos, te recomendamos abrir esta sección
+                desde una PC o laptop.
               </p>
-
-              <a
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-fashion-primary"
-              >
-                {textoBoton}
-              </a>
             </div>
 
             <div className="dashboard-actions mt-3">
