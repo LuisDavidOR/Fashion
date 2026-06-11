@@ -321,7 +321,12 @@ const RestablecerPassword = () => {
                 </Alert>
               )}
 
-              <Form>
+              <Form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  actualizarContrasena();
+                }}
+              >
                 <Form.Group className="mb-3">
                   <Form.Label style={estilos.label}>Nueva contraseña</Form.Label>
 
@@ -374,8 +379,8 @@ const RestablecerPassword = () => {
 
                 <Button
                   style={estilos.boton}
+                  type="submit"
                   className="w-100"
-                  onClick={actualizarContrasena}
                   disabled={cargando || validandoEnlace || !enlaceValido}
                 >
                   {validandoEnlace ? (

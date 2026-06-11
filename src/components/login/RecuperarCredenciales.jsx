@@ -42,7 +42,7 @@ const RecuperarCredenciales = () => {
       const { data: usuarioDB, error: errorUsuario } = await supabase
         .from("Usuarios")
         .select("id_usuario, correo, estado")
-        .eq("correo", correoLimpio)
+        .ilike("correo", correoLimpio)
         .maybeSingle();
 
       if (errorUsuario) {
@@ -68,10 +68,14 @@ const RecuperarCredenciales = () => {
       });
 
       if (error) {
+        console.error("Error Supabase recuperación:", error);
+
         if (error.status === 429) {
           setMensaje("Has solicitado muchos enlaces. Espera unos minutos antes de intentarlo nuevamente.");
+        } else if (error.message?.toLowerCase().includes("rate limit")) {
+          setMensaje("Has solicitado muchos enlaces. Espera unos minutos antes de intentarlo nuevamente.");
         } else {
-          setMensaje("No se pudo enviar el enlace de recuperación.");
+          setMensaje("No se pudo enviar el enlace de recuperación. Verifica con el administrador.");
         }
 
         setTipoMensaje("danger");
@@ -235,7 +239,12 @@ const RecuperarCredenciales = () => {
                 </Alert>
               )}
 
-              <Form>
+              <Form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  enviarRecuperacion();
+                }}
+              >
                 <Form.Group className="mb-3">
                   <Form.Label style={estilos.label}>Correo electrónico</Form.Label>
 
@@ -259,8 +268,8 @@ const RecuperarCredenciales = () => {
                 <Button
                   style={estilos.boton}
                   className="w-100"
-                  onClick={enviarRecuperacion}
                   disabled={cargando}
+                  type="submit"
                 >
                   {cargando ? (
                     <>

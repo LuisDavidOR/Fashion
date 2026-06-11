@@ -259,8 +259,12 @@ useEffect(() => {
   };
 
   //Detectar rutas especiales
-  const esRutaAuth =
-    location.pathname === "/login" || location.pathname === "/registro";
+  const esRutaAuth = [
+    "/login",
+    "/registro",
+    "/recuperar-credenciales",
+    "/restablecer-password",
+  ].includes(location.pathname);
 
   //Contenido del menú
   let contenidoMenu;

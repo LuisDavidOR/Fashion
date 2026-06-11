@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Card, Form, Button, Spinner, Alert } from "react-bootstrap";
+import { Container, Card, Form, Button, Spinner, Alert, Modal } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,13 @@ const Perfil = () => {
   const [mensaje, setMensaje] = useState("");
   const [tipoMensaje, setTipoMensaje] = useState("success");
   const [previewImagen, setPreviewImagen] = useState("");
+  const [mostrarModalPassword, setMostrarModalPassword] = useState(false);
+  const [contrasenaActual, setContrasenaActual] = useState("");
+  const [nuevaContrasena, setNuevaContrasena] = useState("");
+  const [confirmarContrasena, setConfirmarContrasena] = useState("");
+  const [cambiandoPassword, setCambiandoPassword] = useState(false);
+  const [mensajePassword, setMensajePassword] = useState("");
+  const [tipoMensajePassword, setTipoMensajePassword] = useState("danger");
   const [errores, setErrores] = useState({
     nombre: "",
     apellido: "",
@@ -256,6 +263,74 @@ const Perfil = () => {
     return data.publicUrl;
   };
 
+  const cambiarContrasena = async () => {
+    if (cambiandoPassword) return;
+
+    if (
+      !contrasenaActual.trim() ||
+      !nuevaContrasena.trim() ||
+      !confirmarContrasena.trim()
+    ) {
+      setMensajePassword("Todos los campos de contraseña son obligatorios.");
+      setTipoMensajePassword("danger");
+      return;
+    }
+
+    if (nuevaContrasena.length < 6) {
+      setMensajePassword("La nueva contraseña debe tener al menos 6 caracteres.");
+      setTipoMensajePassword("danger");
+      return;
+    }
+
+    if (nuevaContrasena !== confirmarContrasena) {
+      setMensajePassword("La nueva contraseña y la confirmación no coinciden.");
+      setTipoMensajePassword("danger");
+      return;
+    }
+
+    try {
+      setCambiandoPassword(true);
+
+      const correoUsuario = usuario?.email || perfil.correo;
+
+      const { error: errorLogin } = await supabase.auth.signInWithPassword({
+        email: correoUsuario,
+        password: contrasenaActual,
+      });
+
+      if (errorLogin) {
+        setMensajePassword("La contraseña actual no es correcta.");
+        setTipoMensajePassword("danger");
+        return;
+      }
+
+      const { error: errorActualizar } = await supabase.auth.updateUser({
+        password: nuevaContrasena,
+      });
+
+      if (errorActualizar) {
+        setMensajePassword("No se pudo actualizar la contraseña.");
+        setTipoMensajePassword("danger");
+        return;
+      }
+
+      setMensajePassword("");
+      setMensaje("Contraseña actualizada correctamente.");
+      setTipoMensaje("success");
+
+      setContrasenaActual("");
+      setNuevaContrasena("");
+      setConfirmarContrasena("");
+      setMostrarModalPassword(false);
+    } catch (error) {
+      console.error("Error al cambiar contraseña:", error);
+      setMensajePassword("Ocurrió un error al cambiar la contraseña.");
+      setTipoMensajePassword("danger");
+    } finally {
+      setCambiandoPassword(false);
+    }
+  };
+
   if (cargando) {
     return (
       <Container className="mt-5 pt-5 text-center">
@@ -334,6 +409,19 @@ const Perfil = () => {
               </Button>
             )}
           </div>
+
+          <Button
+            variant="outline-primary"
+            size="sm"
+            className="mb-3 me-2"
+            onClick={() => {
+              setMensajePassword("");
+              setMostrarModalPassword(true);
+            }}
+          >
+            <i className="bi-shield-lock me-2"></i>
+            Cambiar contraseña
+          </Button>
 
           <Button
             variant="outline-secondary"
@@ -547,6 +635,103 @@ const Perfil = () => {
           </Form>
         </Card.Body>
       </Card>
+
+      <Modal
+        show={mostrarModalPassword}
+        onHide={() => {
+          setMostrarModalPassword(false);
+          setContrasenaActual("");
+          setNuevaContrasena("");
+          setConfirmarContrasena("");
+          setMensajePassword("");
+        }}
+        centered
+        backdrop="static"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi-shield-lock me-2"></i>
+            Cambiar contraseña
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {mensajePassword && (
+            <Alert variant={tipoMensajePassword} className="py-2 px-3">
+              {mensajePassword}
+            </Alert>
+          )}
+
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Contraseña actual</Form.Label>
+              <Form.Control
+                type="password"
+                value={contrasenaActual}
+                onChange={(e) => setContrasenaActual(e.target.value)}
+                placeholder="Ingrese su contraseña actual"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Nueva contraseña</Form.Label>
+              <Form.Control
+                type="password"
+                value={nuevaContrasena}
+                onChange={(e) => setNuevaContrasena(e.target.value)}
+                placeholder="Ingrese la nueva contraseña"
+              />
+              <Form.Text className="text-muted">
+                Debe tener al menos 6 caracteres.
+              </Form.Text>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Confirmar nueva contraseña</Form.Label>
+              <Form.Control
+                type="password"
+                value={confirmarContrasena}
+                onChange={(e) => setConfirmarContrasena(e.target.value)}
+                placeholder="Confirme la nueva contraseña"
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setMostrarModalPassword(false);
+              setContrasenaActual("");
+              setNuevaContrasena("");
+              setConfirmarContrasena("");
+              setMensajePassword("");
+            }}
+            disabled={cambiandoPassword}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            variant="primary"
+            onClick={cambiarContrasena}
+            disabled={cambiandoPassword}
+          >
+            {cambiandoPassword ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Actualizando...
+              </>
+            ) : (
+              <>
+                <i className="bi-check-circle me-2"></i>
+                Actualizar contraseña
+              </>
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

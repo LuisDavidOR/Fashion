@@ -25,11 +25,6 @@ const ModalEdicionCliente = ({
   //  VALIDACIÓN DE TELÉFONO
   const telefonoValido = /^[0-9]{8}$/.test(clienteEditar.telefono);
 
-  // VALIDACIÓN DE CORREO
-  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|ni|es|mx|us)$/i.test(
-    clienteEditar.correo
-  );
-
   const camposVacios =
     clienteEditar.nombre.trim() === "" ||
     clienteEditar.apellido.trim() === "" ||
@@ -37,7 +32,10 @@ const ModalEdicionCliente = ({
     clienteEditar.correo.trim() === "";
 
   // 🔴 DETECTA SI HAY ERRORES
-  const hayErrores = !telefonoValido || !correoValido;
+  const hayErrores =
+    !nombreValido ||
+    !apellidoValido ||
+    !telefonoValido;
 
   return (
     <Modal
@@ -139,17 +137,13 @@ const ModalEdicionCliente = ({
               type="email"
               name="correo"
               value={clienteEditar.correo}
-              onChange={manejoCambioInputEdicion}
-              placeholder="Ingresa el correo del cliente"
-
-              // 🔴 Activa borde rojo si es inválido
-              isInvalid={clienteEditar.correo && !correoValido}
+              disabled
+              readOnly
+              placeholder="Correo electrónico del cliente"
             />
-
-            {/* 🔴 MENSAJE EN ROJO */}
-            <Form.Control.Feedback type="invalid">
-              Ingresa un correo válido (ej: ejemplo@gmail.com)
-            </Form.Control.Feedback>
+            <Form.Text className="text-muted">
+              El correo electrónico no puede modificarse porque está vinculado al acceso del usuario.
+            </Form.Text>
           </Form.Group>
         </Form>
       </Modal.Body>

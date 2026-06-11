@@ -28,11 +28,6 @@ const ModalEdicionEmpleado = ({
   // 🔴 VALIDACIÓN TELÉFONO (8 dígitos exactos)
   const telefonoValido = /^[0-9]{8}$/.test(empleadoEditar.telefono);
 
-  // 🔴 VALIDACIÓN CORREO
-  const correoValido = /^[^\s@]+@[^\s@]+\.(com|net|org|edu|ni|es|mx|us)$/i.test(
-    empleadoEditar.correo
-  );
-
   const comisionValida =
     empleadoEditar.comision !== "" &&
     !isNaN(parseFloat(empleadoEditar.comision)) &&
@@ -51,7 +46,6 @@ const ModalEdicionEmpleado = ({
     !nombreValido ||
     !apellidoValido ||
     !telefonoValido ||
-    !correoValido ||
     !comisionValida;
 
   return (
@@ -196,13 +190,14 @@ const ModalEdicionEmpleado = ({
                 <Form.Control
                   type="email"
                   name="correo"
-                  value={empleadoEditar.correo || ""}
-                  onChange={manejoCambioInputEdicion}
-                  isInvalid={empleadoEditar.correo && !correoValido}
+                  value={empleadoEditar.correo}
+                  disabled
+                  readOnly
+                  placeholder="Correo electrónico del empleado"
                 />
-                <Form.Control.Feedback type="invalid">
-                  Ingresa un correo válido (ej: ejemplo@gmail.com)
-                </Form.Control.Feedback>
+                <Form.Text className="text-muted">
+                  El correo electrónico no puede modificarse porque está vinculado al acceso del usuario.
+                </Form.Text>
               </Form.Group>
             </Col>
 
