@@ -3967,3 +3967,83 @@ body,
     display: none !important;
   }
 }
+/* Pagina 404 */
+.pagina-404-contenedor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #d8b4a0, #ab9e99, #f1d4cb);
+  overflow: hidden;
+  z-index: 1;
+}
+
+.pagina-404-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 560px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.pagina-404-logo {
+  width: 82px;
+  height: 82px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+
+.pagina-404-numero {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(4.5rem, 14vw, 8rem);
+  font-weight: 800;
+  line-height: 1;
+  color: #8b6b61;
+  text-shadow: 0 8px 20px rgba(139, 107, 97, 0.25);
+}
+
+.pagina-404-titulo {
+  font-family: "Playfair Display", serif;
+  color: #3f3734;
+  font-weight: 700;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.pagina-404-texto {
+  font-family: "Poppins", sans-serif;
+  color: #6b5f5b;
+  font-size: 1rem;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+.pagina-404-btn-principal {
+  background-color: #8b6b61;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-family: "Poppins", sans-serif;
+  transition: all 0.25s ease;
+}
+
+.pagina-404-btn-principal:hover {
+  background-color: #74584f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(139, 107, 97, 0.25);
+}
+
+.pagina-404-btn-secundario {
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-family: "Poppins", sans-serif;
+  transition: all 0.25s ease;
+}
+
+.pagina-404-btn-secundario:hover {
+  transform: translateY(-2px);
+}
