@@ -860,7 +860,38 @@ const Citas = () => {
 
   const completarCita = async (cita) => {
     try {
+      if (!esEmpleado || !perfil?.id_empleado) {
+        setToast({
+          mostrar: true,
+          mensaje: "No tienes permisos para completar citas.",
+          tipo: "advertencia",
+        });
+        return;
+      }
+
       setCompletandoCita(cita.id_cita);
+
+      const { data: citaCompletada, error: errorActualizarCita } = await supabase
+        .from("Citas")
+        .update({
+          estado_cita: "completada",
+        })
+        .eq("id_cita", cita.id_cita)
+        .eq("estado_cita", "aceptado")
+        .eq("id_empleado", perfil.id_empleado)
+        .select("id_cita")
+        .single();
+
+      if (errorActualizarCita || !citaCompletada) {
+        setToast({
+          mostrar: true,
+          mensaje: "Esta cita ya fue completada, cancelada o no está disponible.",
+          tipo: "advertencia",
+        });
+
+        await cargarCitas();
+        return;
+      }
 
       const { data: detalles, error: errorDetalles } = await supabase
         .from("Detalle_cita")
@@ -882,11 +913,14 @@ const Citas = () => {
 
       if (errorDetalles) {
         console.error(errorDetalles.message);
+
         setToast({
           mostrar: true,
-          mensaje: "Error al obtener los insumos de la cita.",
+          mensaje: "La cita se completó, pero ocurrió un error al obtener los insumos.",
           tipo: "error",
         });
+
+        await cargarCitas();
         return;
       }
 
@@ -915,24 +949,6 @@ const Citas = () => {
         }
       }
 
-      const { error: errorCita } = await supabase
-        .from("Citas")
-        .update({
-          estado_cita: "completada",
-        })
-        .eq("id_cita", cita.id_cita)
-        .eq("estado_cita", "aceptado");
-
-      if (errorCita) {
-        console.error(errorCita.message);
-        setToast({
-          mostrar: true,
-          mensaje: "Error al completar la cita.",
-          tipo: "error",
-        });
-        return;
-      }
-
       setToast({
         mostrar: true,
         mensaje: "Cita completada e inventario actualizado.",
@@ -942,6 +958,7 @@ const Citas = () => {
       await cargarCitas();
     } catch (err) {
       console.error("Error al completar cita:", err.message);
+
       setToast({
         mostrar: true,
         mensaje: "Error inesperado al completar la cita.",

@@ -2279,130 +2279,251 @@ body,
    TARJETAS DE CITAS CLIENTE
 ========================= */
 
+/* =========================
+   TARJETAS DE CITAS CLIENTE - REDISEÑO FASHION
+========================= */
+
 .contenedor-tarjetas-citas {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
 .tarjeta-cita-cliente {
-  background: #ffffff;
-  border-radius: 22px;
-  padding: 22px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f1f1f1;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffffff, #fff8f5);
+  border-radius: 26px;
+  padding: 24px;
+  border: 1px solid rgba(122, 86, 74, 0.14);
+  box-shadow: 0 12px 30px rgba(122, 86, 74, 0.12);
   transition: all 0.3s ease;
 }
 
+.tarjeta-cita-cliente::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 7px;
+  height: 100%;
+  background: linear-gradient(180deg, #7a564a, #c4a28d);
+}
+
 .tarjeta-cita-cliente:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-5px);
+  box-shadow: 0 18px 38px rgba(122, 86, 74, 0.18);
 }
 
 .tarjeta-cita-header {
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: flex-start;
+  gap: 14px;
   margin-bottom: 18px;
 }
 
 .tarjeta-cita-label {
-  color: #9a9a9a;
-  font-size: 0.85rem;
-  margin-bottom: 4px;
+  color: #9b7668;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  margin-bottom: 5px;
 }
 
 .tarjeta-cita-header h5 {
-  font-weight: 700;
   margin: 0;
+  color: #2b211e;
+  font-size: 1.12rem;
+  font-weight: 800;
   text-transform: capitalize;
-  color: #2d2d2d;
+}
+
+.badge-estado-cita {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.estado-pendiente {
+  background: #fff3cd;
+  color: #8a6300;
+}
+
+.estado-aceptado {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.estado-completada {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.estado-cancelada {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.estado-default {
+  background: #e5e7eb;
+  color: #374151;
 }
 
 .tarjeta-cita-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 11px;
   margin-bottom: 18px;
 }
 
 .tarjeta-cita-info div {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #faf7f5;
-  padding: 10px 14px;
-  border-radius: 14px;
-}
-
-.tarjeta-cita-info i {
-  color: #7A564A;
-  font-size: 1rem;
-}
-
-.tarjeta-cita-servicios {
-  background: #fcfcfc;
-  border: 1px solid #eeeeee;
+  gap: 9px;
+  background: rgba(122, 86, 74, 0.07);
+  border: 1px solid rgba(122, 86, 74, 0.09);
+  padding: 11px 13px;
   border-radius: 16px;
-  padding: 14px;
-  margin-bottom: 20px;
-}
-
-.tarjeta-cita-servicios span {
-  font-size: 0.85rem;
-  color: #888;
+  color: #4b3a34;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
-.tarjeta-cita-servicios p {
-  margin: 8px 0 0;
-  font-weight: 500;
-  color: #333;
+.tarjeta-cita-info i {
+  color: #7a564a;
+  font-size: 1.05rem;
+}
+
+.tarjeta-cita-servicios {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px dashed rgba(122, 86, 74, 0.22);
+  border-radius: 18px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.tarjeta-cita-servicios > span {
+  display: block;
+  color: #8a5a44;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.chips-servicios-cita {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 11px;
+}
+
+.chips-servicios-cita span {
+  background: #f7efeb;
+  color: #7a564a;
+  border: 1px solid rgba(122, 86, 74, 0.12);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
 }
 
 .tarjeta-cita-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 14px;
 }
 
-.tarjeta-cita-footer span {
+.tarjeta-cita-total span {
   display: block;
-  color: #888;
-  font-size: 0.9rem;
+  color: #8a7770;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
-.tarjeta-cita-footer strong {
-  font-size: 1.2rem;
-  color: #7A564A;
+.tarjeta-cita-total strong {
+  color: #7a564a;
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.acciones-cita-cliente {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.btn-ver-detalle-cita,
+.btn-reagendar-cita,
+.btn-cancelar-cita {
+  border-radius: 13px !important;
+  padding: 8px 14px !important;
+  font-weight: 700 !important;
+  transition: all 0.25s ease !important;
 }
 
 .btn-ver-detalle-cita {
-  background: #7A564A !important;
-  border: none !important;
-  border-radius: 12px !important;
-  padding: 8px 16px !important;
-  transition: 0.3s ease;
+  background: #7a564a !important;
+  border-color: #7a564a !important;
+  color: #ffffff !important;
 }
 
 .btn-ver-detalle-cita:hover {
-  transform: scale(1.03);
+  background: #64463d !important;
+  transform: translateY(-2px);
 }
 
 .btn-reagendar-cita {
-  background: #ead8ce !important;
-  color: #7A564A !important;
-  border: 1px solid #7A564A !important;
-  border-radius: 12px !important;
-  padding: 8px 16px !important;
-  font-weight: 600 !important;
-  transition: all 0.3s ease;
+  background: #f1dfd6 !important;
+  color: #7a564a !important;
+  border: 1px solid rgba(122, 86, 74, 0.35) !important;
 }
 
 .btn-reagendar-cita:hover {
-  background: #7A564A !important;
+  background: #7a564a !important;
   color: #ffffff !important;
-  transform: scale(1.03);
+  transform: translateY(-2px);
+}
+
+.btn-cancelar-cita {
+  background: #fff5f5 !important;
+  color: #b91c1c !important;
+  border: 1px solid rgba(185, 28, 28, 0.28) !important;
+}
+
+.btn-cancelar-cita:hover {
+  background: #dc3545 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .tarjeta-cita-info {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta-cita-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .acciones-cita-cliente {
+    flex-direction: column;
+  }
+
+  .acciones-cita-cliente button {
+    width: 100%;
+  }
 }
 
 /* =========================
