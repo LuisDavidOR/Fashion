@@ -29,6 +29,7 @@ const Catalogo = () => {
 
   const [mostrarModalDetalle, setMostrarModalDetalle] = useState(false);
   const [servicioDetalle, setServicioDetalle] = useState(null);
+  const [mensajeCalificacion, setMensajeCalificacion] = useState("");
 
   const [mostrarModalAcceso, setMostrarModalAcceso] = useState(false);
   const [mensajeAcceso, setMensajeAcceso] = useState("");
@@ -83,7 +84,8 @@ const Catalogo = () => {
           Clientes (
             id_cliente,
             nombre,
-            apellido
+            apellido,
+            url_imagen
           )
         `);
 
@@ -149,14 +151,35 @@ const Catalogo = () => {
     try {
       if (!servicioSeleccionado) return;
 
+      const puntuacion = parseInt(nuevaCalificacion.puntuacion);
+      const comentario = nuevaCalificacion.comentario.trim();
+
+      if (isNaN(puntuacion) || puntuacion < 1 || puntuacion > 5) {
+        setMensajeCalificacion("Selecciona una puntuación válida entre 1 y 5 estrellas.");
+        return;
+      }
+
+      if (comentario.length > 250) {
+        setMensajeCalificacion("El comentario no puede superar los 250 caracteres.");
+        return;
+      }
+
       if (!validarClienteParaCalificar()) return;
 
       if (calificacionExistente) {
+        const esMiCalificacion =
+          Number(calificacionExistente.id_cliente) === Number(perfil.id_cliente);
+
+        if (!esMiCalificacion) {
+          setMensajeCalificacion("No tienes permiso para editar esta calificación.");
+          return;
+        }
+        
         const { error } = await supabase
           .from("Calificaciones")
           .update({
-            puntuacion: parseInt(nuevaCalificacion.puntuacion),
-            comentario: nuevaCalificacion.comentario.trim() || null,
+            puntuacion,
+            comentario: comentario || null,
           })
           .eq("id_calificacion", calificacionExistente.id_calificacion);
 
@@ -166,8 +189,8 @@ const Catalogo = () => {
           {
             id_cliente: perfil.id_cliente,
             id_servicio: servicioSeleccionado.id_servicio,
-            puntuacion: parseInt(nuevaCalificacion.puntuacion),
-            comentario: nuevaCalificacion.comentario.trim() || null,
+            puntuacion,
+            comentario: comentario || null,
             respuesta: null,
           },
         ]);
@@ -197,12 +220,36 @@ const Catalogo = () => {
     }
   };
 
-  const eliminarCalificacion = async (idCalificacion, idServicio) => {
+  const eliminarCalificacion = async (calificacion, idServicio) => {
     try {
+      if (!usuario) {
+        setToast({
+          mostrar: true,
+          mensaje: "Debes iniciar sesión para eliminar una calificación.",
+          tipo: "error",
+        });
+        return;
+      }
+
+      const esAdminOEmpleado = rol === "admin" || rol === "empleado";
+
+      const esPropietario =
+        rol === "cliente" &&
+        Number(perfil?.id_cliente) === Number(calificacion.id_cliente);
+
+      if (!esAdminOEmpleado && !esPropietario) {
+        setToast({
+          mostrar: true,
+          mensaje: "No tienes permiso para eliminar esta calificación.",
+          tipo: "error",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("Calificaciones")
         .delete()
-        .eq("id_calificacion", idCalificacion);
+        .eq("id_calificacion", calificacion.id_calificacion);
 
       if (error) throw error;
 
@@ -211,12 +258,18 @@ const Catalogo = () => {
       if (servicioDetalle && servicioDetalle.id_servicio === idServicio) {
         setServicioDetalle((prev) => {
           const nuevasCalificaciones = prev.calificaciones.filter(
-            (c) => c.id_calificacion !== idCalificacion
+            (c) => c.id_calificacion !== calificacion.id_calificacion
           );
+
           const totalReviews = nuevasCalificaciones.length;
-          const rating = totalReviews > 0
-            ? nuevasCalificaciones.reduce((total, cal) => total + Number(cal.puntuacion), 0) / totalReviews
-            : 0;
+
+          const rating =
+            totalReviews > 0
+              ? nuevasCalificaciones.reduce(
+                  (total, cal) => total + Number(cal.puntuacion),
+                  0
+                ) / totalReviews
+              : 0;
 
           return {
             ...prev,
@@ -229,14 +282,15 @@ const Catalogo = () => {
 
       setToast({
         mostrar: true,
-        mensaje: "Comentario eliminado correctamente.",
+        mensaje: "Calificación eliminada correctamente.",
         tipo: "exito",
       });
     } catch (err) {
       console.error("Error al eliminar calificación:", err.message);
+
       setToast({
         mostrar: true,
-        mensaje: "Error al eliminar el comentario.",
+        mensaje: "Error al eliminar la calificación.",
         tipo: "error",
       });
     }
@@ -461,6 +515,8 @@ const Catalogo = () => {
                   <div className="catalogo-card-scroll" key={servicio.id_servicio}>
                     <TarjetaCatalogo
                       servicios={[servicio]}
+                      rol={rol}
+                      perfil={perfil}
                       abrirModalDetalle={(servicio) => {
                         setServicioDetalle(servicio);
                         setMostrarModalDetalle(true);
@@ -481,6 +537,7 @@ const Catalogo = () => {
                           comentario: miCalificacion?.comentario || "",
                         });
 
+                        setMensajeCalificacion("");
                         setMostrarModalCalificacion(true);
                       }}
                     />
@@ -500,6 +557,7 @@ const Catalogo = () => {
         setNuevaCalificacion={setNuevaCalificacion}
         guardarCalificacion={guardarCalificacion}
         calificacionExistente={calificacionExistente}
+        mensajeCalificacion={mensajeCalificacion}
       />
 
       <ModalDetalleServicio

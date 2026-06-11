@@ -9,6 +9,7 @@ const ModalCalificacionServicio = ({
   setNuevaCalificacion,
   guardarCalificacion,
   calificacionExistente,
+  mensajeCalificacion
 }) => {
   const [deshabilitado, setDeshabilitado] = useState(false);
 
@@ -37,30 +38,55 @@ const ModalCalificacionServicio = ({
       <Modal.Body>
         <h6 className="mb-3">{servicio?.nombre}</h6>
 
+        {mensajeCalificacion && (
+          <div className="alert alert-danger py-2 mb-3">
+            {mensajeCalificacion}
+          </div>
+        )}
+
         <Form.Group className="mb-3">
           <Form.Label>Puntuación</Form.Label>
-          <Form.Select
-            value={nuevaCalificacion.puntuacion}
-            onChange={(e) =>
-              setNuevaCalificacion((prev) => ({
-                ...prev,
-                puntuacion: e.target.value,
-              }))
-            }
-          >
-            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
-            <option value="4">⭐⭐⭐⭐ Muy bueno</option>
-            <option value="3">⭐⭐⭐ Bueno</option>
-            <option value="2">⭐⭐ Regular</option>
-            <option value="1">⭐ Malo</option>
-          </Form.Select>
+
+          <div className="calificacion-estrellas-selector">
+            {[1, 2, 3, 4, 5].map((estrella) => (
+              <button
+                key={estrella}
+                type="button"
+                className="btn-estrella-calificacion"
+                onClick={() =>
+                  setNuevaCalificacion((prev) => ({
+                    ...prev,
+                    puntuacion: estrella,
+                  }))
+                }
+              >
+                <i
+                  className={
+                    estrella <= Number(nuevaCalificacion.puntuacion)
+                      ? "bi bi-star-fill"
+                      : "bi bi-star"
+                  }
+                ></i>
+              </button>
+            ))}
+          </div>
+
+          <small className="text-muted d-block mt-2">
+            {Number(nuevaCalificacion.puntuacion) === 5 && "Excelente"}
+            {Number(nuevaCalificacion.puntuacion) === 4 && "Muy bueno"}
+            {Number(nuevaCalificacion.puntuacion) === 3 && "Bueno"}
+            {Number(nuevaCalificacion.puntuacion) === 2 && "Regular"}
+            {Number(nuevaCalificacion.puntuacion) === 1 && "Malo"}
+          </small>
         </Form.Group>
 
         <Form.Group>
           <Form.Label>Comentario</Form.Label>
+
           <Form.Control
             as="textarea"
             rows={4}
+            maxLength={250}
             value={nuevaCalificacion.comentario}
             onChange={(e) =>
               setNuevaCalificacion((prev) => ({
@@ -70,6 +96,18 @@ const ModalCalificacionServicio = ({
             }
             placeholder="Escribe tu opinión sobre este servicio..."
           />
+
+          <div className="text-end mt-1">
+            <small
+              className={
+                nuevaCalificacion.comentario.length >= 230
+                  ? "text-danger"
+                  : "text-muted"
+              }
+            >
+              {nuevaCalificacion.comentario.length}/250 caracteres
+            </small>
+          </div>
         </Form.Group>
       </Modal.Body>
 
